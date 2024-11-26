@@ -1,4 +1,0 @@
--Wall
--std=c++23
--C:\Libraries\GLM
--C:\Libraries\GLFW
