@@ -1,4 +1,5 @@
+.cache*
 compile_commands*
-premake-ecc*
+ecc*
 *.sln
 *.vcxproj
