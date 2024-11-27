@@ -1,6 +1,5 @@
 .cache*
 compile_flags*
 compile_commands*
-ecc*
 *.sln
 *.vcxproj
