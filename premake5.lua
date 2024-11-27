@@ -28,6 +28,7 @@ newaction({
 	execute = function()
 		print("clean the build...")
 		os.rmdir("./build/")
+		os.rmdir("./bin/")
 		print("done.")
 	end,
 })
