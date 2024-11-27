@@ -5,8 +5,9 @@ This project is intended to be a simple Snake Clone in C++ (Hence the name Cnake
 #### The plan
 | Element                    | Status        |
 | ---                        | ---           |
-| Project Structure          | Revamping WIP |
+| Project Structure          | Done          |
 | Snake Asset                | Done          |
+| Set up Building w/ PreMake | Done          |
 | Draw a Window with Vulkan  | In Progress   |
 | Basic Movement & collision | Not Started   |
 | Scoring System             | Not Started   |
