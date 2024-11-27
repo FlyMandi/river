@@ -1,3 +1,5 @@
+BuildRules*
+bin/
 *.pdb
 .cache*
 compile_flags*
