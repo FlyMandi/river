@@ -2,8 +2,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <stdexcept>
-
 
 int main(){
     engine::Cnake cnake{};
