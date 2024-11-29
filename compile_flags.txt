@@ -1,7 +1,7 @@
 -I
-..\lib\GLFW\include\
+.\vendor\GLFW\include\
 -I
-..\lib\
+.\vendor\GLM\
 -I
 ..\..\VulkanSDK\1.3.296.0\Include\
 -target
