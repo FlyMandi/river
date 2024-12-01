@@ -58,7 +58,7 @@ class EngineDevice {
 
     VkCommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-    void copyBuffer();
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
 
     void createImageWithInfo(
@@ -68,7 +68,7 @@ class EngineDevice {
         VkDeviceMemory &imageMemory
     );
 
-    VkPhysicalDeviceIDProperties properties;
+    VkPhysicalDeviceProperties properties;
 
  private:
     void createInstance();
