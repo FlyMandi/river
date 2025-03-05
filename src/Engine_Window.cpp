@@ -4,7 +4,7 @@
 
 namespace engine {
     
-EngineWindow::EngineWindow(int w, int h, std::string name) : width{w}, height{h}, windowName{name} {
+EngineWindow::EngineWindow(int w, int h, std::string name) : width{w}, height{h}, windowName{name}{
     initWindow(); 
 }
 
@@ -13,7 +13,7 @@ EngineWindow::~EngineWindow(){
     glfwTerminate();
 }
 
-void EngineWindow::initWindow() { 
+void EngineWindow::initWindow(){ 
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

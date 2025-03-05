@@ -22,7 +22,7 @@ class EngineWindow {
     EngineWindow(const EngineWindow &) = delete;
     EngineWindow &operator=(const EngineWindow &) = delete;
 
-    bool shouldClose() { return glfwWindowShouldClose(window); }
+    bool shouldClose(){ return glfwWindowShouldClose(window); }
 
     void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 };
