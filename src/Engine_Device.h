@@ -21,7 +21,7 @@ struct QueueFamilyIndices{
     bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 };
 
-class EngineDevice {
+class EngineDevice{
     void createInstance();
     void setupDebugMessenger();
     void createSurface();
@@ -67,36 +67,25 @@ class EngineDevice {
     EngineDevice(EngineDevice &&) = delete;
     EngineDevice &operator=(EngineDevice &&) = delete;
 
-    VkCommandPool getCommandPool() { return commandPool; }
-    VkDevice device() { return device_; }
-    VkSurfaceKHR surface() { return surface_; }
-    VkQueue graphicsQueue() { return graphicsQueue_; }
-    VkQueue presentQueue() { return presentQueue_; }
+    VkCommandPool getCommandPool(){ return commandPool; }
+    VkDevice device(){ return device_; }
+    VkSurfaceKHR surface(){ return surface_; }
+    VkQueue graphicsQueue(){ return graphicsQueue_; }
+    VkQueue presentQueue(){ return presentQueue_; }
 
-    SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
+    SwapChainSupportDetails getSwapChainSupport(){ return querySwapChainSupport(physicalDevice); }
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-    QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
+    QueueFamilyIndices findPhysicalQueueFamilies(){ return findQueueFamilies(physicalDevice); }
     VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-    void createBuffer(
-        VkDeviceSize size,
-        VkBufferUsageFlags flags,
-        VkMemoryPropertyFlags properties,
-        VkBuffer &buffer,
-        VkDeviceMemory &bufferMemory
-    );  
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags flags, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);  
 
     VkCommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(VkCommandBuffer commandBuffer);
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
 
-    void createImageWithInfo(
-        const VkImageCreateInfo &imageInfo,
-        VkMemoryPropertyFlags properties,
-        VkImage &image,
-        VkDeviceMemory &imageMemory
-    );
+    void createImageWithInfo(const VkImageCreateInfo &imageInfo, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
 
     VkPhysicalDeviceProperties properties;
 };
