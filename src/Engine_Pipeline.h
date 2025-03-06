@@ -12,6 +12,17 @@ namespace engine{
 struct PipelineConfigInfo{};
 
 class EnginePipeline{
+    EngineDevice &EngineDevice;
+    VkPipeline graphicsPipeline;
+    VkShaderModule vertShaderModule;
+    VkShaderModule fragShaderModule;
+
+    static std::vector<char> readFile(const std::string &filepath);
+
+    void createGraphicsPipeline(const PipelineConfigInfo &configInfo,const std::string &vertFilepath, const std::string &fragFilepath);
+
+    void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
+
  public:
     EnginePipeline(EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
 
@@ -21,18 +32,6 @@ class EnginePipeline{
     EnginePipeline operator=(const EnginePipeline&) = delete;
 
     static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
-
- private:
-    static std::vector<char> readFile(const std::string &filepath);
-
-    void createGraphicsPipeline(const PipelineConfigInfo &configInfo,const std::string &vertFilepath, const std::string &fragFilepath);
-
-    void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
-
-    EngineDevice &EngineDevice;
-    VkPipeline graphicsPipeline;
-    VkShaderModule vertShaderModule;
-    VkShaderModule fragShaderModule;
 };
 
 }  //namespace engine 
