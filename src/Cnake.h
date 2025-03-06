@@ -12,7 +12,7 @@ class Cnake {
 
     EngineWindow engineWindow{w_WIDTH, w_HEIGHT, "Cnake " + m_Version};
     EngineDevice engineDevice{engineWindow};
-    EnginePipeline enginePipeline{engineDevice, EnginePipeline::defaultPipelineConfigInfo(w_WIDTH, w_HEIGHT),"T:/Repository/Cnake/src/shaders/simple_shader.vert.spv", "T:/Repository/Cnake/src/shaders/simple_shader.frag.spv"};
+    EnginePipeline enginePipeline{engineDevice, EnginePipeline::defaultPipelineConfigInfo(w_WIDTH, w_HEIGHT),"shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv"};
 
  public:
     static constexpr int w_WIDTH = 1920;
