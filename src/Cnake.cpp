@@ -4,11 +4,9 @@
 namespace engine{
 
 void Cnake::run(){
-
     while(!engineWindow.shouldClose()){
         glfwPollEvents();
     }
-
 }
 
-}
+} //namespace engine
