@@ -43,7 +43,7 @@ void EnginePipeline::createShaderModule(const std::vector<char> &code, VkShaderM
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     if(vkCreateShaderModule(EngineDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS){
-        throw std::runtime_error("failed to create shader module.");
+        throw std::runtime_error("Failed to create shader module.");
     }
 }
 
