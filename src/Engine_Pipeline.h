@@ -24,7 +24,7 @@ class EnginePipeline{
     void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
 
  public:
-    EnginePipeline(EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
+    EnginePipeline(class EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
 
     ~EnginePipeline(){}
 
