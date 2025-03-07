@@ -28,7 +28,6 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMes
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator){
-    
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(func != nullptr){
         func(instance, debugMessenger, pAllocator);
@@ -290,12 +289,7 @@ bool EngineDevice::checkDeviceExtensionSupport(VkPhysicalDevice device){
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-    vkEnumerateDeviceExtensionProperties(
-        device,
-        nullptr,
-        &extensionCount,
-        availableExtensions.data()
-    );
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
     std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
@@ -356,12 +350,7 @@ SwapChainSupportDetails EngineDevice::querySwapChainSupport(VkPhysicalDevice dev
     if(presentModeCount != 0){
         details.presentModes.resize(presentModeCount);
         
-        vkGetPhysicalDeviceSurfacePresentModesKHR(
-            device,
-            surface_,
-            &presentModeCount,
-            details.presentModes.data()
-        );
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface_, &presentModeCount, details.presentModes.data());
     }
     return details;
 }
@@ -389,7 +378,6 @@ uint32_t EngineDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
     for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++){
         if((typeFilter & (1 << i)) &&
             (memProperties.memoryTypes[i].propertyFlags & properties) == properties){
-
             return i;
         }
     }
@@ -397,13 +385,7 @@ uint32_t EngineDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-void EngineDevice::createBuffer(
-    VkDeviceSize size,
-    VkBufferUsageFlags usage,
-    VkMemoryPropertyFlags properties,
-    VkBuffer &buffer,
-    VkDeviceMemory &bufferMemory){
-
+void EngineDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory){
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
@@ -474,7 +456,6 @@ void EngineDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
 }
 
 void EngineDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount){
-
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkBufferImageCopy region{};
@@ -490,22 +471,11 @@ void EngineDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wi
     region.imageOffset = {0, 0, 0};
     region.imageExtent = {width, height, 1};
 
-    vkCmdCopyBufferToImage(
-        commandBuffer,
-        buffer,
-        image,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1,
-        &region);
+    vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     endSingleTimeCommands(commandBuffer);
 }
 
-void EngineDevice::createImageWithInfo(
-    const VkImageCreateInfo &imageInfo,
-    VkMemoryPropertyFlags properties,
-    VkImage &image,
-    VkDeviceMemory &imageMemory){
-
+void EngineDevice::createImageWithInfo(const VkImageCreateInfo &imageInfo, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory){
     if(vkCreateImage(device_, &imageInfo, nullptr, &image) != VK_SUCCESS){
         throw std::runtime_error("failed to create image!");
     }
