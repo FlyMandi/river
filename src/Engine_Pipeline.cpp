@@ -6,6 +6,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
+#include <cassert>
 
 namespace engine{
 
@@ -35,6 +36,9 @@ std::vector<char> EnginePipeline::readFile(const std::string &filepath){
 }
 
 void EnginePipeline::createGraphicsPipeline(const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath){
+    assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
+    assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
+
     auto vertCode = readFile(vertFilepath);
     auto fragCode = readFile(fragFilepath);
 
@@ -72,6 +76,7 @@ void EnginePipeline::createGraphicsPipeline(const PipelineConfigInfo &configInfo
     pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
     pipelineInfo.pViewportState = &configInfo.viewportInfo;
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
+    pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
     pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
     pipelineInfo.pDynamicState = nullptr; 
 
