@@ -82,6 +82,24 @@ PipelineConfigInfo EnginePipeline::defaultPipelineConfigInfo(uint32_t width, uin
     configInfo.rasterizationInfo.depthBiasClamp = 0.0f;
     configInfo.rasterizationInfo.depthBiasSlopeFactor = 0.0f;
 
+    configInfo.multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    configInfo.multisampleInfo.sampleShadingEnable = VK_FALSE;
+    configInfo.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    configInfo.multisampleInfo.minSampleShading = 1.0f;
+    configInfo.multisampleInfo.pSampleMask = nullptr; 
+    configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE; 
+    configInfo.multisampleInfo.alphaToOneEnable = VK_FALSE; 
+
+    configInfo.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
+    configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
+    configInfo.colorBlendInfo.attachmentCount = 1;
+    configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
+    configInfo.colorBlendInfo.blendConstants[0] = 0.0f;
+    configInfo.colorBlendInfo.blendConstants[1] = 0.0f;
+    configInfo.colorBlendInfo.blendConstants[2] = 0.0f;
+    configInfo.colorBlendInfo.blendConstants[3] = 0.0f;
+
     return configInfo;
 }
 
