@@ -19,7 +19,7 @@ EngineSwapChain::EngineSwapChain(EngineDevice &deviceRef, VkExtent2D extent) : d
 }
 
 EngineSwapChain::~EngineSwapChain(){
-    for (auto imageView : swapChainImageViews){
+    for(auto imageView : swapChainImageViews){
         vkDestroyImageView(device.device(), imageView, nullptr);
     }
     swapChainImageViews.clear();
@@ -29,19 +29,19 @@ EngineSwapChain::~EngineSwapChain(){
         swapChain = nullptr;
     }
 
-    for (int i = 0; i < depthImages.size(); i++){
+    for(int i = 0; i < depthImages.size(); i++){
         vkDestroyImageView(device.device(), depthImageViews[i], nullptr);
         vkDestroyImage(device.device(), depthImages[i], nullptr);
         vkFreeMemory(device.device(), depthImageMemorys[i], nullptr);
     }
 
-    for (auto framebuffer : swapChainFramebuffers){
+    for(auto framebuffer : swapChainFramebuffers){
         vkDestroyFramebuffer(device.device(), framebuffer, nullptr);
     }
 
     vkDestroyRenderPass(device.device(), renderPass, nullptr);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
         vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(device.device(), inFlightFences[i], nullptr);
@@ -158,7 +158,7 @@ void EngineSwapChain::createSwapChain(){
 
 void EngineSwapChain::createImageViews(){
     swapChainImageViews.resize(swapChainImages.size());
-    for (size_t i = 0; i < swapChainImages.size(); i++){
+    for(size_t i = 0; i < swapChainImages.size(); i++){
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = swapChainImages[i];
@@ -236,7 +236,7 @@ void EngineSwapChain::createRenderPass(){
 
 void EngineSwapChain::createFramebuffers(){
     swapChainFramebuffers.resize(imageCount());
-    for (size_t i = 0; i < imageCount(); i++){
+    for(size_t i = 0; i < imageCount(); i++){
         std::array<VkImageView, 2> attachments = {swapChainImageViews[i], depthImageViews[i]};
 
         VkExtent2D swapChainExtent = getSwapChainExtent();
@@ -263,7 +263,7 @@ void EngineSwapChain::createDepthResources(){
     depthImageMemorys.resize(imageCount());
     depthImageViews.resize(imageCount());
 
-    for (int i = 0; i < depthImages.size(); i++){
+    for(int i = 0; i < depthImages.size(); i++){
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -312,7 +312,7 @@ void EngineSwapChain::createSyncObjects(){
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
         VkResult semaphoreA = vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]);
         VkResult semaphoreF = vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]);
         VkResult fence = vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]);
@@ -324,7 +324,7 @@ void EngineSwapChain::createSyncObjects(){
 
 VkSurfaceFormatKHR EngineSwapChain::chooseSwapSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &availableFormats){
-    for (const auto &availableFormat : availableFormats){
+    for(const auto &availableFormat : availableFormats){
         if(availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
             availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR){
             return availableFormat;
@@ -335,12 +335,19 @@ VkSurfaceFormatKHR EngineSwapChain::chooseSwapSurfaceFormat(
 }
 
 VkPresentModeKHR EngineSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes){
-    for (const auto &availablePresentMode : availablePresentModes){
+    for(const auto &availablePresentMode : availablePresentModes){
         if(availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR){
-          std::cout << "Present mode: Mailbox" << std::endl;
-          return availablePresentMode;
+            std::cout << "Present mode: Mailbox" << std::endl;
+            return availablePresentMode;
         }
     }
+
+    for(const auto &availablePresentMode : availablePresentModes){
+        if(availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR){
+            std::cout << "Present mode: Immediate" << std::endl; 
+        }
+    }
+
     std::cout << "Present mode: V-Sync" << std::endl;
     return VK_PRESENT_MODE_FIFO_KHR;
 }
