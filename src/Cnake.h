@@ -1,4 +1,6 @@
 #pragma once
+//TODO: eventually replace getenv() when dealing with platform compilation
+#pragma warning(disable: 4996)
 
 #include "Engine_Window.h"
 #include "Engine_Pipeline.h"
