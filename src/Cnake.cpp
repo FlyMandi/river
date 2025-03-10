@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include <vector>
 
 class CnakeApp{
     const char *version = "Cnake 0.0.0";
@@ -23,7 +24,34 @@ class CnakeApp{
         window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
     }
 
+    void verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
+        std::string glfwExtString = *glfwExt;
+        std::string vulkanExtString = "";
+        std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
+        std::cout << "\nVulkan presents:\n";
+
+        for(const auto &extension : vulkanExt){
+            vulkanExtString += extension.extensionName;
+            std::cout << '\t' << extension.extensionName << '\n';
+        }
+
+        if(vulkanExtString.find(glfwExtString) == std::string::npos){
+            throw std::runtime_error ("not all needed extensions present.");
+        }
+        std::cout << "\nAll needed extensions are present.";
+    }
+
     void createInstance(){
+        uint32_t extensionCount = 0;
+        uint32_t glfwExtensionCount = 0;
+
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        std::vector<VkExtensionProperties> extensions(extensionCount); 
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        verifyExtensionPresence(glfwExtensions, extensions);
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "Cnake";
@@ -31,10 +59,6 @@ class CnakeApp{
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
