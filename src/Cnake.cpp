@@ -50,8 +50,8 @@ void Cnake::createPipeline(){
     pipelineConfig.pipelineLayout = pipelineLayout; 
 
     std::string repo = std::getenv("REPO");
-    std::string vert = repo + "Cnake\\src\\shaders\\simple_shader.vert.spv";
-    std::string frag = repo + "Cnake\\src\\shaders\\simple_shader.frag.spv";
+    std::string vert = repo + "Cnake\\bin\\simple_shader.vert.spv";
+    std::string frag = repo + "Cnake\\bin\\simple_shader.frag.spv";
 
     if(!std::filesystem::exists(vert) || !std::filesystem::exists(frag)){
         throw std::runtime_error("could not find the necessary shaders for pipeline construction.");
