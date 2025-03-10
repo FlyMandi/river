@@ -83,6 +83,7 @@ class CnakeApp{
     }
 
     void cleanup(){
+        vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(window);
         glfwTerminate();
     }
