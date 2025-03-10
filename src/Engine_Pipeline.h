@@ -37,7 +37,7 @@ class EnginePipeline{
     static std::vector<char> readFile(const std::string &filepath);
 
     void createGraphicsPipeline(const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
-    void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
+    VkShaderModule createShaderModule(const std::vector<char> &code);
 
  public:
     EnginePipeline(class EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
