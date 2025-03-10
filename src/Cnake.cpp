@@ -106,7 +106,7 @@ void Cnake::createCommandBuffers(){
 
 void Cnake::drawFrame(){
     uint32_t imageIndex;
-    auto result = engineSwapChain.acquireNextImage(&imageIndex);
+    VkResult result = engineSwapChain.acquireNextImage(&imageIndex);
 
     if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR){
         throw std::runtime_error("failed to acquire the next swapChain image.");
