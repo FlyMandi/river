@@ -6,8 +6,19 @@
 #include <cstdlib>
 
 class CnakeApp{
-    void initWindow(){
+    const char *version = "Cnake 0.0.0";
+    const uint32_t WIDTH = 1920;
+    const uint32_t HEIGHT = 1080;
 
+    GLFWwindow *window;
+
+    void initWindow(){
+        glfwInit();
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+        window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
     }
 
     void initVulkan(){
@@ -15,15 +26,19 @@ class CnakeApp{
     }
 
     void gameLoop(){
-
+        while(!glfwWindowShouldClose(window)){
+           glfwPollEvents(); 
+        }
     }
 
     void cleanup(){
-
+        glfwDestroyWindow(window);
+        glfwTerminate();
     }
 
  public:
     void run(){
+        initWindow();
         initVulkan();
         gameLoop();
         cleanup();
