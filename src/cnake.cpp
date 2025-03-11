@@ -60,6 +60,10 @@ void CnakeApp::initWindow(){
 }
 
 void CnakeApp::createInstance(){
+    if(enableValidationLayers && !checkValidationLayerSupport()){
+        throw std::runtime_error("validation layers requested, but not available!");
+    }
+
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
     std::vector<VkExtensionProperties> extensions(extensionCount); 
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
@@ -86,6 +90,13 @@ void CnakeApp::createInstance(){
     createInfo.enabledExtensionCount = glfwExtensionCount;
     createInfo.ppEnabledExtensionNames = glfwExtensions;
     createInfo.enabledLayerCount = 0;
+
+    if(enableValidationLayers){
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }else{
+        createInfo.enabledLayerCount = 0;
+    }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance)){
         throw std::runtime_error("failed to create instance.");
