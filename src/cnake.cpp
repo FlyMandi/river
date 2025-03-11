@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
+#include <cstring>
 
 bool CnakeApp::checkValidationLayerSupport(){
     uint32_t layerCount;
@@ -13,7 +14,19 @@ bool CnakeApp::checkValidationLayerSupport(){
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
-    return false;
+    for(const char *layer : validationLayers){
+        bool layerFound = false;
+
+        for(const auto &layerPresent : layerVec){
+            if(0 == strcmp(layerPresent.layerName, layer)){
+                layerFound = true;
+                break;
+            }
+        }
+        if(!layerFound){ return false; }
+    }
+
+    return true;
 }
 
 void CnakeApp::verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
