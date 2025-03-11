@@ -32,6 +32,7 @@ class CnakeApp{
     bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
     bool checkValidationLayerSupport();
 
+    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
     void setupDebugMessenger();
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
