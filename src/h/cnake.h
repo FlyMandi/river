@@ -11,6 +11,9 @@ class CnakeApp{
     const uint32_t WIDTH = 1920;
     const uint32_t HEIGHT = 1080;
 
+    uint32_t extensionCount = 0;
+    uint32_t glfwExtensionCount = 0;
+
     const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 #ifdef NDEBUG
@@ -22,9 +25,9 @@ class CnakeApp{
     GLFWwindow *window;
     VkInstance instance;
 
+    bool verifyExtensionPresence(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt);
     bool checkValidationLayerSupport();
 
-    void verifyExtensionPresence(const char** glfwExt, std::vector<VkExtensionProperties> vulkanExt);
     void initWindow();
     void createInstance();
     void initVulkan();
