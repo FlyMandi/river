@@ -1,17 +1,19 @@
 #include "h/cnake.h"
+#include "vulkan/vulkan_core.h"
 
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
 
-void CnakeApp::initWindow(){
-    glfwInit();
+bool CnakeApp::checkValidationLayerSupport(){
+    uint32_t layerCount;
+    
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    std::vector<VkLayerProperties> layerVec(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
+    return false;
 }
 
 void CnakeApp::verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
@@ -28,6 +30,15 @@ void CnakeApp::verifyExtensionPresence(const char **glfwExt, std::vector<VkExten
         throw std::runtime_error("not all needed extensions present.");
     }
     std::cout << "\nAll needed extensions are present.";
+}
+
+void CnakeApp::initWindow(){
+    glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
 }
 
 void CnakeApp::createInstance(){
@@ -73,6 +84,7 @@ void CnakeApp::gameLoop(){
 
 void CnakeApp::cleanup(){
     vkDestroyInstance(instance, nullptr);
+
     glfwDestroyWindow(window);
     glfwTerminate();
 }
