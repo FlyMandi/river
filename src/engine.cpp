@@ -1,7 +1,4 @@
 #include "h/engine.h"
-#include "GLFW/glfw3.h"
-
-#include <cstring>
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
