@@ -1,13 +1,13 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
+#include "GLFW/glfw3.h"
 
 #include <cstdlib>
 #include <iostream>
-#include <map>
 #include <vector>
+#include <map>
 
 class Engine{
 
@@ -25,14 +25,13 @@ class Engine{
 
     const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
-    GLFWwindow *window;
     VkInstance instance;
+    GLFWwindow *window;
 
     VkDebugUtilsMessengerEXT debugMessenger;
 
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
-
 
     std::vector<const char*> getRequiredExtensions();
 
