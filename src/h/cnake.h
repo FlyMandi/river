@@ -3,6 +3,6 @@
 void run();
 void initGLFW();
 void gameLoop();
-void GLFWcleanup();
+void cleanupGLFW();
 
 void createMainMenu(); 

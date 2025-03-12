@@ -243,7 +243,7 @@ void createInstance(){
     }
 }
 
-void vulkanCleanup(){
+void cleanupVulkan(){
     if(enableValidationLayers){
         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     }

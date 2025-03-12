@@ -18,11 +18,11 @@ void run(){
 
     gameLoop();
 
-    vulkanCleanup();
-    GLFWcleanup();
+    cleanupVulkan();
+    cleanupGLFW();
 }
 
-void GLFWcleanup(){
+void cleanupGLFW(){
     glfwDestroyWindow(window);
     glfwTerminate();
 }
