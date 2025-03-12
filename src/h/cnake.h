@@ -4,7 +4,8 @@
 #include <GLFW/glfw3.h>
 
 void run();
-void initWindow();
+void initGLFW();
 void gameLoop();
+void GLFWcleanup();
 
 void createMainMenu(); 

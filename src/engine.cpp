@@ -240,13 +240,10 @@ void createInstance(){
     }
 }
 
-void cleanup(){
+void vulkanCleanup(){
     if(enableValidationLayers){
         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     }
 
     vkDestroyInstance(instance, nullptr);
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
 }
