@@ -14,7 +14,7 @@ void CnakeApp::gameLoop(){
 void CnakeApp::run(){
     initWindow();
 
-    Engine engine;
+    Engine engine(window);
     engine.initVulkan();
 
     gameLoop();
