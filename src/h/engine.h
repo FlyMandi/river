@@ -2,7 +2,6 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include "vulkan/vulkan_core.h"
-#include "GLFW/glfw3.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -16,54 +15,37 @@
     const bool enableValidationLayers = true;
 #endif
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
+        void                                        *pUserData
+    ){
+
+    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
+
+    return VK_FALSE;
+}
+
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
 
     bool isComplete(){ return graphicsFamily.has_value(); }
 };
 
-struct Engine{
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
-    Engine() = default;
-    Engine(const Engine&) = delete;
-    Engine &operator=(const Engine&) = delete;
-    Engine(GLFWwindow *&window) : window(window){};
+void createInstance();
+void initVulkan();
+void cleanup();
 
-    const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+std::vector<const char*> getRequiredExtensions();
+bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
+bool checkValidationLayerSupport();
 
-    VkInstance instance;
-    GLFWwindow *window;
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+void setupDebugMessenger();
 
-    VkDebugUtilsMessengerEXT debugMessenger;
-
-    VkPhysicalDeviceProperties deviceProperties;
-    VkPhysicalDeviceFeatures deviceFeatures;
-
-    std::vector<const char*> getRequiredExtensions();
-
-    bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
-    bool checkValidationLayerSupport();
-
-    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-    void setupDebugMessenger();
-
-    void pickPhysicalDevice();      
-    uint32_t rateDeviceSuitability(VkPhysicalDevice device);
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT             messageType, 
-            const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
-            void                                        *pUserData
-        ){
-
-        std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
-
-        return VK_FALSE;
-    }
-
-    void createInstance();
-    void initVulkan();
-    void cleanup();
-};
+void pickPhysicalDevice();      
+uint32_t rateDeviceSuitability(VkPhysicalDevice device);
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);

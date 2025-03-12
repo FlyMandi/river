@@ -1,7 +1,13 @@
 #include "h/engine.h"
+#include "h/cnake.h"
 #include "vulkan/vulkan_core.h"
-#include <algorithm>
 #include <map>
+
+VkInstance instance;
+VkDebugUtilsMessengerEXT debugMessenger;
+
+VkPhysicalDeviceProperties deviceProperties;
+VkPhysicalDeviceFeatures deviceFeatures;
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
@@ -30,7 +36,7 @@ void DestroyDebugUtilsMessengerEXT(
     }
 }
 
-void Engine::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
     createInfo = {}; 
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -39,7 +45,7 @@ void Engine::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT
     createInfo.pfnUserCallback = debugCallback;
 }
 
-void Engine::setupDebugMessenger(){
+void setupDebugMessenger(){
     if(!enableValidationLayers){ return; }
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
@@ -50,7 +56,7 @@ void Engine::setupDebugMessenger(){
     }
 }
 
-std::vector<const char*> Engine::getRequiredExtensions(){
+std::vector<const char*> getRequiredExtensions(){
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
 
@@ -64,7 +70,7 @@ std::vector<const char*> Engine::getRequiredExtensions(){
     return extensions;
 }
 
-bool Engine::checkValidationLayerSupport(){
+bool checkValidationLayerSupport(){
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
     
@@ -86,7 +92,7 @@ bool Engine::checkValidationLayerSupport(){
     return true;
 }
 
-bool Engine::checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
+bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
     std::cout << "\n\tInstance presents:\n";
     for(const auto &extension : *instanceExt){
         std::cout << "\t" << extension.extensionName << '\n';
@@ -112,7 +118,7 @@ bool Engine::checkExtensionSupport(std::vector<const char*> *requiredExt, std::v
     return true;
 }
 
-uint32_t Engine::rateDeviceSuitability(VkPhysicalDevice device){
+uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     uint32_t score = 0;
 
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -131,7 +137,7 @@ uint32_t Engine::rateDeviceSuitability(VkPhysicalDevice device){
     return score;
 }
 
-void Engine::pickPhysicalDevice(){
+void pickPhysicalDevice(){
     uint32_t deviceCount = 0;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     
@@ -157,7 +163,7 @@ void Engine::pickPhysicalDevice(){
     }
 }
 
-QueueFamilyIndices Engine::findQueueFamilies(VkPhysicalDevice device){
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
@@ -179,13 +185,62 @@ QueueFamilyIndices Engine::findQueueFamilies(VkPhysicalDevice device){
     return indices;
 }
 
-void Engine::initVulkan(){
+void initVulkan(){
     createInstance();
     setupDebugMessenger();
     pickPhysicalDevice();
 }
 
-void Engine::cleanup(){
+void createInstance(){
+    if(enableValidationLayers && !checkValidationLayerSupport()){
+        throw std::runtime_error("validation layers requested, but not available!");
+    }
+
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Cnake";
+    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    uint32_t instanceExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
+
+    auto requiredExtensions = getRequiredExtensions();
+    if(!checkExtensionSupport(&requiredExtensions, &instanceExtensions)){
+        throw std::runtime_error("extensions required, but not available!"); 
+    }
+
+    std::cout << "\nAll needed extensions are present.\n\n";
+
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+    createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+    createInfo.enabledLayerCount = 0;
+
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+    if(enableValidationLayers){
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+        
+        populateDebugMessengerCreateInfo(debugCreateInfo);
+        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+    }else{
+        createInfo.enabledLayerCount = 0;
+        createInfo.pNext = nullptr;
+    }
+
+    if(vkCreateInstance(&createInfo, nullptr, &instance)){
+        throw std::runtime_error("failed to create instance.");
+    }
+}
+
+void cleanup(){
     if(enableValidationLayers){
         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     }
