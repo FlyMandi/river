@@ -1,4 +1,16 @@
-param( $build = "debug" )
+param( 
+    [Parameter(position=0,Mandatory=$false)]
+    $build = "release",
+    [Parameter(position=1,Mandatory=$false)]
+    [switch] $nAMD = $false 
+)
+
 &premake5 vs2022
-&"$env:ProgramFiles\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" .\build\Cnake.sln -p:Configuration=$build
+
+$VS = Join-Path $env:PROGRAMFILES "\Microsoft Visual Studio\2022\Community\"
+
+if($nAMD){ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\" }
+else{ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" }
+
+&"$MSBuild\MSBuild.exe" .\build\Cnake.sln -p:Configuration=$build
 .\win_compile_shaders.ps1
