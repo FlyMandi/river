@@ -121,13 +121,12 @@ uint32_t Engine::rateDeviceSuitability(VkPhysicalDevice device){
     if(!deviceFeatures.geometryShader){ return 0; }
 
     QueueFamilyIndices indices = findQueueFamilies(device);
-    if(!indices.graphicsFamily.has_value()){ return 0; }
+    if(!indices.isComplete()){ return 0; }
     
     if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
         score += 1000;
     }
     score += deviceProperties.limits.maxImageDimension2D;
-
 
     return score;
 }
@@ -172,6 +171,8 @@ QueueFamilyIndices Engine::findQueueFamilies(VkPhysicalDevice device){
         if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
             indices.graphicsFamily = i;
         }
+        if(indices.isComplete()){ break; }
+
         ++i;
     }
 
