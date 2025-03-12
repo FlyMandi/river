@@ -1,6 +1,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
 #include <cstdlib>
@@ -14,6 +15,8 @@
 #else 
     const bool enableValidationLayers = true;
 #endif
+
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
@@ -29,15 +32,20 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
 
-    bool isComplete(){ return graphicsFamily.has_value(); }
+    bool isComplete(){ 
+        return graphicsFamily.has_value(); 
+    }
 };
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+bool appShouldClose();
 
-void createInstance();
 void initVulkan();
 void cleanupVulkan();
+void cleanupGLFW();
+
+void createInstance();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
@@ -51,3 +59,4 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 void createLogicalDevice();
+void createSurface();
