@@ -10,17 +10,18 @@
 #include <vector>
 #include <map>
 
-class Engine{
-
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
 #else 
     const bool enableValidationLayers = true;
 #endif
 
+struct Engine{
+
     Engine() = default;
     Engine(const Engine&) = delete;
     Engine &operator=(const Engine&) = delete;
+    Engine(GLFWwindow *&window) : window(window){};
 
     uint32_t instanceExtensionCount = 0;
     uint32_t glfwExtensionCount = 0;
@@ -58,8 +59,6 @@ class Engine{
 
         return VK_FALSE;
     }
- public:
-    Engine(GLFWwindow *&window) : window(window){};
 
     void createInstance();
     void initVulkan();
