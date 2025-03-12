@@ -8,14 +8,14 @@ class CnakeApp{
     const uint32_t WIDTH = 1920;
     const uint32_t HEIGHT = 1080;
 
-    //TODO: make sure this points to the same exact window as Engine::window
     GLFWwindow *window;
 
-    //TODO: remove copy constructor & operator
-    //deal with constructors & destructors, default constructors
+    CnakeApp(const CnakeApp&) = delete;
+    CnakeApp &operator=(const CnakeApp&) = delete;
 
     void initWindow();
     void gameLoop();
  public:
+    CnakeApp() = default;
     void run();
 };
