@@ -1,4 +1,4 @@
-#include "h/cnake.h"
+#include "h/game.h"
 #include "h/engine.h"
 #include "GLFW/glfw3.h"
 

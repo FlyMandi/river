@@ -49,3 +49,5 @@ void setupDebugMessenger();
 void pickPhysicalDevice();      
 uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+
+void createLogicalDevice();
