@@ -1,2 +1,2 @@
-param ( $config = "debug" )
+param ( $config = "release" )
 &".\bin\$config\Cnake.exe"
