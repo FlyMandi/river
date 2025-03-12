@@ -290,7 +290,6 @@ void createLogicalDevice(){
         throw std::runtime_error("failed to create logical device!");
     }
 
-    //NOTE: not entirely sure about the double 0 here
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
