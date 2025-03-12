@@ -18,6 +18,7 @@ void CnakeApp::run(){
     engine.initVulkan();
 
     gameLoop();
+
     engine.cleanup();
 }
 
