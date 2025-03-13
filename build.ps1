@@ -13,4 +13,4 @@ if($nAMD){ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\" }
 else{ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" }
 
 &"$MSBuild\MSBuild.exe" .\build\Cnake.sln -p:Configuration=$build
-.\win_compile_shaders.ps1
+.\compile_shaders.ps1
