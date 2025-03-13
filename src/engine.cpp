@@ -45,6 +45,21 @@ std::vector<VkImageView> swapChainImageViews;
 
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
 
+std::filesystem::path getProjectRoot(){
+    std::filesystem::path current = std::filesystem::current_path();
+
+    for(int i = 0; i < 4; ++i){
+        if(strcmp(current.filename().string().c_str(), appName) == 0) {
+            if(config_DEBUG){ std::cout << "project root: " << current << '\n'; }
+            return current;
+        }else{
+            current = current.parent_path();
+        }
+    }
+
+    return "."; 
+}
+
 void initGLFW(){
     glfwInit();
 
@@ -557,7 +572,7 @@ void createImageViews(){
 }
 
 static std::vector<char> readFile(const std::string &filename){
-    if(config_DEBUG){ std::cout << "reading file: " << filename << '\n'; }
+    if(config_DEBUG){ std::cout << "\nreading file: " << filename << '\n'; }
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if(!file.is_open()){
@@ -590,7 +605,6 @@ VkShaderModule createShaderModule(const std::vector<char> &code){
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    
     if(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
         throw std::runtime_error("failed to create shader module!");
     }
@@ -600,14 +614,28 @@ VkShaderModule createShaderModule(const std::vector<char> &code){
 
 void createGraphicsPipeline(){
     if(config_DEBUG){ std::cout << "current directory: " << std::filesystem::current_path() << '\n'; }
+    
+    std::filesystem::path appRoot = getProjectRoot();
 
-    auto vertShaderCode = readFile("..\\..\\src\\shaders\\vertTest.vert");
-    auto fragShaderCode = readFile("..\\..\\src\\shaders\\fragTest.frag");
+    auto vertShaderCode = readFile((appRoot / "bin\\vertTest.vert.spv").string());
+    auto fragShaderCode = readFile((appRoot / "bin\\fragTest.frag.spv").string());
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-    //code
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.pName = "main";
+
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    vertShaderStageInfo.module = fragShaderModule;
+    vertShaderStageInfo.pName = "main";
+
+    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
