@@ -55,6 +55,7 @@ void initVulkan(){
     createSurface();
     pickPhysicalDevice();
     createLogicalDevice();
+    createSwapChain();
 }
 
 void initGLFW(){
@@ -311,6 +312,35 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
     return indices;
 }
 
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats){
+    for(const auto &availableFormat : availableFormats){
+        if(VK_FORMAT_B8G8R8_SRGB == availableFormat.format && VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace){
+            return availableFormat;
+        }
+    }
+    
+    return availableFormats[0];
+}
+
+VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
+    for(const auto &availablePresentMode : availablePresentModes){
+        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
+            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
+            return availablePresentMode;
+        }
+    }
+
+    for(const auto &availablePresentMode : availablePresentModes){
+        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
+            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
+        }
+        return availablePresentMode;
+    }
+
+    if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';}
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
 void createLogicalDevice(){
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -356,6 +386,14 @@ void createSurface(){
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
         throw std::runtime_error("failed to create window surface!");
     }
+}
+
+void createSwapChain(){
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+
+    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+    //VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 }
 
 void createInstance(){
