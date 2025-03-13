@@ -20,7 +20,7 @@ In case you want to build this code from source:
 
 1. Clone this repository into a local folder
 2. Run the included `.\setup.ps1` to make sure you have all the prerequisites. This will install the VulkanSDK and the latest premake5 binary, if missing.
-3. If you have Visual Studio 2022, you can quickstart by running `.\build; .\run` (will use `MSBuild.exe` to compile)
+3. If you have Visual Studio 2022, you can skip steps 4&5 by running `.\build; .\run` (will use `MSBuild.exe` to compile)
 4. Otherwise, compile shaders with `.\compile_shaders.ps1`(uses `glslc.exe` from the VulkanSDK)
 5. Use `premake5` to generate any IDE project files you want (Visual Studio, gmake, xCode, CodeLite) and compile.
 
