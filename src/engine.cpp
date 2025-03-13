@@ -324,17 +324,17 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
-        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
-            return availablePresentMode;
-        }
-    }
-
-    for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
             if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
         }
         return availablePresentMode;
+    }
+
+    for(const auto &availablePresentMode : availablePresentModes){
+        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
+            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
+            return availablePresentMode;
+        }
     }
 
     if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';}
