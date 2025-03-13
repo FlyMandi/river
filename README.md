@@ -14,6 +14,16 @@ This project is intended to be a simple Snake Clone in C++ (Hence the name Cnake
 | Scoring System             | Not Started   |
 | Gameplay Expansion         | Not Started   |
 
+## Build from source guide
+
+In case you want to build this code from source:
+
+1. Clone this repository into a local folder
+2. Run the included `.\setup.ps1` to make sure you have all the prerequisites. This will install the VulkanSDK and the latest premake5 binary, if missing.
+3. If you have Visual Studio 2022, you can quickstart by running `.\build; .\run` (will use `MSBuild.exe` to compile)
+4. Otherwise, compile shaders with `.\compile_shaders.ps1`(uses `glslc.exe` from the VulkanSDK)
+5. Use `premake5` to generate any IDE project files you want (Visual Studio, gmake, xCode, CodeLite) and compile.
+
 ## Project Resources
 
 These are all my tools of choice to build this project.
@@ -39,14 +49,3 @@ Building cross-plaform and cross-IDE is a fairly simple task with PreMake and I 
 #### Text Editor/IDE
 
 For editing text, I use neovim with [my custom configuration](https://github.com/FlyMandi/dotfiles/tree/main/nvim/), specifically for C++ I use `clang` as an LSP and write a simple `compile_flags.txt` with the include folders, which clang can pick up on. Then, when I want to debug or compile, I simply run `premake5 vs2022` and load up the `.vcxproj` in Visual Studio 2022.
-
-## Build from source guide
-
-In case you want to build this code from source.
-Code Review?? Nah jk.
-
-1. Clone this repository into a local folder
-2. Run the included `.\setup.ps1` to make sure you have all the prerequisites. This will install the VulkanSDK and PreMake, if missing.
-3. Use `premake5.lua` to generate any IDE project files you want (Visual Studio, gmake, xCode, CodeLite) 
-    2.1 If you have `vs2022 Community`, you can quickstart by running `.\build; .\run` (will use `MSBuild.exe` to compile)
-4. Run the game from `.\bin\Release\Cnake.exe` or by using `.\run`
