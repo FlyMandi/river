@@ -9,12 +9,18 @@
 #include <optional>
 
 #ifdef NDEBUG
-    const bool enableValidationLayers = false;
+    const bool isDebugMode = false;
 #else 
-    const bool enableValidationLayers = true;
+    const bool isDebugMode = true;
 #endif
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+const std::vector<const char*> validationLayers = {
+    "VK_LAYER_KHRONOS_validation" 
+};
+
+const std::vector<const char*> deviceExtensions = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
@@ -37,6 +43,12 @@ struct QueueFamilyIndices{
     }
 };
 
+struct SwapChainSupportDetails{
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 bool appShouldClose();
 
 void initVulkan();
@@ -46,15 +58,18 @@ void cleanupGLFW();
 void createInstance();
 
 std::vector<const char*> getRequiredExtensions();
-bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
+bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
 bool checkValidationLayerSupport();
 
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 void setupDebugMessenger();
 
-void pickPhysicalDevice();      
+bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 uint32_t rateDeviceSuitability(VkPhysicalDevice device);
+void pickPhysicalDevice();      
+
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
 void createLogicalDevice();
 void createSurface();
