@@ -77,6 +77,7 @@ void createInstance();
 void createLogicalDevice();
 void createSwapChain();
 void createImageViews();
+void createRenderPass();
 void createGraphicsPipeline();
 
 std::vector<const char*> getRequiredExtensions();
