@@ -1,15 +1,16 @@
 #include "h/engine.h"
-#include <algorithm>
-#include <cstdint>
-#include <fstream>
-#include <limits>
-#include <string_view>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "vulkan/vulkan_core.h"
 
 #include <stdexcept>
+#include <string_view>
+#include <algorithm>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <limits>
 #include <map>
 #include <set>
 
@@ -569,17 +570,22 @@ static std::vector<char> readFile(const std::string &filename){
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    file.close();
-
     if(config_DEBUG){
         std::cout << "buffer size: " << buffer.size() << '\n';
         std::cout << "file size: " << fileSize << '\n';
     }
 
+    if(buffer.size() != fileSize){
+        throw std::runtime_error("failed to correctly read from file");
+    }
+
+    file.close();
     return buffer;
 }
 
 void createGraphicsPipeline(){
-    auto vertShaderCode = readFile("shaders/vertTest.vert");
-    auto fragShaderCode = readFile("shaders/fragTest.frag");
+    if(config_DEBUG){ std::cout << "current directory: " << std::filesystem::current_path() << '\n'; }
+
+    auto vertShaderCode = readFile("..\\..\\src\\shaders\\vertTest.vert");
+    auto fragShaderCode = readFile("..\\..\\src\\shaders\\fragTest.frag");
 }
