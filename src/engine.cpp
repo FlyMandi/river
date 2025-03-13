@@ -11,7 +11,9 @@
 #include <map>
 #include <set>
 
-const char *version = "Cnake 0.0.0";
+const char *appName = "Cnake";
+const char *engineName = "CNengine";
+const char *version = "0.0.0";
 
 const uint32_t WIDTH = 1920;
 const uint32_t HEIGHT = 1080;
@@ -36,6 +38,103 @@ VkFormat swapChainImageFormat;
 VkExtent2D swapChainExtent;
 
 std::vector<VkImage> swapChainImages;
+std::vector<VkImageView> swapChainImageViews;
+
+bool appShouldClose(){ return glfwWindowShouldClose(window); }
+
+void initGLFW(){
+    glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
+}
+
+void cleanupGLFW(){
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+void initVulkan(){
+    createInstance();
+    setupDebugMessenger();
+    createSurface();
+    pickPhysicalDevice();
+    createLogicalDevice();
+    createSwapChain();
+    createImageViews();
+}
+
+void cleanupVulkan(){
+    vkDestroySwapchainKHR(device, swapChain, nullptr);
+    vkDestroyDevice(device, nullptr);
+
+    if(isDebugMode){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
+
+    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
+}
+
+void createInstance(){
+    if(isDebugMode && !checkValidationLayerSupport()){
+        throw std::runtime_error("validation layers requested, but not available!");
+    }
+
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = appName;
+    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.pEngineName = engineName;
+    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    uint32_t instanceExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
+
+    auto requiredExtensions = getRequiredExtensions();
+    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+        throw std::runtime_error("extensions required, but not available!"); 
+    }
+
+    if(isDebugMode){ std::cout << "\nAll needed extensions are present.\n\n"; }
+
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+    createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+    createInfo.enabledLayerCount = 0;
+
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+    if(isDebugMode){
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+        
+        populateDebugMessengerCreateInfo(debugCreateInfo);
+        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+    }else{
+        createInfo.enabledLayerCount = 0;
+        createInfo.pNext = nullptr;
+    }
+
+    if(vkCreateInstance(&createInfo, nullptr, &instance)){
+        throw std::runtime_error("failed to create instance.");
+    }
+}
+
+void setupDebugMessenger(){
+    if(!isDebugMode){ return; }
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+    populateDebugMessengerCreateInfo(createInfo);
+
+    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger)){
+        throw std::runtime_error("failed to set up debug messenger!");
+    }
+}
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
@@ -52,26 +151,13 @@ VkResult CreateDebugUtilsMessengerEXT(
     }
 }
 
-bool appShouldClose(){
-    return glfwWindowShouldClose(window);
-}
-
-void initVulkan(){
-    createInstance();
-    setupDebugMessenger();
-    createSurface();
-    pickPhysicalDevice();
-    createLogicalDevice();
-    createSwapChain();
-}
-
-void initGLFW(){
-    glfwInit();
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
+    createInfo = {}; 
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
 }
 
 void DestroyDebugUtilsMessengerEXT(
@@ -83,41 +169,6 @@ void DestroyDebugUtilsMessengerEXT(
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func){
         func(instance, messenger, pAllocator);
-    }
-}
-
-void cleanupVulkan(){
-    vkDestroySwapchainKHR(device, swapChain, nullptr);
-    vkDestroyDevice(device, nullptr);
-
-    if(isDebugMode){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
-
-    vkDestroySurfaceKHR(instance, surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
-}
-
-void cleanupGLFW(){
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
-
-void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
-    createInfo = {}; 
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    createInfo.pfnUserCallback = debugCallback;
-}
-
-void setupDebugMessenger(){
-    if(!isDebugMode){ return; }
-
-    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-    populateDebugMessengerCreateInfo(createInfo);
-
-    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger)){
-        throw std::runtime_error("failed to set up debug messenger!");
     }
 }
 
@@ -471,51 +522,6 @@ void createSwapChain(){
     swapChainExtent = extent;
 }
 
-void createInstance(){
-    if(isDebugMode && !checkValidationLayerSupport()){
-        throw std::runtime_error("validation layers requested, but not available!");
-    }
-
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Cnake";
-    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-    appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
-
-    uint32_t instanceExtensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
-    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
-    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
-
-    auto requiredExtensions = getRequiredExtensions();
-    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        throw std::runtime_error("extensions required, but not available!"); 
-    }
-
-    if(isDebugMode){ std::cout << "\nAll needed extensions are present.\n\n"; }
-
-    VkInstanceCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
-    createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-    createInfo.enabledLayerCount = 0;
-
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if(isDebugMode){
-        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-        
-        populateDebugMessengerCreateInfo(debugCreateInfo);
-        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-    }else{
-        createInfo.enabledLayerCount = 0;
-        createInfo.pNext = nullptr;
-    }
-
-    if(vkCreateInstance(&createInfo, nullptr, &instance)){
-        throw std::runtime_error("failed to create instance.");
-    }
+void createImageViews(){
+    
 }
