@@ -243,6 +243,8 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     //NOTE: this is a janky check, optimally I'd want to loop through the queue Families and see
     //how many families are the same queue for optimal performance 
     //this really is not important tho lol
+    //probably just have an std::set of uint32_t and check for the difference between the size of
+    //the set and the amount of queue families that indices has
     if(indices.presentFamily.value() == indices.graphicsFamily.value()){
         score += 100;
     }
