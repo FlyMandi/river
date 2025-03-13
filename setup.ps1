@@ -3,7 +3,7 @@
 
 if(-Not(Get-Command premake5.exe -ErrorAction SilentlyContinue)){
    if(Get-Command scoop -ErrorAction SilentlyContinue){ 
-        &scoop install premake5
+        &scoop install premake
    }else{
         $sourceRepo = "premake/premake-core"
         $namePattern = "*windows.zip"
