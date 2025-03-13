@@ -45,6 +45,8 @@ VkExtent2D swapChainExtent;
 std::vector<VkImage> swapChainImages;
 std::vector<VkImageView> swapChainImageViews;
 
+VkPipelineLayout pipelineLayout;
+
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
 
 void initGLFW(){
@@ -73,9 +75,12 @@ void initVulkan(){
 }
 
 void cleanupVulkan(){
+    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+
     for(const auto &imageView : swapChainImageViews){
         vkDestroyImageView(device, imageView, nullptr);
     }
+
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroyDevice(device, nullptr);
 
@@ -707,6 +712,13 @@ void createGraphicsPipeline(){
     colorBlend.logicOpEnable = VK_FALSE;
     colorBlend.attachmentCount = 1;
     colorBlend.pAttachments = &colorBlendAttachment;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+    if(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
+        throw std::runtime_error("failed to create pipeline layout!");
+    }
 
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
