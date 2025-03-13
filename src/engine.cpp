@@ -31,6 +31,11 @@ VkQueue graphicsQueue;
 VkQueue presentQueue;
 
 VkSurfaceKHR surface;
+VkSwapchainKHR swapChain;
+VkFormat swapChainImageFormat;
+VkExtent2D swapChainExtent;
+
+std::vector<VkImage> swapChainImages;
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
@@ -82,6 +87,7 @@ void DestroyDebugUtilsMessengerEXT(
 }
 
 void cleanupVulkan(){
+    vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroyDevice(device, nullptr);
 
     if(isDebugMode){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
@@ -445,6 +451,24 @@ void createSwapChain(){
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
     }
+
+    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    createInfo.presentMode = presentMode;
+    createInfo.clipped = VK_TRUE;
+
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    if(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
+        throw std::runtime_error("failed to create swap chain!");
+    }
+
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+    swapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+
+    swapChainImageFormat = surfaceFormat.format;
+    swapChainExtent = extent;
 }
 
 void createInstance(){
