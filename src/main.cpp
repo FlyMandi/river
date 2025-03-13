@@ -2,9 +2,6 @@
 #include "h/engine.h"
 #include "GLFW/glfw3.h"
 
-#include <cstdlib>
-#include <cstring>
-
 void gameLoop(){
     while(!appShouldClose()){
        glfwPollEvents(); 

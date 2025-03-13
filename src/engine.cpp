@@ -4,8 +4,8 @@
 #include <GLFW/glfw3.h>
 #include "vulkan/vulkan_core.h"
 
-#include <map>
 #include <stdexcept>
+#include <map>
 #include <set>
 
 const char *version = "Cnake 0.0.0";
