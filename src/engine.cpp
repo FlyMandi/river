@@ -243,11 +243,6 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     }
     score += deviceProperties.limits.maxImageDimension2D;
 
-    //NOTE: this is a janky check, optimally I'd want to loop through the queue Families and see
-    //how many families are the same queue for optimal performance 
-    //this really is not important tho lol
-    //probably just have an std::set of uint32_t and check for the difference between the size of
-    //the set and the amount of queue families that indices has
     if(indices.presentFamily.value() == indices.graphicsFamily.value()){
         score += 100;
     }
@@ -344,7 +339,6 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> avail
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
-
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         if(isDebugMode){
             std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
@@ -422,6 +416,35 @@ void createSwapChain(){
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+
+    if(0 < swapChainSupport.capabilities.maxImageCount && imageCount > swapChainSupport.capabilities.maxImageCount){
+        imageCount = swapChainSupport.capabilities.maxImageCount;
+    }
+
+    VkSwapchainCreateInfoKHR createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    createInfo.surface = surface;
+    createInfo.minImageCount = imageCount;
+    createInfo.imageFormat = surfaceFormat.format;
+    createInfo.imageColorSpace = surfaceFormat.colorSpace;
+    createInfo.imageExtent = extent; 
+    createInfo.imageArrayLayers = 1;
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+
+    if(indices.graphicsFamily != indices.presentFamily){
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    }else{
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0;
+        createInfo.pQueueFamilyIndices = nullptr;
+    }
 }
 
 void createInstance(){
