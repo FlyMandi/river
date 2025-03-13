@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <optional>
@@ -13,6 +14,7 @@
 #else 
     const bool config_DEBUG = true;
 #endif
+
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation" 
@@ -47,8 +49,9 @@ void DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,
         VkDebugUtilsMessengerEXT    messenger, 
         const VkAllocationCallbacks *pAllocator
-    );
+);
 
+std::filesystem::path getProjectRoot();
 
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
