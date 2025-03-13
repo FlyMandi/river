@@ -21,6 +21,8 @@ const char *version = "0.0.0";
 const uint32_t WIDTH = 1920;
 const uint32_t HEIGHT = 1080;
 
+const std::filesystem::path appRoot = getProjectRoot();
+
 GLFWwindow *window;
 
 VkInstance instance;
@@ -57,7 +59,7 @@ std::filesystem::path getProjectRoot(){
         }
     }
 
-    return "."; 
+    throw std::runtime_error("failed to find root folder!");
 }
 
 void initGLFW(){
@@ -83,6 +85,8 @@ void initVulkan(){
     createSwapChain();
     createImageViews();
     createGraphicsPipeline();
+    //shaders
+    //other stuf
 }
 
 void cleanupVulkan(){
@@ -615,10 +619,11 @@ VkShaderModule createShaderModule(const std::vector<char> &code){
 void createGraphicsPipeline(){
     if(config_DEBUG){ std::cout << "current directory: " << std::filesystem::current_path() << '\n'; }
     
-    std::filesystem::path appRoot = getProjectRoot();
+    const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
+    const std::filesystem::path fragPath = appRoot / "bin\\fragTest.frag.spv";
 
-    auto vertShaderCode = readFile((appRoot / "bin\\vertTest.vert.spv").string());
-    auto fragShaderCode = readFile((appRoot / "bin\\fragTest.frag.spv").string());
+    auto vertShaderCode = readFile(vertPath.string());
+    auto fragShaderCode = readFile(fragPath.string());
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
