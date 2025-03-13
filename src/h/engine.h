@@ -59,8 +59,8 @@ struct QueueFamilyIndices{
     }
 };
 
-struct SwapChainSupportDetails{
-    VkSurfaceCapabilitiesKHR capabilities;
+struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilities{};
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
 };
