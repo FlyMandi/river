@@ -56,6 +56,8 @@ void cleanupVulkan();
 void cleanupGLFW();
 
 void createInstance();
+void createLogicalDevice();
+void createSwapChain();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
@@ -71,5 +73,4 @@ void pickPhysicalDevice();
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
-void createLogicalDevice();
 void createSurface();
