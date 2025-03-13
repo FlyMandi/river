@@ -48,4 +48,5 @@ Building cross-plaform and cross-IDE is a fairly simple task with PreMake and I 
 
 #### Text Editor/IDE
 
-For editing text, I use neovim with [my custom configuration](https://github.com/FlyMandi/dotfiles/tree/main/nvim/), specifically for C++ I use `clang` as an LSP and write a simple `compile_flags.txt` with the include folders, which clang can pick up on. Then, when I want to debug or compile, I simply run `premake5 vs2022` and load up the `.vcxproj` in Visual Studio 2022.
+For editing text, I use neovim with [my custom configuration](https://github.com/FlyMandi/dotfiles/tree/main/nvim/), specifically for C++ I use `clang` as an LSP and write a simple `compile_flags.txt` with the include folders, which clang can pick up on. I compile via `.\build` (MSBuild.exe). For debugging/profiling, I simply run `.\vs2022`, which builds, compiles & opens the project in Visual Studio 2022 for me. 
+
