@@ -249,6 +249,10 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
+    if(isDebugMode){
+        std::cout << deviceProperties.deviceName << ": score " << score << '\n';
+    }
+
     return score;
 }
 
