@@ -95,6 +95,10 @@ void initVulkan(){
 }
 
 void cleanupVulkan(){
+    for(const auto &framebuffer : swapChainFramebuffers){
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
+
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);
