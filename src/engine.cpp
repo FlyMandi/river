@@ -21,7 +21,7 @@ const char *version = "0.0.0";
 const uint32_t WIDTH = 1920;
 const uint32_t HEIGHT = 1080;
 
-const std::filesystem::path appRoot = getProjectRoot();
+const std::filesystem::path appRoot = getProjectRoot(appName);
 
 GLFWwindow *window;
 
@@ -57,22 +57,6 @@ VkSemaphore renderFinishedSemaphore;
 VkFence inFlightFence;
 
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
-
-//TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
-std::filesystem::path getProjectRoot(){
-    std::filesystem::path current = std::filesystem::current_path();
-
-    for(int i = 0; i < 3; ++i){
-        if(strcmp(current.filename().string().c_str(), appName) == 0) {
-            if(config_DEBUG){ std::cout << "project root: " << current << '\n'; }
-            return current;
-        }else{
-            current = current.parent_path();
-        }
-    }
-
-    throw std::runtime_error("failed to find root folder!");
-}
 
 void initGLFW(){
     glfwInit();
@@ -919,6 +903,30 @@ void createSyncObjects(){
 }
 
 void drawFrame(){
+    uint32_t imageIndex;
+
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
     vkResetFences(device, 1, &inFlightFence);
+
+    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    
+    vkResetCommandBuffer(commandBuffer, 0);
+    recordCommandBuffer(commandBuffer, imageIndex);
+
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    submitInfo.pSignalSemaphores = signalSemaphores;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.waitSemaphoreCount = 1;
+
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
 }

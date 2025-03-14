@@ -66,7 +66,7 @@ struct SwapChainSupportDetails {
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-std::filesystem::path getProjectRoot();
+std::filesystem::path getProjectRoot(const char* rootName);
 bool appShouldClose();
 
 void initVulkan();
