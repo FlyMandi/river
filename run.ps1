@@ -1,2 +1,2 @@
 param ( $config = "release" )
-&".\Cnake.exe"
+&".\bin\$config\Cnake.exe"
