@@ -49,9 +49,12 @@ std::vector<VkFramebuffer> swapChainFramebuffers;
 VkRenderPass renderPass;
 VkPipelineLayout pipelineLayout;
 VkPipeline graphicsPipeline;
+VkCommandPool commandPool;
+VkCommandBuffer commandBuffer;
 
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
 
+//TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
 std::filesystem::path getProjectRoot(){
     std::filesystem::path current = std::filesystem::current_path();
 
@@ -92,9 +95,12 @@ void initVulkan(){
     createRenderPass();
     createGraphicsPipeline();
     createFramebuffers();
+    createCommandPool();
 }
 
 void cleanupVulkan(){
+    vkDestroyCommandPool(device, commandPool, nullptr);
+
     for(const auto &framebuffer : swapChainFramebuffers){
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
@@ -809,5 +815,18 @@ void createFramebuffers(){
         if(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
             throw std::runtime_error("failed to create framebuffer!");
         }
+    }
+}
+
+void createCommandPool(){
+    QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+    if((vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
+        throw std::runtime_error("failed to create command pool!");
     }
 }
