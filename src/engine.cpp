@@ -85,8 +85,6 @@ void initVulkan(){
     createSwapChain();
     createImageViews();
     createGraphicsPipeline();
-    //shaders
-    //other stuf
 }
 
 void cleanupVulkan(){
