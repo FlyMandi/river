@@ -79,6 +79,7 @@ void createSwapChain();
 void createImageViews();
 void createRenderPass();
 void createGraphicsPipeline();
+void createFramebuffers();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
