@@ -52,6 +52,10 @@ VkPipeline graphicsPipeline;
 VkCommandPool commandPool;
 VkCommandBuffer commandBuffer;
 
+VkSemaphore imageAvailableSemaphore;
+VkSemaphore renderFinishedSemaphore;
+VkFence inFlightFence;
+
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
@@ -97,9 +101,14 @@ void initVulkan(){
     createFramebuffers();
     createCommandPool();
     createCommandBuffer();
+    createSyncObjects();
 }
 
 void cleanupVulkan(){
+    vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
+    vkDestroyFence(device, inFlightFence, nullptr);
+
     vkDestroyCommandPool(device, commandPool, nullptr);
 
     for(const auto &framebuffer : swapChainFramebuffers){
@@ -891,4 +900,23 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex){
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
         throw std::runtime_error("failed to record command buffer!");
     }
+}
+
+void createSyncObjects(){
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    
+    if((vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
+        throw std::runtime_error("failed to create semaphores!");
+    }
+    if((vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
+        throw std::runtime_error("failed to create fence!");
+    }
+}
+
+void drawFrame(){
+    vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 }

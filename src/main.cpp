@@ -5,6 +5,7 @@
 void gameLoop(){
     while(!appShouldClose()){
        glfwPollEvents(); 
+       drawFrame();
     }
 }
 
