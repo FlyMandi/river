@@ -15,13 +15,15 @@
 #include <set>
 
 const char *appName = "Cnake";
-const char *engineName = "CNengine";
-const char *version = "0.0.0";
+const char *engineName = "CNNgine";
+const char *version = "0.0.1";
 
 const uint32_t WIDTH = 1920;
 const uint32_t HEIGHT = 1080;
 
 const std::filesystem::path appRoot = getProjectRoot(appName);
+
+const int MAX_FRAMES_IN_FLIGHT = 2;
 
 GLFWwindow *window;
 
@@ -64,7 +66,7 @@ void initGLFW(){
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
+    window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)version).c_str(), nullptr, nullptr);
 }
 
 void cleanupGLFW(){
