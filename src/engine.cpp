@@ -1,8 +1,5 @@
+#include "h/window.h"
 #include "h/engine.h"
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include "vulkan/vulkan_core.h"
 
 #include <stdexcept>
 #include <string_view>
@@ -13,66 +10,6 @@
 #include <limits>
 #include <map>
 #include <set>
-
-const char *appName = "Cnake";
-const char *engineName = "CNNgine";
-const char *version = "0.0.1";
-
-const uint32_t WIDTH = 1920;
-const uint32_t HEIGHT = 1080;
-
-const std::filesystem::path appRoot = getProjectRoot(appName);
-
-const int MAX_FRAMES_IN_FLIGHT = 2;
-
-GLFWwindow *window;
-
-VkInstance instance;
-VkDebugUtilsMessengerEXT debugMessenger;
-
-VkPhysicalDevice physicalDevice;
-VkPhysicalDeviceProperties deviceProperties;
-VkPhysicalDeviceFeatures deviceFeatures;
-
-VkDevice device;
-
-VkQueue graphicsQueue;
-VkQueue presentQueue;
-
-VkSurfaceKHR surface;
-VkSwapchainKHR swapChain;
-VkFormat swapChainImageFormat;
-VkExtent2D swapChainExtent;
-
-std::vector<VkImage> swapChainImages;
-std::vector<VkImageView> swapChainImageViews;
-std::vector<VkFramebuffer> swapChainFramebuffers;
-
-VkRenderPass renderPass;
-VkPipelineLayout pipelineLayout;
-VkPipeline graphicsPipeline;
-VkCommandPool commandPool;
-VkCommandBuffer commandBuffer;
-
-VkSemaphore imageAvailableSemaphore;
-VkSemaphore renderFinishedSemaphore;
-VkFence inFlightFence;
-
-bool appShouldClose(){ return glfwWindowShouldClose(window); }
-
-void initGLFW(){
-    glfwInit();
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)version).c_str(), nullptr, nullptr);
-}
-
-void cleanupGLFW(){
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
 
 void initVulkan(){
     createInstance();
