@@ -7,7 +7,7 @@ std::filesystem::path getProjectRoot(const char *rootName){
 
     for(int i = 0; i < 3; ++i){
         if(strcmp(current.filename().string().c_str(), rootName) == 0) {
-            if(config_DEBUG){ 
+            if(build_DEBUG){ 
                 std::cout << "project root: " << current << '\n'; 
             }
             return current;

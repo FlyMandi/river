@@ -9,12 +9,12 @@
 #include <optional>
 
 #ifdef NDEBUG
-    const bool config_DEBUG = false;
+    const bool build_DEBUG = false;
 #else 
-    const bool config_DEBUG = true;
+    const bool build_DEBUG = true;
 #endif
 
-inline const char *engineName = "";
+inline const char *engineName = "MagmaRiver";
 
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
