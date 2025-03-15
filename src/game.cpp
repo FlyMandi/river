@@ -9,8 +9,8 @@ void initGame(){
 
 void gameLoop(){
     while(!window_SHOULDCLOSE){
-       glfwPollEvents(); 
-       drawFrame();
+        windowPollEvents();
+        drawFrame();
     }
 }
 

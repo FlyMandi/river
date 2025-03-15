@@ -21,3 +21,5 @@ inline GLFWwindow *window;
 
 void initGLFW();
 void cleanupGLFW();
+
+void windowPollEvents();
