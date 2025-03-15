@@ -14,7 +14,7 @@
     const bool build_DEBUG = true;
 #endif
 
-inline const char *engineName = "MagmaRiver";
+inline const char *engineName = "River";
 
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
