@@ -51,7 +51,7 @@ void cleanupVulkan(){
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroyDevice(device, nullptr);
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); 
     }
 
@@ -60,7 +60,7 @@ void cleanupVulkan(){
 }
 
 void createInstance(){
-    if(config_DEBUG && !checkValidationLayerSupport()){
+    if(build_DEBUG && !checkValidationLayerSupport()){
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
@@ -82,7 +82,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    if(config_DEBUG){ 
+    if(build_DEBUG){ 
         std::cout << "\nAll needed extensions are present.\n\n"; 
     }
 
@@ -94,7 +94,7 @@ void createInstance(){
     createInfo.enabledLayerCount = 0;
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if(config_DEBUG){
+    if(build_DEBUG){
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
         createInfo.ppEnabledLayerNames = validationLayers.data();
         
@@ -111,7 +111,7 @@ void createInstance(){
 }
 
 void setupDebugMessenger(){
-    if(!config_DEBUG){ 
+    if(!build_DEBUG){ 
         return; 
     }
 
@@ -190,7 +190,7 @@ std::vector<const char*> getRequiredExtensions(){
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
     }
 
@@ -198,14 +198,14 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    if(config_DEBUG){
+    if(build_DEBUG){
         std::cout << "\n\tPresent:\n";
         for(const auto &extension : *instanceExt){
             std::cout << "\t" << extension.extensionName << '\n';
         }
     }
 
-    if(config_DEBUG) { 
+    if(build_DEBUG) { 
         std::cout << "\n\tRequired:\n"; 
     }
     for(const auto &required : *requiredExt){
@@ -213,7 +213,7 @@ bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    if(config_DEBUG){ 
+                    if(build_DEBUG){ 
                         std::cout << "found:\t" << required << '\n'; 
                     }
                     extFound = true;
@@ -221,7 +221,7 @@ bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<
                 }
             }
         if(!extFound){ 
-            if(config_DEBUG){ 
+            if(build_DEBUG){ 
                 std::cout << "not found: \t" << required << '\n'; 
             }
             return false; 
@@ -301,7 +301,7 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         std::cout << '\n' << deviceProperties.deviceName << ": score " << score << '\n';
     }
 
@@ -377,7 +377,7 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            if(config_DEBUG){ 
+            if(build_DEBUG){ 
                 std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; 
             } 
             return availablePresentMode;
@@ -386,14 +386,14 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> avail
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            if(config_DEBUG){
+            if(build_DEBUG){
                 std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';
             }
             return availablePresentMode;
         }
     }
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';
     }
     return VK_PRESENT_MODE_FIFO_KHR;
@@ -401,7 +401,7 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> avail
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        if(config_DEBUG){
+        if(build_DEBUG){
             std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
             std::cout << "swap height: " << capabilities.currentExtent.height << "\n\n";
         }
@@ -415,7 +415,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        if(config_DEBUG){
+        if(build_DEBUG){
             std::cout << "swap width: " << actualExtent.width << '\n';
             std::cout << "swap height: " << actualExtent.height << "\n\n";
         }
@@ -450,7 +450,7 @@ void createLogicalDevice(){
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
     }else{
@@ -566,7 +566,7 @@ static std::vector<char> readFile(const std::string &filename){
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    if(config_DEBUG){
+    if(build_DEBUG){
         std::cout << "\nreading file: " << filename << '\n'; 
         std::cout << "buffer size: " << buffer.size() << '\n';
         std::cout << "file size: " << fileSize << '\n';
@@ -639,7 +639,7 @@ void createRenderPass(){
 }
 
 void createGraphicsPipeline(){
-    if(config_DEBUG){ 
+    if(build_DEBUG){ 
         std::cout << "current directory: " << std::filesystem::current_path() << '\n'; 
     }
     
