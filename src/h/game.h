@@ -1,7 +1,5 @@
 #pragma once
 
-void initGLFW();
-void cleanupGLFW();
-
+void initGame();
 void gameLoop();
 void createMainMenu(); 
