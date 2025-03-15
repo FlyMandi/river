@@ -7,7 +7,6 @@
 #include <filesystem>
 
 inline const char *appName = "Cnake";
-inline const char *engineName = "CNNgine";
 inline const char *version = "0.0.1";
 
 inline const uint32_t WIDTH = 1920;
