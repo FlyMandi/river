@@ -51,7 +51,9 @@ void cleanupVulkan(){
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroyDevice(device, nullptr);
 
-    if(config_DEBUG){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
+    if(config_DEBUG){
+        DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); 
+    }
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
@@ -80,7 +82,9 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    if(config_DEBUG){ std::cout << "\nAll needed extensions are present.\n\n"; }
+    if(config_DEBUG){ 
+        std::cout << "\nAll needed extensions are present.\n\n"; 
+    }
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -107,7 +111,9 @@ void createInstance(){
 }
 
 void setupDebugMessenger(){
-    if(!config_DEBUG){ return; }
+    if(!config_DEBUG){ 
+        return; 
+    }
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
@@ -169,7 +175,9 @@ bool checkValidationLayerSupport(){
                 break;
             }
         }
-        if(!layerFound){ return false; }
+        if(!layerFound){
+            return false; 
+        }
     }
 
     return true;
@@ -183,7 +191,7 @@ std::vector<const char*> getRequiredExtensions(){
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     if(config_DEBUG){
-        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
     }
 
     return extensions;
@@ -197,19 +205,25 @@ bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<
         }
     }
 
-    if(config_DEBUG) { std::cout << "\n\tRequired:\n"; }
+    if(config_DEBUG) { 
+        std::cout << "\n\tRequired:\n"; 
+    }
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    if(config_DEBUG){ std::cout << "found:\t" << required << '\n'; }
+                    if(config_DEBUG){ 
+                        std::cout << "found:\t" << required << '\n'; 
+                    }
                     extFound = true;
                     break;
                 }
             }
         if(!extFound){ 
-            if(config_DEBUG){ std::cout << "not found: \t" << required << '\n'; }
+            if(config_DEBUG){ 
+                std::cout << "not found: \t" << required << '\n'; 
+            }
             return false; 
         } 
     }
@@ -259,7 +273,9 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     uint32_t score = 0;
 
     QueueFamilyIndices indices = findQueueFamilies(device);
-    if(!indices.isComplete()){ return 0; }
+    if(!indices.isComplete()){ 
+        return 0; 
+    }
 
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
@@ -340,7 +356,9 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
             indices.presentFamily = i;
         }
 
-        if(indices.isComplete()){ break; }
+        if(indices.isComplete()){ 
+            break; 
+        }
         ++i;
     }
 
@@ -360,19 +378,25 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
+            if(config_DEBUG){ 
+                std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; 
+            } 
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
+            if(config_DEBUG){
+                std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';
+            }
             return availablePresentMode;
         }
     }
 
-    if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';}
+    if(config_DEBUG){
+        std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';
+    }
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -531,7 +555,6 @@ void createImageViews(){
 }
 
 static std::vector<char> readFile(const std::string &filename){
-    if(config_DEBUG){ std::cout << "\nreading file: " << filename << '\n'; }
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if(!file.is_open()){
@@ -545,6 +568,7 @@ static std::vector<char> readFile(const std::string &filename){
     file.read(buffer.data(), fileSize);
 
     if(config_DEBUG){
+        std::cout << "\nreading file: " << filename << '\n'; 
         std::cout << "buffer size: " << buffer.size() << '\n';
         std::cout << "file size: " << fileSize << '\n';
     }
@@ -613,11 +637,12 @@ void createRenderPass(){
     if((vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
         throw std::runtime_error("failed to create render pass!");
     }
-
 }
 
 void createGraphicsPipeline(){
-    if(config_DEBUG){ std::cout << "current directory: " << std::filesystem::current_path() << '\n'; }
+    if(config_DEBUG){ 
+        std::cout << "current directory: " << std::filesystem::current_path() << '\n'; 
+    }
     
     const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
     const std::filesystem::path fragPath = appRoot / "bin\\fragTest.frag.spv";
