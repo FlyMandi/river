@@ -33,16 +33,16 @@ filter("platforms:Win64")
     system("Windows")
     architecture("x86_64")
 
-    newaction({
-        trigger = "clean",
-        description = "clean the software",
-        execute = function()
-            print("clean the build...")
-            os.rmdir("./build/")
-            os.rmdir("./bin/")
-            os.remove("BuildRules.xml")
-            os.remove("BuildRules.props")
-            os.remove("BuildRules.targets")
-            print("done.")
-        end,
-    })
+newaction({
+    trigger = "clean",
+    description = "clean the software",
+    execute = function()
+        print("clean the build...")
+        os.rmdir("./build/")
+        os.rmdir("./bin/")
+        os.remove("BuildRules.xml")
+        os.remove("BuildRules.props")
+        os.remove("BuildRules.targets")
+        print("done.")
+    end,
+})
