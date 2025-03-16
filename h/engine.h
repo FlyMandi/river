@@ -49,9 +49,6 @@ inline VkSemaphore imageAvailableSemaphore;
 inline VkSemaphore renderFinishedSemaphore;
 inline VkFence inFlightFence;
 
-void initVulkan();
-void cleanupVulkan();
-
 void createInstance();
 void setupDebugMessenger();
 void createSurface();
@@ -65,8 +62,6 @@ void createFramebuffers();
 void createCommandPool();
 void createCommandBuffer();
 void createSyncObjects();
-
-void drawFrame();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
