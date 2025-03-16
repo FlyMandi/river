@@ -1,4 +1,5 @@
-#include "river.h"
+#include "h/river.h"
+#include "h/engine.h"
 
 void initVulkan(){
     createInstance();
