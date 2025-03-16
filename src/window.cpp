@@ -1,4 +1,4 @@
-#include "h/window.h"
+#include "river.h"
 
 void initGLFW(){
     glfwInit();

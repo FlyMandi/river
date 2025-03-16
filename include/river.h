@@ -1,7 +1,10 @@
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
+#include <filesystem>
 #include <vector>
 
 #ifdef NDEBUG
@@ -10,7 +13,19 @@
     const bool build_DEBUG = true;
 #endif
 
+inline bool window_SHOULDCLOSE = false;
+
 inline const char *engineName = "River";
+inline const char *appName;
+inline const char *version;
+
+inline const uint32_t WIDTH = 1920;
+inline const uint32_t HEIGHT = 1080;
+
+inline GLFWwindow *window;
+
+inline std::filesystem::path appRoot;
+std::filesystem::path getProjectRoot(const char* rootName);
 
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -48,3 +63,7 @@ inline VkFence inFlightFence;
 void initVulkan();
 void cleanupVulkan();
 void drawFrame();
+
+void initGLFW();
+void cleanupGLFW();
+void windowPollEvents();

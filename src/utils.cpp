@@ -1,5 +1,7 @@
-#include "h/engine.h"
-#include "h/utils.h"
+#include "river.h"
+
+#include <cstring>
+#include <iostream>
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
 std::filesystem::path getProjectRoot(const char *rootName){

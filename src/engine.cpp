@@ -1,6 +1,6 @@
-#include "h/window.h"
+#include "river.h"
+
 #include "h/engine.h"
-#include "h/river.h"
 
 #include <stdexcept>
 #include <string_view>
@@ -11,7 +11,6 @@
 #include <limits>
 #include <map>
 #include <set>
-
 
 void createInstance(){
     if(build_DEBUG && !checkValidationLayerSupport()){
