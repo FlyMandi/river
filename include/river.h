@@ -69,4 +69,4 @@ void cleanupGLFW();
 void windowPollEvents();
 
 std::filesystem::path getProjectRoot(const char* rootName);
-void printDebugLog(const std::string &text, std::filesystem::path &logFile);
+void printDebugLog(const std::string &text, std::filesystem::path &logFile, uint32_t tabs, uint32_t newlines);

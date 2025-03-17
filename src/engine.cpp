@@ -35,7 +35,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    printDebugLog("All needed extensions are present.", debugLog);
+    printDebugLog("\nAll needed extensions are present.", debugLog, 0, 1);
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -149,20 +149,19 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("\tPresent:", debugLog);
+    printDebugLog("Present:", debugLog, 1, 1);
     for(const auto &extension : *instanceExt){
-        std::cout << "\t" << extension.extensionName << '\n';
+        printDebugLog(extension.extensionName, debugLog, 2, 1);
     }
 
-    printDebugLog("\tRequired:", debugLog);
+    printDebugLog("Required:", debugLog, 1, 1);
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    if(build_DEBUG){ 
-                        std::cout << "found:\t" << required << '\n'; 
-                    }
+                    printDebugLog("found:\t", debugLog, 0, 0);
+                    printDebugLog(required, debugLog, 1, 1);
                     extFound = true;
                     break;
                 }
