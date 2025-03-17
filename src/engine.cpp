@@ -3,6 +3,7 @@
 #include "h/engine.h"
 
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <algorithm>
 #include <cstdint>
@@ -246,7 +247,8 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     }
 
     printDebugLog(deviceProperties.deviceName, 0, 1);
-    printDebugLog("score", 1, 0);
+    printDebugLog("score: ", 0, 0);
+    printDebugLog(std::to_string(score), 0, 2);
 
     return score;
 }
