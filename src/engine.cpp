@@ -35,9 +35,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    if(build_DEBUG){ 
-        std::cout << "\nAll needed extensions are present.\n\n"; 
-    }
+    printDebugLog("All needed extensions are present.", debugLog);
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -151,16 +149,12 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    if(build_DEBUG){
-        std::cout << "\n\tPresent:\n";
-        for(const auto &extension : *instanceExt){
-            std::cout << "\t" << extension.extensionName << '\n';
-        }
+    printDebugLog("\tPresent:", debugLog);
+    for(const auto &extension : *instanceExt){
+        std::cout << "\t" << extension.extensionName << '\n';
     }
 
-    if(build_DEBUG) { 
-        std::cout << "\n\tRequired:\n"; 
-    }
+    printDebugLog("\tRequired:", debugLog);
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
@@ -508,7 +502,6 @@ void createImageViews(){
 
 static std::vector<char> readFile(const std::string &filename){
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-
     if(!file.is_open()){
         throw std::runtime_error("failed to open file");
     }
