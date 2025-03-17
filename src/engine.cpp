@@ -35,7 +35,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    printDebugLog("\nAll needed extensions are present.", debugLog, 0, 1);
+    printDebugLog("\nAll needed extensions are present.", 0, 1);
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -149,25 +149,25 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("\nPresent:", debugLog, 1, 1);
+    printDebugLog("\nPresent:", 1, 1);
     for(const auto &extension : *instanceExt){
-        printDebugLog(extension.extensionName, debugLog, 2, 1);
+        printDebugLog(extension.extensionName, 2, 1);
     }
 
-    printDebugLog("\nRequired:", debugLog, 1, 1);
+    printDebugLog("\nRequired:", 1, 1);
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    printDebugLog("found:\t", debugLog, 0, 0);
-                    printDebugLog(required, debugLog, 1, 1);
+                    printDebugLog("found:\t", 0, 0);
+                    printDebugLog(required, 1, 1);
                     extFound = true;
                     break;
                 }
             }
         if(!extFound){ 
-            printDebugLog("not found:\t", debugLog, 0, 0);
+            printDebugLog("not found:\t", 0, 0);
             return false; 
         } 
     }
@@ -245,8 +245,8 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    printDebugLog(deviceProperties.deviceName, debugLog, 0, 1);
-    printDebugLog("score", debugLog, 1, 0);
+    printDebugLog(deviceProperties.deviceName, 0, 1);
+    printDebugLog("score", 1, 0);
 
     return score;
 }
