@@ -149,12 +149,12 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("Present:", debugLog, 1, 1);
+    printDebugLog("\nPresent:", debugLog, 1, 1);
     for(const auto &extension : *instanceExt){
         printDebugLog(extension.extensionName, debugLog, 2, 1);
     }
 
-    printDebugLog("Required:", debugLog, 1, 1);
+    printDebugLog("\nRequired:", debugLog, 1, 1);
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
