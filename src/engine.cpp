@@ -36,7 +36,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    printDebugLog("\nAll needed extensions are present.", 0, 1);
+    printDebugLog("\nAll required extensions are present.", 0, 2);
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -322,32 +322,29 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 1);
+            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            if(build_DEBUG){
-                std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';
-            }
+            printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
-    if(build_DEBUG){
-        std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';
-    }
+    printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        if(build_DEBUG){
-            std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
-            std::cout << "swap height: " << capabilities.currentExtent.height << "\n\n";
-        }
+        printDebugLog("swap width: ", 0, 0);
+        printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
+        printDebugLog("swap height: ", 0, 0);
+        printDebugLog(std::to_string(capabilities.currentExtent.height), 0, 2);
+
         return capabilities.currentExtent; 
     }else{
         int width, height;
@@ -358,11 +355,11 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        if(build_DEBUG){
-            std::cout << "swap width: " << actualExtent.width << '\n';
-            std::cout << "swap height: " << actualExtent.height << "\n\n";
-        }
-
+        printDebugLog("swap width: ", 0, 0);
+        printDebugLog(std::to_string(actualExtent.width), 0, 1);
+        printDebugLog("swap height: ", 0, 0);
+        printDebugLog(std::to_string(actualExtent.height), 0, 2);
+        
         return actualExtent;
     }
 }
@@ -508,11 +505,12 @@ static std::vector<char> readFile(const std::string &filename){
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    if(build_DEBUG){
-        std::cout << "\nreading file: " << filename << '\n'; 
-        std::cout << "buffer size: " << buffer.size() << '\n';
-        std::cout << "file size: " << fileSize << '\n';
-    }
+    printDebugLog("reading file:", 0, 0);
+    printDebugLog(filename, 1, 1);
+    printDebugLog("buffer size:", 0, 0);
+    printDebugLog(std::to_string(buffer.size()), 1, 1);
+    printDebugLog("file size:", 0, 0);
+    printDebugLog(std::to_string(fileSize), 1, 2);
 
     if(buffer.size() != fileSize){
         throw std::runtime_error("failed to correctly read from file");
@@ -581,9 +579,8 @@ void createRenderPass(){
 }
 
 void createGraphicsPipeline(){
-    if(build_DEBUG){ 
-        std::cout << "current directory: " << std::filesystem::current_path() << '\n'; 
-    }
+    printDebugLog("current directory: ", 0, 0);
+    printDebugLog(std::filesystem::current_path().string(), 0, 2);
     
     const std::filesystem::path vertPath = appRoot / "river\\bin\\vertTest.vert.spv";
     const std::filesystem::path fragPath = appRoot / "river\\bin\\fragTest.frag.spv";
