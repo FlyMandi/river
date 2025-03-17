@@ -25,15 +25,16 @@ std::filesystem::path getProjectRoot(const char *rootName){
     throw std::runtime_error("failed to find root folder!");
 }
 
-//TODO: flush every time the application is started, prob use a boolean
-void printDebugLog(const std::string &text, std::filesystem::path &logFile, uint32_t tabs, uint32_t newlines){
+//TODO: look into the cost of this function, maybe there's no need to open/close it on every function call
+//just open the file on initGame, close it on gameShutdown
+void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
         if(firstOpen){
-            remove(logFile);
+            remove(debugLog);
             firstOpen = false;
         }
 
-        std::ofstream log(logFile, std::ios::app);
+        std::ofstream log(debugLog, std::ios::app);
         if(!log.is_open()){
             throw std::runtime_error("failed to open file");
         }else{
