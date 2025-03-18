@@ -86,8 +86,6 @@ void river::drawFrame(){
     if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
         throw std::runtime_error("failed to submit draw command buffer!");
-    }else{
-        printDebugLog("Successfully drew command buffer.", 1, 1);
     }
 
     VkSwapchainKHR swapChains[] = {swap::swapChain};
