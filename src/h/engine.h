@@ -1,12 +1,64 @@
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
 #include "vulkan/vulkan_core.h"
+#include "GLFW/glfw3.h"
 
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <optional>
+
+namespace engine{
+
+#if defined(DEBUG) || defined(_DEBUG)
+    const bool build_DEBUG = true;
+#else
+    const bool build_DEBUG = false;
+#endif
+
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
+inline GLFWwindow *window;
+
+inline std::filesystem::path appRoot;
+inline std::filesystem::path debugLog;
+
+inline VkInstance instance;
+inline VkDebugUtilsMessengerEXT debugMessenger;
+
+inline VkPhysicalDevice physicalDevice;
+inline VkPhysicalDeviceProperties deviceProperties;
+inline VkPhysicalDeviceFeatures deviceFeatures;
+
+inline VkDevice device;
+
+inline VkQueue graphicsQueue;
+inline VkQueue presentQueue;
+
+inline VkSurfaceKHR surface;
+inline VkSwapchainKHR swapChain;
+inline VkFormat swapChainImageFormat;
+inline VkExtent2D swapChainExtent;
+
+inline std::vector<VkImage> swapChainImages;
+inline std::vector<VkImageView> swapChainImageViews;
+inline std::vector<VkFramebuffer> swapChainFramebuffers;
+
+inline VkRenderPass renderPass;
+inline VkPipelineLayout pipelineLayout;
+inline VkPipeline graphicsPipeline;
+inline VkCommandPool commandPool;
+inline VkCommandBuffer commandBuffer;
+
+inline VkSemaphore imageAvailableSemaphore;
+inline VkSemaphore renderFinishedSemaphore;
+inline VkFence inFlightFence;
+
+void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
+std::vector<char> readFile(const std::string &filename);
 
 void createInstance();
 void setupDebugMessenger();
@@ -21,6 +73,7 @@ void createFramebuffers();
 void createCommandPool();
 void createCommandBuffer();
 void createSyncObjects();
+void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
@@ -32,6 +85,8 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
+VkShaderModule createShaderModule(const std::vector<char> &code);
 
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
@@ -86,3 +141,5 @@ void DestroyDebugUtilsMessengerEXT(
         VkDebugUtilsMessengerEXT    messenger, 
         const VkAllocationCallbacks *pAllocator
 );
+
+};
