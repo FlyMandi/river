@@ -4,12 +4,8 @@
 
 #include <stdexcept>
 #include <string>
-#include <string_view>
-#include <algorithm>
 #include <cstdint>
 #include <filesystem>
-#include <limits>
-#include <map>
 #include <set>
 
 void engine::createInstance(){
@@ -30,7 +26,7 @@ void engine::createInstance(){
     std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
-    auto requiredExtensions = getRequiredExtensions();
+    std::vector<const char*> requiredExtensions = getRequiredExtensions();
     if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
         throw std::runtime_error("extensions required, but not available!"); 
     }
@@ -175,193 +171,6 @@ bool engine::checkInstanceExtensions(std::vector<const char*> *requiredExt, std:
     return true;
 }
 
-bool engine::checkDeviceExtensionSupport(VkPhysicalDevice device){
-    uint32_t extensionCount;
-
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
-    std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-
-    for(const auto &extension : availableExtensions){
-        requiredExtensions.erase(extension.extensionName);
-    }
-
-    return requiredExtensions.empty();
-}
-
-engine::SwapChainSupportDetails engine::querySwapChainSupport(VkPhysicalDevice device){
-    SwapChainSupportDetails details;
-    uint32_t formatCount;
-    uint32_t presentModeCount;
-
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
-
-    if(0 != formatCount){
-        details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
-    }
-
-    if(0 != presentModeCount){
-        details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
-    }
-
-    return details;
-}
-
-uint32_t engine::rateDeviceSuitability(VkPhysicalDevice device){
-    uint32_t score = 0;
-
-    QueueFamilyIndices indices = findQueueFamilies(device);
-    if(!indices.isComplete()){ 
-        return 0; 
-    }
-
-    vkGetPhysicalDeviceProperties(device, &deviceProperties);
-    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-    if(!deviceFeatures.geometryShader){ return 0; }
-
-    bool extensionsSupported = checkDeviceExtensionSupport(device);
-    if(!extensionsSupported){
-        return 0;
-    }else{
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
-        if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()){
-            return 0;
-        }
-    }
-    
-    if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
-        score += 1000;
-    }
-    score += deviceProperties.limits.maxImageDimension2D;
-
-    if(indices.presentFamily.value() == indices.graphicsFamily.value()){
-        score += 100;
-    }
-
-    printDebugLog(deviceProperties.deviceName, 0, 1);
-    printDebugLog("score: ", 0, 0);
-    printDebugLog(std::to_string(score), 0, 2);
-
-    return score;
-}
-
-void engine::pickPhysicalDevice(){
-    uint32_t deviceCount = 0;
-    physicalDevice = VK_NULL_HANDLE;
-    
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-    if(0 == deviceCount){
-        throw std::runtime_error("failed to find any GPU with vulkan support!");
-    }
-
-    std::vector<VkPhysicalDevice> devices(deviceCount);
-    std::multimap<uint32_t, VkPhysicalDevice> suitabilityCandidates;
-
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-
-    for(const auto& device : devices){
-        uint32_t score = rateDeviceSuitability(device);
-        suitabilityCandidates.insert(std::make_pair(score, device));
-    }
-
-    if(suitabilityCandidates.rbegin()->first > 0){
-        physicalDevice = suitabilityCandidates.rbegin()->second; 
-    }else{
-        throw std::runtime_error("failed to find a suitable GPU!");
-    }
-}
-
-engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
-    QueueFamilyIndices indices;
-    uint32_t queueFamilyCount = 0;
-
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-    VkBool32 presentSupport = false;
-
-    for(int i = 0; const auto &queueFamily : queueFamilies){
-        if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
-            indices.graphicsFamily = i;
-        }
-        
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-        if(presentSupport){
-            indices.presentFamily = i;
-        }
-
-        if(indices.isComplete()){ 
-            break; 
-        }
-        ++i;
-    }
-
-    return indices;
-}
-
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats){
-    for(const auto &availableFormat : availableFormats){
-        if(VK_FORMAT_B8G8R8_SRGB == availableFormat.format && VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace){
-            return availableFormat;
-        }
-    }
-    
-    return availableFormats[0];
-}
-
-VkPresentModeKHR engine::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
-    for(const auto &availablePresentMode : availablePresentModes){
-        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
-            return availablePresentMode;
-        }
-    }
-
-    for(const auto &availablePresentMode : availablePresentModes){
-        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
-            return availablePresentMode;
-        }
-    }
-
-    printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D engine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
-    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        printDebugLog("swap width: ", 0, 0);
-        printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
-        printDebugLog("swap height: ", 0, 0);
-        printDebugLog(std::to_string(capabilities.currentExtent.height), 0, 2);
-
-        return capabilities.currentExtent; 
-    }else{
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-
-        VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-        printDebugLog("swap width: ", 0, 0);
-        printDebugLog(std::to_string(actualExtent.width), 0, 1);
-        printDebugLog("swap height: ", 0, 0);
-        printDebugLog(std::to_string(actualExtent.height), 0, 2);
-        
-        return actualExtent;
-    }
-}
 
 void engine::createLogicalDevice(){
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
