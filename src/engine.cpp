@@ -357,8 +357,7 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
 
     vkCmdEndRenderPass(commandBuffer);
 
-    // if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
-    if(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS){
+    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to record command buffer!", 2, 1);
         throw std::runtime_error("failed to record command buffer!");
     }
