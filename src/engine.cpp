@@ -2,10 +2,6 @@
 
 #include "h/engine.h"
 
-#include <stdexcept>
-#include <string>
-#include <cstdint>
-
 void engine::createInstance(){
     if(build_DEBUG && !checkValidationLayerSupport()){
         throw std::runtime_error("validation layers requested, but not available!");
