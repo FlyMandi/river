@@ -58,7 +58,6 @@ inline VkSemaphore renderFinishedSemaphore;
 inline VkFence inFlightFence;
 
 void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
-std::vector<char> readFile(const std::string &filename);
 
 void createInstance();
 void setupDebugMessenger();
@@ -74,15 +73,6 @@ void createCommandPool();
 void createCommandBuffer();
 void createSyncObjects();
 void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
-std::vector<const char*> getRequiredExtensions();
-bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
-bool checkValidationLayerSupport();
-
-void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-
-bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
@@ -113,27 +103,6 @@ const std::vector<const char*> validationLayers = {
 const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
-        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
-        void                                        *pUserData
-    ){
-
-    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
-
-    return VK_FALSE;
-}
-
-VkResult CreateDebugUtilsMessengerEXT(
-        VkInstance                                  instance,
-        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
-        const VkAllocationCallbacks                 *pAllocator,
-        VkDebugUtilsMessengerEXT                    *pDebugMessenger
-    );
-
-void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
 void DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,

@@ -2,6 +2,109 @@
 
 #include "h/engine.h"
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
+        void                                        *pUserData
+    ){
+
+    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
+
+    return VK_FALSE;
+}
+
+static VkResult CreateDebugUtilsMessengerEXT(
+        VkInstance                                  instance,
+        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
+        const VkAllocationCallbacks                 *pAllocator,
+        VkDebugUtilsMessengerEXT                    *pDebugMessenger
+    ){
+
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if(nullptr != func){
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }else{
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}
+
+static std::vector<const char*> getRequiredExtensions(){
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions;
+
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+    if(engine::build_DEBUG){
+        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
+    }
+
+    return extensions;
+}
+
+static bool checkValidationLayerSupport(){
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    
+    std::vector<VkLayerProperties> layerVec(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
+
+    for(const char *layer : engine::validationLayers){
+        bool layerFound = false;
+
+        for(const auto &layerPresent : layerVec){
+            if(0 == strcmp(layerPresent.layerName, layer)){
+                layerFound = true;
+                break;
+            }
+        }
+        if(!layerFound){
+            return false; 
+        }
+    }
+
+    return true;
+}
+
+static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
+    createInfo = {}; 
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
+}
+
+static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
+    using namespace engine;
+
+    printDebugLog("\nPresent:", 1, 1);
+    for(const auto &extension : *instanceExt){
+        printDebugLog(extension.extensionName, 2, 1);
+    }
+
+    printDebugLog("\nRequired:", 1, 1);
+    for(const auto &required : *requiredExt){
+        bool extFound = false;
+        
+            for(const auto &present : *instanceExt){
+                if(0 == strcmp(required, present.extensionName)){
+                    printDebugLog("found:\t", 0, 0);
+                    printDebugLog(required, 1, 1);
+                    extFound = true;
+                    break;
+                }
+            }
+        if(!extFound){ 
+            printDebugLog("not found:\t", 0, 0);
+            return false; 
+        } 
+    }
+
+    return true;
+}
+
 void engine::createInstance(){
     if(build_DEBUG && !checkValidationLayerSupport()){
         throw std::runtime_error("validation layers requested, but not available!");
@@ -64,30 +167,6 @@ void engine::setupDebugMessenger(){
     }
 }
 
-VkResult engine::CreateDebugUtilsMessengerEXT(
-        VkInstance                                  instance,
-        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
-        const VkAllocationCallbacks                 *pAllocator,
-        VkDebugUtilsMessengerEXT                    *pDebugMessenger
-    ){
-
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if(nullptr != func){
-        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    }else{
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-}
-
-void engine::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
-    createInfo = {}; 
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    createInfo.pfnUserCallback = debugCallback;
-}
-
 void engine::DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,
         VkDebugUtilsMessengerEXT    messenger, 
@@ -98,71 +177,6 @@ void engine::DestroyDebugUtilsMessengerEXT(
     if(nullptr != func){
         func(instance, messenger, pAllocator);
     }
-}
-
-bool engine::checkValidationLayerSupport(){
-    uint32_t layerCount = 0;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    
-    std::vector<VkLayerProperties> layerVec(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
-
-    for(const char *layer : validationLayers){
-        bool layerFound = false;
-
-        for(const auto &layerPresent : layerVec){
-            if(0 == strcmp(layerPresent.layerName, layer)){
-                layerFound = true;
-                break;
-            }
-        }
-        if(!layerFound){
-            return false; 
-        }
-    }
-
-    return true;
-}
-
-std::vector<const char*> engine::getRequiredExtensions(){
-    uint32_t glfwExtensionCount = 0;
-    const char** glfwExtensions;
-
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
-    if(build_DEBUG){
-        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
-    }
-
-    return extensions;
-}
-
-bool engine::checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("\nPresent:", 1, 1);
-    for(const auto &extension : *instanceExt){
-        printDebugLog(extension.extensionName, 2, 1);
-    }
-
-    printDebugLog("\nRequired:", 1, 1);
-    for(const auto &required : *requiredExt){
-        bool extFound = false;
-        
-            for(const auto &present : *instanceExt){
-                if(0 == strcmp(required, present.extensionName)){
-                    printDebugLog("found:\t", 0, 0);
-                    printDebugLog(required, 1, 1);
-                    extFound = true;
-                    break;
-                }
-            }
-        if(!extFound){ 
-            printDebugLog("not found:\t", 0, 0);
-            return false; 
-        } 
-    }
-
-    return true;
 }
 
 void engine::createSurface(){
