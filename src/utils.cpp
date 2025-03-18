@@ -39,6 +39,7 @@ void engine::printDebugLog(const std::string &text, uint32_t tabs, uint32_t newl
 
         std::ofstream log(debugLog, std::ios::app);
         if(!log.is_open()){
+            printDebugLog("\nERROR: failed to open file", 2, 1);
             throw std::runtime_error("failed to open file");
         }else{
             for(;tabs > 0; --tabs){

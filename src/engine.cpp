@@ -107,6 +107,7 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
 
 void engine::createInstance(){
     if(build_DEBUG && !checkValidationLayerSupport()){
+        printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
@@ -125,6 +126,7 @@ void engine::createInstance(){
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
     if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+        printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
@@ -150,6 +152,7 @@ void engine::createInstance(){
     }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance)){
+        printDebugLog("\nERROR: failed to create instance.", 2, 1);
         throw std::runtime_error("failed to create instance.");
     }
 }
@@ -163,6 +166,7 @@ void engine::setupDebugMessenger(){
     populateDebugMessengerCreateInfo(createInfo);
 
     if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger)){
+        printDebugLog("\nERROR: failed to set up debug messenger.", 2, 1);
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }
@@ -181,6 +185,7 @@ void engine::DestroyDebugUtilsMessengerEXT(
 
 void engine::createSurface(){
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create window surface!", 2, 1);
         throw std::runtime_error("failed to create window surface!");
     }
 }
@@ -207,6 +212,7 @@ void engine::createImageViews(){
         createInfo.subresourceRange.layerCount = 1;
 
         if(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
+            printDebugLog("\nERROR: failed to create image views!", 2, 1);
             throw std::runtime_error("failed to create image views!");
         }
     }
@@ -252,6 +258,7 @@ void engine::createRenderPass(){
     renderPassInfo.pDependencies = &dependency;
 
     if((vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create render pass!", 2, 1);
         throw std::runtime_error("failed to create render pass!");
     }
 }
@@ -272,6 +279,7 @@ void engine::createFramebuffers(){
         framebufferInfo.layers = 1;
 
         if(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
+            printDebugLog("\nERROR: failed to create framebuffer!", 2, 1);
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
@@ -286,6 +294,7 @@ void engine::createCommandPool(){
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
     if((vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create command pool!", 2, 1);
         throw std::runtime_error("failed to create command pool!");
     }
 }
@@ -299,6 +308,7 @@ void engine::createCommandBuffer(){
     allocInfo.commandBufferCount = 1;
 
     if(vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to allocate command buffers!", 2, 1);
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }
@@ -308,6 +318,7 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
     if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to begin recording command buffer!", 2, 1);
         throw std::runtime_error("failed to begin recording command buffer!");
     }
     
@@ -346,7 +357,9 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
 
     vkCmdEndRenderPass(commandBuffer);
 
-    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
+    // if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
+    if(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS){
+        printDebugLog("\nERROR: failed to record command buffer!", 2, 1);
         throw std::runtime_error("failed to record command buffer!");
     }
 }
@@ -360,9 +373,11 @@ void engine::createSyncObjects(){
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
     if((vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
         throw std::runtime_error("failed to create semaphores!");
     }
     if((vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create fence!", 2, 1);
         throw std::runtime_error("failed to create fence!");
     }
 }
