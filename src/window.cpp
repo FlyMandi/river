@@ -1,23 +1,23 @@
-#include "river.h"
+#include "window.h"
 
-#include "h/engine.h"
+#include <string>
 
-void river::initGLFW(){
+void window::initGLFW(){
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    engine::window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
+    pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
 }
 
-void river::cleanupGLFW(){
-    glfwDestroyWindow(engine::window);
+void window::cleanupGLFW(){
+    glfwDestroyWindow(pWindow);
     glfwTerminate();
 }
 
-void river::windowPollEvents(){
+void window::pollEvents(){
 //TODO: better use of GLFW event system, there has to be a better way to check for window exit
     glfwPollEvents();
-    window_SHOULDCLOSE = glfwWindowShouldClose(engine::window);
+    window_SHOULDCLOSE = glfwWindowShouldClose(pWindow);
 }

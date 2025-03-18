@@ -1,6 +1,11 @@
 #include "river.h"
+#include "engine.h"
+#include "device.h"
 
-#include "h/engine.h"
+#include "GLFW/glfw3.h"
+#include "window.h"
+
+#include <iostream>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
@@ -50,7 +55,7 @@ static bool checkValidationLayerSupport(){
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
-    for(const char *layer : engine::validationLayers){
+    for(const char *layer : device::validationLayers){
         bool layerFound = false;
 
         for(const auto &layerPresent : layerVec){
@@ -141,8 +146,8 @@ void engine::createInstance(){
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     if(build_DEBUG){
-        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
-        createInfo.ppEnabledLayerNames = validationLayers.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(device::validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = device::validationLayers.data();
         
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -165,13 +170,13 @@ void engine::setupDebugMessenger(){
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
-    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger)){
+    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &device::debugMessenger)){
         printDebugLog("\nERROR: failed to set up debug messenger.", 2, 1);
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }
 
-void engine::DestroyDebugUtilsMessengerEXT(
+void device::DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,
         VkDebugUtilsMessengerEXT    messenger, 
         const VkAllocationCallbacks *pAllocator
@@ -184,7 +189,7 @@ void engine::DestroyDebugUtilsMessengerEXT(
 }
 
 void engine::createSurface(){
-    if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
+    if(glfwCreateWindowSurface(instance, window::pWindow, nullptr, &surface) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create window surface!", 2, 1);
         throw std::runtime_error("failed to create window surface!");
     }
@@ -211,7 +216,7 @@ void engine::createImageViews(){
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if(vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
+        if(vkCreateImageView(device::logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
             printDebugLog("\nERROR: failed to create image views!", 2, 1);
             throw std::runtime_error("failed to create image views!");
         }
@@ -257,7 +262,7 @@ void engine::createRenderPass(){
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if((vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
+    if((vkCreateRenderPass(device::logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create render pass!", 2, 1);
         throw std::runtime_error("failed to create render pass!");
     }
@@ -278,7 +283,7 @@ void engine::createFramebuffers(){
         framebufferInfo.height = swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
+        if(vkCreateFramebuffer(device::logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
             printDebugLog("\nERROR: failed to create framebuffer!", 2, 1);
             throw std::runtime_error("failed to create framebuffer!");
         }
@@ -293,7 +298,7 @@ void engine::createCommandPool(){
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if((vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
+    if((vkCreateCommandPool(device::logicalDevice, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create command pool!", 2, 1);
         throw std::runtime_error("failed to create command pool!");
     }
@@ -307,7 +312,7 @@ void engine::createCommandBuffer(){
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    if(vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS){
+    if(vkAllocateCommandBuffers(device::logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to allocate command buffers!", 2, 1);
         throw std::runtime_error("failed to allocate command buffers!");
     }
@@ -371,11 +376,11 @@ void engine::createSyncObjects(){
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
-    if((vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
+    if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
         throw std::runtime_error("failed to create semaphores!");
     }
-    if((vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
+    if((vkCreateFence(device::logicalDevice, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create fence!", 2, 1);
         throw std::runtime_error("failed to create fence!");
     }
