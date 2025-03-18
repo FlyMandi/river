@@ -1,7 +1,10 @@
 #include "engine.h"
+#include "device.h"
+#include "swapchain.h"
 
 #include <filesystem>
 #include <fstream>
+#include <vector>
 
 static VkShaderModule createShaderModule(const std::vector<char> &code){
     using namespace engine;
@@ -12,7 +15,7 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
+    if(vkCreateShaderModule(device::logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create shader module!", 2, 1);
         throw std::runtime_error("failed to create shader module!");
     }
@@ -100,14 +103,14 @@ void engine::createGraphicsPipeline(){
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)swapChainExtent.width;
-    viewport.height = (float)swapChainExtent.height;
+    viewport.width = (float)swap::swapChainExtent.width;
+    viewport.height = (float)swap::swapChainExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChainExtent;
+    scissor.extent = swap::swapChainExtent;
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -149,7 +152,7 @@ void engine::createGraphicsPipeline(){
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-    if(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
+    if(vkCreatePipelineLayout(device::logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
         throw std::runtime_error("failed to create pipeline layout!");
     }
@@ -172,12 +175,12 @@ void engine::createGraphicsPipeline(){
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
-    if((vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
+    if((vkCreateGraphicsPipelines(device::logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(device::logicalDevice, vertShaderModule, nullptr);
+    vkDestroyShaderModule(device::logicalDevice, fragShaderModule, nullptr);
 }
 

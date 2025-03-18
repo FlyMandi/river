@@ -1,23 +1,23 @@
 #include "river.h"
 #include "engine.h"
 #include "device.h"
+#include "swapchain.h"
 
 void river::initVulkan(){
-    using namespace engine;
 
-    createInstance();
-    setupDebugMessenger();
-    createSurface();
-    pickPhysicalDevice();
-    createLogicalDevice();
-    createSwapChain();
-    createImageViews();
-    createRenderPass();
-    createGraphicsPipeline();
-    createFramebuffers();
-    createCommandPool();
-    createCommandBuffer();
-    createSyncObjects();
+    engine::createInstance();
+    engine::setupDebugMessenger();
+    engine::createSurface();
+    device::pickPhysicalDevice();
+    device::createLogicalDevice();
+    swap::createSwapChain();
+    swap::createImageViews();
+    swap::createRenderPass();
+    engine::createGraphicsPipeline();
+    engine::createFramebuffers();
+    engine::createCommandPool();
+    engine::createCommandBuffer();
+    engine::createSyncObjects();
 }
 
 void river::cleanupVulkan(){
@@ -31,7 +31,7 @@ void river::cleanupVulkan(){
 
     vkDestroyCommandPool(device::logicalDevice, commandPool, nullptr);
 
-    for(const auto &framebuffer : swapChainFramebuffers){
+    for(const auto &framebuffer : swap::swapChainFramebuffers){
         vkDestroyFramebuffer(device::logicalDevice, framebuffer, nullptr);
     }
 
@@ -39,18 +39,18 @@ void river::cleanupVulkan(){
     vkDestroyPipelineLayout(device::logicalDevice, pipelineLayout, nullptr);
     vkDestroyRenderPass(device::logicalDevice, renderPass, nullptr);
 
-    for(const auto &imageView : swapChainImageViews){
+    for(const auto &imageView : swap::swapChainImageViews){
         vkDestroyImageView(device::logicalDevice, imageView, nullptr);
     }
 
-    vkDestroySwapchainKHR(device::logicalDevice, swapChain, nullptr);
+    vkDestroySwapchainKHR(device::logicalDevice, swap::swapChain, nullptr);
     vkDestroyDevice(device::logicalDevice, nullptr);
 
     if(build_DEBUG){
         device::DestroyDebugUtilsMessengerEXT(instance, device::debugMessenger, nullptr); 
     }
 
-    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroySurfaceKHR(instance, swap::surface, nullptr);
     vkDestroyInstance(instance, nullptr);
 }
 
@@ -62,7 +62,7 @@ void river::drawFrame(){
     vkWaitForFences(device::logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
     vkResetFences(device::logicalDevice, 1, &inFlightFence);
 
-    vkAcquireNextImageKHR(device::logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(device::logicalDevice, swap::swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
     
     vkResetCommandBuffer(commandBuffer, 0);
     recordCommandBuffer(commandBuffer, imageIndex);
@@ -88,7 +88,7 @@ void river::drawFrame(){
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
-    VkSwapchainKHR swapChains[] = {swapChain};
+    VkSwapchainKHR swapChains[] = {swap::swapChain};
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

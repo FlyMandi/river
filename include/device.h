@@ -47,4 +47,7 @@ extern void DestroyDebugUtilsMessengerEXT(
         const VkAllocationCallbacks *pAllocator
 );
 
+extern void pickPhysicalDevice();
+extern void createLogicalDevice();
+
 };

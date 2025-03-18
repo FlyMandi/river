@@ -1,4 +1,7 @@
 #include "engine.h"
+#include "device.h"
+#include "river.h"
+#include "swapchain.h"
 
 #include <set>
 #include <map>
@@ -12,7 +15,7 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-    std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    std::set<std::string_view> requiredExtensions(device::deviceExtensions.begin(), device::deviceExtensions.end());
 
     for(const auto &extension : availableExtensions){
         requiredExtensions.erase(extension.extensionName);
@@ -21,30 +24,8 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     return requiredExtensions.empty();
 }
 
-engine::SwapChainSupportDetails engine::querySwapChainSupport(VkPhysicalDevice device){
-    SwapChainSupportDetails details;
-    uint32_t formatCount;
-    uint32_t presentModeCount;
-
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
-
-    if(0 != formatCount){
-        details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
-    }
-
-    if(0 != presentModeCount){
-        details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
-    }
-
-    return details;
-}
-
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
-    using namespace engine;
+    using namespace device;
 
     uint32_t score = 0;
 
@@ -77,6 +58,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
+    using namespace engine;
     printDebugLog(deviceProperties.deviceName, 0, 1);
     printDebugLog("score: ", 0, 0);
     printDebugLog(std::to_string(score), 0, 2);
@@ -84,7 +66,33 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     return score;
 }
 
-void engine::pickPhysicalDevice(){
+SwapChainSupportDetails device::querySwapChainSupport(VkPhysicalDevice device){
+    using namespace swap;
+
+    SwapChainSupportDetails details;
+    uint32_t formatCount;
+    uint32_t presentModeCount;
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+
+    if(0 != formatCount){
+        details.formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+    }
+
+    if(0 != presentModeCount){
+        details.presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+    }
+
+    return details;
+}
+
+void device::pickPhysicalDevice(){
+    using namespace engine;
+
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
     
@@ -112,7 +120,7 @@ void engine::pickPhysicalDevice(){
     }
 }
 
-engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
+QueueFamilyIndices device::findQueueFamilies(VkPhysicalDevice device){
     static QueueFamilyIndices indices;
     static uint32_t queueFamilyCount = 0;
 
@@ -128,7 +136,7 @@ engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
             indices.graphicsFamily = i;
         }
         
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, swap::surface, &presentSupport);
         if(presentSupport){
             indices.presentFamily = i;
         }
@@ -142,8 +150,10 @@ engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
     return indices;
 }
 
-void engine::createLogicalDevice(){
-    static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+void device::createLogicalDevice(){
+    using namespace engine;
+
+    static QueueFamilyIndices indices = device::findQueueFamilies(device::physicalDevice);
 
     static std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     static std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -175,11 +185,11 @@ void engine::createLogicalDevice(){
         createInfo.enabledLayerCount = 0;
     }
 
-    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)){
+    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice)){
         printDebugLog("\nERROR: failed to create logical device.", 2, 1);
         throw std::runtime_error("failed to create logical device!");
     }
 
-    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }

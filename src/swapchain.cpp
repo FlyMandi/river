@@ -1,4 +1,7 @@
 #include "engine.h"
+#include "swapchain.h"
+#include "window.h"
+#include "device.h"
 
 #include <algorithm>
 
@@ -12,26 +15,28 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
     return availableFormats[0];
 }
 
-VkPresentModeKHR engine::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
+static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
+            engine::printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
+            engine::printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
-    printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
+    engine::printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D engine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
+static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
+    using namespace engine;
+
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         printDebugLog("swap width: ", 0, 0);
         printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
@@ -41,9 +46,9 @@ VkExtent2D engine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities
         return capabilities.currentExtent; 
     }else{
         int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(window::pWindow, &width, &height);
 
-        VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
@@ -57,7 +62,9 @@ VkExtent2D engine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities
     }
 }
 
-void engine::createSwapChain(){
+void swap::createSwapChain(){
+    using namespace device;
+
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -100,15 +107,88 @@ void engine::createSwapChain(){
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
+    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
+        engine::printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+}
+
+void swap::createImageViews(){
+    swapChainImageViews.resize(swapChainImages.size()); 
+
+    for(size_t i = 0; i < swapChainImages.size(); ++i){
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = swapChainImages[i];
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = swapChainImageFormat;
+
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        if(vkCreateImageView(device::logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
+            engine::printDebugLog("\nERROR: failed to create image views!", 2, 1);
+            throw std::runtime_error("failed to create image views!");
+        }
+    }
+}
+
+void swap::createRenderPass(){
+    VkAttachmentDescription colorAttachment{}; 
+    colorAttachment.format = swap::swapChainImageFormat;
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 1;
+    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
+    if((vkCreateRenderPass(device::logicalDevice, &renderPassInfo, nullptr, &engine::renderPass)) != VK_SUCCESS){
+        engine::printDebugLog("\nERROR: failed to create render pass!", 2, 1);
+        throw std::runtime_error("failed to create render pass!");
+    }
 }
