@@ -29,7 +29,6 @@ void river::getProjectRoot(const char *rootName){
 bool firstOpen = true;
 
 //TODO: look into the cost of this function, maybe there's no need to open/close it on every function call
-//just open the file on initGame, close it on cleanupGame or something 
 void engine::printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
         if(firstOpen){

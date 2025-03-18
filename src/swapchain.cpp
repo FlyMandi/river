@@ -1,7 +1,8 @@
 #include "engine.h"
-#include "swapchain.h"
 #include "window.h"
 #include "device.h"
+#include "swapchain.h"
+#include "pipeline.h"
 
 #include <algorithm>
 
@@ -187,7 +188,7 @@ void swap::createRenderPass(){
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if((vkCreateRenderPass(device::logicalDevice, &renderPassInfo, nullptr, &engine::renderPass)) != VK_SUCCESS){
+    if((vkCreateRenderPass(device::logicalDevice, &renderPassInfo, nullptr, &pipeline::renderPass)) != VK_SUCCESS){
         engine::printDebugLog("\nERROR: failed to create render pass!", 2, 1);
         throw std::runtime_error("failed to create render pass!");
     }

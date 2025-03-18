@@ -19,6 +19,7 @@ inline VkQueue graphicsQueue;
 inline VkQueue presentQueue;
 
 extern void createSurface();
+
 extern void createInstance();
 
 extern void createCommandBuffer();

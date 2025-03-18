@@ -1,10 +1,11 @@
 #include "river.h"
+#include "window.h"
 #include "engine.h"
 #include "device.h"
 #include "swapchain.h"
+#include "pipeline.h"
 
 #include "GLFW/glfw3.h"
-#include "window.h"
 
 #include <iostream>
 
@@ -213,7 +214,7 @@ void engine::createFramebuffers(){
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass;
+        framebufferInfo.renderPass = pipeline::renderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = swapChainExtent.width;
@@ -239,7 +240,7 @@ void engine::createCommandPool(){
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if((vkCreateCommandPool(device::logicalDevice, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
+    if((vkCreateCommandPool(device::logicalDevice, &poolInfo, nullptr, &pipeline::commandPool)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create command pool!", 2, 1);
         throw std::runtime_error("failed to create command pool!");
     }else{
@@ -250,11 +251,11 @@ void engine::createCommandPool(){
 void engine::createCommandBuffer(){
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = pipeline::commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    if(vkAllocateCommandBuffers(device::logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS){
+    if(vkAllocateCommandBuffers(device::logicalDevice, &allocInfo, &pipeline::commandBuffer) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to allocate command buffers!", 2, 1);
         throw std::runtime_error("failed to allocate command buffers!");
     }else{
@@ -277,7 +278,7 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.renderPass = pipeline::renderPass;
     renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChainExtent;
@@ -285,7 +286,7 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
     renderPassInfo.pClearValues = &clearColor;
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline::graphicsPipeline);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -322,13 +323,13 @@ void engine::createSyncObjects(){
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
-    if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
+    if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::renderFinishedSemaphore)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
         throw std::runtime_error("failed to create semaphores!");
     }else{
         printDebugLog("Successfully created semaphores.", 0, 1);
     }
-    if((vkCreateFence(device::logicalDevice, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
+    if((vkCreateFence(device::logicalDevice, &fenceInfo, nullptr, &pipeline::inFlightFence)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create fence!", 2, 1);
         throw std::runtime_error("failed to create fence!");
     }else{
