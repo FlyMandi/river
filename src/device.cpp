@@ -100,6 +100,8 @@ void device::pickPhysicalDevice(){
     if(0 == deviceCount){
         printDebugLog("\nERROR: failed to find any GPU with vulkan support!", 2, 1);
         throw std::runtime_error("failed to find any GPU with vulkan support!");
+    }else{
+        printDebugLog("found GPU with vulkan support!", 0, 1);
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -114,6 +116,7 @@ void device::pickPhysicalDevice(){
 
     if(suitabilityCandidates.rbegin()->first > 0){
         physicalDevice = suitabilityCandidates.rbegin()->second; 
+        printDebugLog("found suitable GPU.", 0, 1);
     }else{
         printDebugLog("\nERROR: failed to find a suitable GPU!", 2, 1);
         throw std::runtime_error("failed to find a suitable GPU!");
@@ -185,7 +188,7 @@ void device::createLogicalDevice(){
         createInfo.enabledLayerCount = 0;
     }
 
-    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice)){
+    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create logical device.", 2, 1);
         throw std::runtime_error("failed to create logical device!");
     }

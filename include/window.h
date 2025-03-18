@@ -5,12 +5,12 @@
 
 namespace window{
 
-inline bool window_SHOULDCLOSE = false;
+inline bool SHOULDCLOSE = false;
 
-extern const uint32_t WIDTH;
-extern const uint32_t HEIGHT;
+inline uint32_t WIDTH;
+inline uint32_t HEIGHT;
 
-extern GLFWwindow *pWindow;
+inline GLFWwindow *pWindow;
 
 extern void initGLFW();
 extern void cleanupGLFW();
