@@ -14,7 +14,6 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
 
     VkShaderModule shaderModule;
     if(vkCreateShaderModule(device::logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create shader module!", 2, 1);
         throw std::runtime_error("failed to create shader module!");
     }
 
@@ -24,7 +23,6 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
 static std::vector<char> readFile(const std::string &filename){
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if(!file.is_open()){
-        printDebugLog("\nERROR: failed to open file: " + filename, 2, 1);
         throw std::runtime_error("failed to open file!");
     }
 
@@ -34,15 +32,7 @@ static std::vector<char> readFile(const std::string &filename){
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    printDebugLog("reading file:", 0, 0);
-    printDebugLog(filename, 1, 1);
-    printDebugLog("buffer size:", 0, 0);
-    printDebugLog(std::to_string(buffer.size()), 1, 1);
-    printDebugLog("file size:", 0, 0);
-    printDebugLog(std::to_string(fileSize), 1, 2);
-
     if(buffer.size() != fileSize){
-        printDebugLog("\nERROR: failed to correctly read from buffer!", 2, 1);
         throw std::runtime_error("failed to correctly read from buffer!");
     }
 

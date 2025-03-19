@@ -1,8 +1,12 @@
 #pragma once
 
+#include "debugger.h"
 #include "vulkan/vulkan_core.h"
 
 typedef struct Pipeline{
+
+Pipeline();
+~Pipeline();
 
 VkRenderPass renderPass;
 VkPipelineLayout pipelineLayout;

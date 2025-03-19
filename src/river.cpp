@@ -1,20 +1,9 @@
 #include "river.h"
-#include "device.h"
-#include "swapchain.h"
-#include "pipeline.h"
-
-#if defined(DEBUG) || defined (_DEBUG)
-#include "debugger.h"
-#endif
 
 void River::initVulkan(){
 
     createInstance();
-
-#if defined(DEBUG) || defined (_DEBUG)
-        debugger.setupDebugMessenger(instance);
-#endif
-
+    debugger.setupDebugMessenger();
     window.createSurface();
     device.pickPhysicalDevice();
     device.createLogicalDevice();
@@ -53,23 +42,23 @@ void River::cleanupVulkan(){
     vkDestroyDevice(device.logicalDevice, nullptr);
 
     if(build_DEBUG){
-        DestroyDebugUtilsMessengerEXT(instance, debugger.debugMessenger, nullptr); 
+        debugger.DestroyDebugUtilsMessengerEXT(debugger.debugMessenger, nullptr); 
     }
 
-    vkDestroySurfaceKHR(instance, swapchain.surface, nullptr);
+    vkDestroySurfaceKHR(instance, window.surface, nullptr);
     vkDestroyInstance(instance, nullptr);
 }
 
 void River::drawFrame(){
     uint32_t imageIndex;
 
-    vkWaitForFences(device.logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(device.logicalDevice, 1, &inFlightFence);
+    vkWaitForFences(device.logicalDevice, 1, &pipeline.inFlightFence, VK_TRUE, UINT64_MAX);
+    vkResetFences(device.logicalDevice, 1, &pipeline.inFlightFence);
 
-    vkAcquireNextImageKHR(device.logicalDevice, swap.swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(device.logicalDevice, swapchain.swapChain, UINT64_MAX, pipeline.imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
     
     vkResetCommandBuffer(commandBuffer, 0);
-    engine.recordCommandBuffer(commandBuffer, imageIndex);
+    recordCommandBuffer(commandBuffer, imageIndex);
 
     VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
@@ -87,12 +76,12 @@ void River::drawFrame(){
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &pipeline.commandBuffer;
 
-    if(vkQueueSubmit(engine.graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
-        engine.printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
-        throw std.runtime_error("failed to submit draw command buffer!");
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, pipeline.inFlightFence) != VK_SUCCESS){
+        debugger.printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
+        throw std::runtime_error("failed to submit draw command buffer!");
     }
 
-    VkSwapchainKHR swapChains[] = {swap.swapChain};
+    VkSwapchainKHR swapChains[] = {swapchain.swapChain};
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -103,7 +92,7 @@ void River::drawFrame(){
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    vkQueuePresentKHR(engine.presentQueue, &presentInfo);
+    vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
 static std::vector<const char*> getRequiredExtensions(){
@@ -120,68 +109,17 @@ static std::vector<const char*> getRequiredExtensions(){
     return extensions;
 }
 
-static bool checkValidationLayerSupport(){
-    uint32_t layerCount = 0;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    
-    std::vector<VkLayerProperties> layerVec(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
-
-    for(const char *layer : device::validationLayers){
-        bool layerFound = false;
-
-        for(const auto &layerPresent : layerVec){
-            if(0 == strcmp(layerPresent.layerName, layer)){
-                layerFound = true;
-                break;
-            }
-        }
-        if(!layerFound){
-            return false; 
-        }
-    }
-
-    return true;
-}
-
-static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("\nPresent:", 1, 1);
-    for(const auto &extension : *instanceExt){
-        printDebugLog(extension.extensionName, 2, 1);
-    }
-
-    printDebugLog("\nRequired:", 1, 1);
-    for(const auto &required : *requiredExt){
-        bool extFound = false;
-        
-            for(const auto &present : *instanceExt){
-                if(0 == strcmp(required, present.extensionName)){
-                    printDebugLog("found:\t", 0, 0);
-                    printDebugLog(required, 1, 1);
-                    extFound = true;
-                    break;
-                }
-            }
-        if(!extFound){ 
-            printDebugLog("not found:\t", 0, 0);
-            return false; 
-        } 
-    }
-
-    return true;
-}
-
-void engine::createInstance(){
-    if(build_DEBUG && !checkValidationLayerSupport()){
-        printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
+void River::createInstance(){
+    if(build_DEBUG && !debugger.checkValidationLayerSupport()){
+        debugger.printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = river::appName;
+    appInfo.pApplicationName = appName;
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-    appInfo.pEngineName = river::engineName;
+    appInfo.pEngineName = engineName;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
@@ -191,10 +129,10 @@ void engine::createInstance(){
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
-    if(checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        printDebugLog("\nAll required extensions are present.", 0, 1);
+    if(debugger.checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+        debugger.printDebugLog("\nAll required extensions are present.", 0, 1);
     }else{
-        printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
+        debugger.printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
@@ -208,10 +146,10 @@ void engine::createInstance(){
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     if(build_DEBUG){
-        createInfo.enabledLayerCount = static_cast<uint32_t>(device::validationLayers.size()); 
-        createInfo.ppEnabledLayerNames = device::validationLayers.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(debugger.validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = debugger.validationLayers.data();
         
-        populateDebugMessengerCreateInfo(debugCreateInfo);
+        debugger.populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
     }else{
         createInfo.enabledLayerCount = 0;
@@ -219,15 +157,14 @@ void engine::createInstance(){
     }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create instance.", 2, 1);
+        debugger.printDebugLog("\nERROR: failed to create instance.", 2, 1);
         throw std::runtime_error("failed to create instance.");
     }else{
-        printDebugLog("Successfully created instance.", 0, 1);
+        debugger.printDebugLog("Successfully created instance.", 0, 1);
     }
 }
 
-
-void engine::createFramebuffers(){
+void River::createFramebuffers(){
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
     for(size_t i = 0; i < swapChainImageViews.size(); ++i){

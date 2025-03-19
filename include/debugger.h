@@ -21,14 +21,16 @@ const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation" 
 };
 
-
 VkInstance &instance;
 Device &device;
 
-bool firstOpen = true;
-
+bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
+bool checkValidationLayerSupport();
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 void setupDebugMessenger();
 void DestroyDebugUtilsMessengerEXT(VkDebugUtilsMessengerEXT messenger, const VkAllocationCallbacks *pAllocator);
+
+bool firstOpen = true;
 void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
 
 std::filesystem::path debugLog;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "window.h"
+
 #include "vulkan/vulkan_core.h"
 
 #include <optional>
@@ -22,11 +24,13 @@ typedef struct QueueFamilyIndices{
 
 typedef struct Device{
 
-Device();
+Device() = delete;
+Device(Window &window) : window(window){};
 Device(const Device&) = delete;
 Device operator=(const Device &) = delete;
 ~Device();
 
+Window &window;
 
 VkPhysicalDevice physicalDevice;
 VkPhysicalDeviceProperties deviceProperties;
@@ -36,11 +40,6 @@ VkDevice logicalDevice;
 
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
-};
-
 
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 

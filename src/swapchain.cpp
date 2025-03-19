@@ -19,19 +19,19 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            engine::printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
+            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            engine::printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
+            printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
             return availablePresentMode;
         }
     }
 
-    engine::printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
+    printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -61,7 +61,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
     }
 }
 
-void swap::createSwapChain(){
+void SwapChain::createSwapChain(){
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
