@@ -2,18 +2,18 @@
 
 #include "vulkan/vulkan_core.h"
 
-namespace pipeline{
+typedef struct Pipeline{
 
-inline VkRenderPass renderPass;
-inline VkPipelineLayout pipelineLayout;
-inline VkPipeline graphicsPipeline;
-inline VkCommandPool commandPool;
-inline VkCommandBuffer commandBuffer;
+VkRenderPass renderPass;
+VkPipelineLayout pipelineLayout;
+VkPipeline graphicsPipeline;
+VkCommandPool commandPool;
+VkCommandBuffer commandBuffer;
 
-inline VkSemaphore imageAvailableSemaphore;
-inline VkSemaphore renderFinishedSemaphore;
-inline VkFence inFlightFence;
+VkSemaphore imageAvailableSemaphore;
+VkSemaphore renderFinishedSemaphore;
+VkFence inFlightFence;
 
-extern void createGraphicsPipeline();
+void createGraphicsPipeline();
 
-};
+}Pipeline;
