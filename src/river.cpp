@@ -3,10 +3,18 @@
 #include "swapchain.h"
 #include "pipeline.h"
 
+#if defined(DEBUG) || defined (_DEBUG)
+#include "debugger.h"
+#endif
+
 void River::initVulkan(){
 
     createInstance();
-    setupDebugMessenger();
+
+#if defined(DEBUG) || defined (_DEBUG)
+        debugger.setupDebugMessenger(instance);
+#endif
+
     window.createSurface();
     device.pickPhysicalDevice();
     device.createLogicalDevice();
@@ -45,11 +53,11 @@ void River::cleanupVulkan(){
     vkDestroyDevice(device.logicalDevice, nullptr);
 
     if(build_DEBUG){
-        DestroyDebugUtilsMessengerEXT(river.instance, debugMessenger, nullptr); 
+        DestroyDebugUtilsMessengerEXT(instance, debugger.debugMessenger, nullptr); 
     }
 
-    vkDestroySurfaceKHR(river.instance, swapchain.surface, nullptr);
-    vkDestroyInstance(river.instance, nullptr);
+    vkDestroySurfaceKHR(instance, swapchain.surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
 }
 
 void River::drawFrame(){
@@ -98,33 +106,6 @@ void River::drawFrame(){
     vkQueuePresentKHR(engine.presentQueue, &presentInfo);
 }
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
-        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
-        void                                        *pUserData
-    ){
-
-    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
-
-    return VK_FALSE;
-}
-
-static VkResult CreateDebugUtilsMessengerEXT(
-        VkInstance                                  instance,
-        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
-        const VkAllocationCallbacks                 *pAllocator,
-        VkDebugUtilsMessengerEXT                    *pDebugMessenger
-    ){
-
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if(nullptr != func){
-        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    }else{
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-}
-
 static std::vector<const char*> getRequiredExtensions(){
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -161,15 +142,6 @@ static bool checkValidationLayerSupport(){
     }
 
     return true;
-}
-
-static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
-    createInfo = {}; 
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-    createInfo.pfnUserCallback = debugCallback;
 }
 
 static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
@@ -254,33 +226,6 @@ void engine::createInstance(){
     }
 }
 
-void engine::setupDebugMessenger(){
-    if(!build_DEBUG){ 
-        return; 
-    }
-
-    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-    populateDebugMessengerCreateInfo(createInfo);
-
-    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &device::debugMessenger) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to set up debug messenger.", 2, 1);
-        throw std::runtime_error("failed to set up debug messenger!");
-    }else{
-        printDebugLog("Successfully set up debug messenger.", 0, 1);
-    }
-}
-
-void device::DestroyDebugUtilsMessengerEXT(
-        VkInstance                  instance,
-        VkDebugUtilsMessengerEXT    messenger, 
-        const VkAllocationCallbacks *pAllocator
-    ){
-
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if(nullptr != func){
-        func(instance, messenger, pAllocator);
-    }
-}
 
 void engine::createFramebuffers(){
     swapChainFramebuffers.resize(swapChainImageViews.size());
@@ -408,3 +353,21 @@ void engine::createSyncObjects(){
         printDebugLog("Successfully created fence.", 0, 1);
     }
 }
+
+//TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
+void River::getProjectRoot(const char *rootName){
+    std::filesystem::path current = std::filesystem::current_path();
+
+    for(int i = 0; i < 3; ++i){
+        if(strcmp(current.filename().string().c_str(), rootName) == 0) {
+            appRoot = current;
+            debugger.debugLog = current / "debug.log";
+            debugger.printDebugLog("project root:", 0, 0);
+            debugger.printDebugLog(current.string(), 1, 1);
+            return;
+        }else{
+            current = current.parent_path();
+        }
+    }
+}
+
