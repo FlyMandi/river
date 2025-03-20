@@ -1,3 +1,4 @@
+#include "river.h"
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
@@ -41,11 +42,12 @@ static std::vector<char> readFile(const std::string &filename){
 }
 
 void pipeline::createGraphicsPipeline(){
-    engine::printDebugLog("current directory: ", 0, 0);
-    engine::printDebugLog(std::filesystem::current_path().string(), 0, 2);
+    using namespace river;
+    printDebugLog("current directory: ", 0, 0);
+    printDebugLog(std::filesystem::current_path().string(), 0, 2);
     
-    const std::filesystem::path vertPath = engine::appRoot / "river\\bin\\vertTest.vert.spv";
-    const std::filesystem::path fragPath = engine::appRoot / "river\\bin\\fragTest.frag.spv";
+    const std::filesystem::path vertPath = appRoot / "river\\bin\\vertTest.vert.spv";
+    const std::filesystem::path fragPath = appRoot / "river\\bin\\fragTest.frag.spv";
 
     auto vertShaderCode = readFile(vertPath.string());
     auto fragShaderCode = readFile(fragPath.string());
@@ -89,14 +91,14 @@ void pipeline::createGraphicsPipeline(){
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)swap::swapChainExtent.width;
-    viewport.height = (float)swap::swapChainExtent.height;
+    viewport.width = (float)swapchain::swapChainExtent.width;
+    viewport.height = (float)swapchain::swapChainExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swap::swapChainExtent;
+    scissor.extent = swapchain::swapChainExtent;
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -139,7 +141,7 @@ void pipeline::createGraphicsPipeline(){
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
     if(vkCreatePipelineLayout(device::logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
-        engine::printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
+        printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -162,11 +164,139 @@ void pipeline::createGraphicsPipeline(){
     pipelineInfo.subpass = 0;
 
     if((vkCreateGraphicsPipelines(device::logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
-        engine::printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
+        printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
     vkDestroyShaderModule(device::logicalDevice, vertShaderModule, nullptr);
     vkDestroyShaderModule(device::logicalDevice, fragShaderModule, nullptr);
+}
+
+void pipeline::createFramebuffers(){
+    swapchain::swapChainFramebuffers.resize(swapchain::swapChainImageViews.size());
+
+    for(size_t i = 0; i < swapchain::swapChainImageViews.size(); ++i){
+        VkImageView attachments[] = { swapchain::swapChainImageViews[i] };
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = pipeline::renderPass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = swapchain::swapChainExtent.width;
+        framebufferInfo.height = swapchain::swapChainExtent.height;
+        framebufferInfo.layers = 1;
+
+        if(vkCreateFramebuffer(device::logicalDevice, &framebufferInfo, nullptr, &swapchain::swapChainFramebuffers[i]) != VK_SUCCESS){
+            river::printDebugLog("\nERROR: failed to create framebuffer!", 2, 1);
+            throw std::runtime_error("failed to create framebuffer!");
+        }else{
+            river::printDebugLog("Successfully created framebuffer.", 0, 1);
+        }
+    }
+}
+
+void pipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex){
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+    if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
+        river::printDebugLog("\nERROR: failed to begin recording command buffer!", 2, 1);
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
+    
+    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = pipeline::renderPass;
+    renderPassInfo.framebuffer = swapchain::swapChainFramebuffers[imageIndex];
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = swapchain::swapChainExtent;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline::graphicsPipeline);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(swapchain::swapChainExtent.width);
+    viewport.height = static_cast<float>(swapchain::swapChainExtent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = swapchain::swapChainExtent;
+
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    //NOTE: I'm specifyin the num of verts... lmfao
+    vkCmdDraw(commandBuffer, 3, 2, 0, 0);
+
+    vkCmdEndRenderPass(commandBuffer);
+
+    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
+        river::printDebugLog("\nERROR: failed to record command buffer!", 2, 1);
+        throw std::runtime_error("failed to record command buffer!");
+    }
+}
+
+void pipeline::createCommandPool(){
+    QueueFamilyIndices queueFamilyIndices = device::findQueueFamilies(device::physicalDevice);
+
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+    if((vkCreateCommandPool(device::logicalDevice, &poolInfo, nullptr, &pipeline::commandPool)) != VK_SUCCESS){
+        river::printDebugLog("\nERROR: failed to create command pool!", 2, 1);
+        throw std::runtime_error("failed to create command pool!");
+    }else{
+        river::printDebugLog("Successfully created command pool.", 0, 1);
+    }
+}
+
+void pipeline::createCommandBuffer(){
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = pipeline::commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    if(vkAllocateCommandBuffers(device::logicalDevice, &allocInfo, &pipeline::commandBuffer) != VK_SUCCESS){
+        river::printDebugLog("\nERROR: failed to allocate command buffers!", 2, 1);
+        throw std::runtime_error("failed to allocate command buffers!");
+    }else{
+        river::printDebugLog("Successfully allocated command buffer.", 0, 1);
+    }
+}
+
+void pipeline::createSyncObjects(){
+    using namespace river;
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    
+    if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::renderFinishedSemaphore)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
+        throw std::runtime_error("failed to create semaphores!");
+    }else{
+        printDebugLog("Successfully created semaphores.", 0, 1);
+    }
+    if((vkCreateFence(device::logicalDevice, &fenceInfo, nullptr, &pipeline::inFlightFence)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create fence!", 2, 1);
+        throw std::runtime_error("failed to create fence!");
+    }else{
+        printDebugLog("Successfully created fence.", 0, 1);
+    }
 }
 
