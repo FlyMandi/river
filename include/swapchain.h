@@ -4,8 +4,6 @@
 
 #include <vector>
 
-namespace swapchain{
-
 inline VkSwapchainKHR swapChain;
 inline VkFormat swapChainImageFormat;
 inline VkExtent2D swapChainExtent;
@@ -19,5 +17,3 @@ extern void createImageViews();
 extern void createRenderPass();
 
 extern VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-
-}
