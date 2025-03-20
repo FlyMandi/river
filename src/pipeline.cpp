@@ -15,7 +15,10 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
 
     VkShaderModule shaderModule;
     if(vkCreateShaderModule(device::logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
+        river::printDebugLog("failed to create shader module!", 0, 2);
         throw std::runtime_error("failed to create shader module!");
+    }else{
+        river::printDebugLog("Successfully created shader module.", 0, 2);
     }
 
     return shaderModule;
@@ -34,6 +37,7 @@ static std::vector<char> readFile(const std::string &filename){
     file.read(buffer.data(), fileSize);
 
     if(buffer.size() != fileSize){
+        river::printDebugLog("failed to correctly read from file!", 0, 2);
         throw std::runtime_error("failed to correctly read from buffer!");
     }
 
