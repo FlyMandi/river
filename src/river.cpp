@@ -36,25 +36,25 @@ void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT             messageType, 
-        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
-        void                                        *pUserData
+        const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
+        void                                        *userData
     ){
 
-    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
+    std::cerr << "validation layer: " << callbackData->pMessage << '\n';
 
     return VK_FALSE;
 }
 
 static VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
-        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
-        const VkAllocationCallbacks                 *pAllocator,
-        VkDebugUtilsMessengerEXT                    *pDebugMessenger
+        const VkDebugUtilsMessengerCreateInfoEXT    *createInfo,
+        const VkAllocationCallbacks                 *allocator,
+        VkDebugUtilsMessengerEXT                    *debugMessenger
     ){
 
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if(nullptr != func){
-        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+        return func(instance, createInfo, allocator, debugMessenger);
     }else{
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
@@ -150,10 +150,10 @@ static void setupDebugMessenger(){
     }
 }
 
-static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *pAllocator){
+static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator){
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func){
-        func(instance, debugMessenger, pAllocator);
+        func(instance, debugMessenger, allocator);
     }
 }
 
