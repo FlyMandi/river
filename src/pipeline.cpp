@@ -18,7 +18,7 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
         printDebugLog("failed to create shader module!", 0, 2);
         throw std::runtime_error("failed to create shader module!");
     }else{
-        printDebugLog("Successfully created shader module.", 0, 2);
+        printDebugLog("Successfully created shader module.", 0, 1);
     }
 
     return shaderModule;
