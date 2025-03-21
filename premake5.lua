@@ -17,7 +17,7 @@ workspace("Cnake")
         files({ "**.h", "**.c", "**.hpp", "**.cpp" })
 
 filter("configurations:Debug")
-    defines{"DEBUG", "_DEBUG"}
+    defines{"DEBUG"}
     staticruntime("off")
     runtime("Debug")
     symbols("On")

@@ -19,19 +19,19 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
+            printDebugLog('\0', "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", '\n');
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            printDebugLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", 0, 2);
+            printDebugLog('\0', "present mode: VK_PRESENT_MODE_MAILBOX_KHR", '\n');
             return availablePresentMode;
         }
     }
 
-    printDebugLog("present mode: VK_PRESENT_MODE_FIFO_KHR", 0, 2);
+    printDebugLog('\0', "present mode: VK_PRESENT_MODE_FIFO_KHR", '\n');
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -39,10 +39,10 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
-        printDebugLog("swap width: ", 0, 0);
-        printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
-        printDebugLog("swap height: ", 0, 0);
-        printDebugLog(std::to_string(capabilities.currentExtent.height), 0, 2);
+        printDebugLog('\0', "swap width: ");
+        printDebugLog(capabilities.currentExtent.width, '\n');
+        printDebugLog('\0', "swap height: ");
+        printDebugLog(capabilities.currentExtent.height, '\n');
 
         return capabilities.currentExtent; 
     }else{
@@ -54,10 +54,10 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        printDebugLog("swap width: ", 0, 0);
-        printDebugLog(std::to_string(actualExtent.width), 0, 1);
-        printDebugLog("swap height: ", 0, 0);
-        printDebugLog(std::to_string(actualExtent.height), 0, 2);
+        printDebugLog('\0', "swap width: ");
+        printDebugLog(actualExtent.width, '\n');
+        printDebugLog('\0', "swap height: ");
+        printDebugLog(actualExtent.height, '\n');
         
         return actualExtent;
     }
@@ -107,7 +107,7 @@ void createSwapChain(){
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
+        printDebugLog("\nERROR: failed to create swap chain!");
         throw std::runtime_error("failed to create swap chain!");
     }
 
@@ -141,7 +141,7 @@ void createImageViews(){
         createInfo.subresourceRange.layerCount = 1;
 
         if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
-            printDebugLog("\nERROR: failed to create image views!", 2, 1);
+            printDebugLog("\nERROR: failed to create image views!");
             throw std::runtime_error("failed to create image views!");
         }
     }
@@ -187,7 +187,7 @@ void createRenderPass(){
     renderPassInfo.pDependencies = &dependency;
 
     if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create render pass!", 2, 1);
+        printDebugLog("\nERROR: failed to create render pass!");
         throw std::runtime_error("failed to create render pass!");
     }
 }

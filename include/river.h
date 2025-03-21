@@ -2,13 +2,19 @@
 
 #include "vulkan/vulkan_core.h"
 
-//TODO: try to minimize the amount of data types. See if it makes sense to make own data structures
+//OPTIM: try to minimize the amount of data types. See if it makes sense to make own data structures
 //vectors, for example, since I'm really not using most (if any) of the functionality
 //maybe just get rid of vectors in favour of another resizeable list
+#include <ctime>
 #include <filesystem>
+#include <iomanip>
+#include <iostream>
 #include <vector>
+#include <chrono>
 
-#if defined(DEBUG) || defined(_DEBUG)
+#define TIMESTAMP 
+
+#ifdef DEBUG
     #define BUILD_DEBUG true 
 #else
     #define BUILD_DEBUG false 
@@ -16,6 +22,7 @@
 
 #define MAX_FRAMES_IN_FLIGHT 2
 #define ENGINE_NAME "River"
+//TODO: rename this, because when debugging, there is no log (lmao)
 #define DEBUG_LOG appRoot / "debug.log" 
  
 inline const char *appName;
@@ -33,6 +40,43 @@ extern void cleanupVulkan();
 
 extern void drawFrame();
 
-extern std::filesystem::path getProjectRoot(const char* rootName);
+extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
-extern void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
+
+void printDebugLog(const auto &text){
+    if(!BUILD_DEBUG){
+        return; 
+    }
+    std::cout << text;
+}
+
+void printDebugLog(const auto &text, const char &newline){
+    if(!BUILD_DEBUG){
+        return; 
+    }
+    std::cout << text << newline;
+}
+
+void printDebugLog(const char &tab, const auto &text){
+    if(!BUILD_DEBUG){
+        return; 
+    }
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cout << std::put_time(&buf, "[%T] ") << tab << text;
+}
+
+void printDebugLog(const char &tab, const auto &text, const char &newline){
+    if(!BUILD_DEBUG){
+        return; 
+    }
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cout << std::put_time(&buf, "[%T] ") << tab << text << newline;
+}

@@ -6,32 +6,7 @@
 #include "pipeline.h"
 
 #include <cstring>
-#include <iostream>
-#include <fstream>
-
-void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
-    std::ofstream log(DEBUG_LOG, std::ios::app);
-
-    if(!BUILD_DEBUG){
-        return;
-    }
-
-    if(!log.is_open()){
-        throw std::runtime_error("failed to open file");
-    }
-
-    for(;tabs > 0; --tabs){
-        log << '\t'; 
-    }
-
-        log << text;
-
-    for(;newlines > 0; --newlines){
-        log << '\n';
-    }
-
-    log.close();
-}
+#include <ctime>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
@@ -40,7 +15,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         void                                        *userData
     ){
 
-    std::cerr << "validation layer: " << callbackData->pMessage << '\n';
+    printDebugLog('\0', "[VL] ");
+    printDebugLog(callbackData->pMessage, '\n');
 
     return VK_FALSE;
 }
@@ -75,25 +51,25 @@ static std::vector<const char*> getRequiredExtensions(){
 }
 
 static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("Present:", 1, 1);
+    printDebugLog('\0', "Present:", '\n');
     for(const auto &extension : *instanceExt){
-        printDebugLog(extension.extensionName, 2, 1);
+        printDebugLog('\t', extension.extensionName, '\n');
     }
 
-    printDebugLog("Required:", 1, 1);
+    printDebugLog('\0', "Required:", '\n');
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    printDebugLog("found:\t", 0, 0);
-                    printDebugLog(required, 1, 1);
+                    printDebugLog('\t', required, '\n');
                     extFound = true;
                     break;
                 }
             }
         if(!extFound){ 
-            printDebugLog("not found:\t", 0, 0);
+            printDebugLog('\0', "!!!", '\t');
+            printDebugLog(required, '\n');
             return false; 
         } 
     }
@@ -143,10 +119,8 @@ static void setupDebugMessenger(){
     populateDebugMessengerCreateInfo(createInfo);
 
     if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to set up debug messenger.", 2, 1);
+        printDebugLog('\n', "ERROR: failed to set up debug messenger.");
         throw std::runtime_error("failed to set up debug messenger!");
-    }else{
-        printDebugLog("Successfully set up debug messenger.", 0, 1);
     }
 }
 
@@ -159,16 +133,16 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 
 static void createInstance(){
     if(BUILD_DEBUG && !checkValidationLayerSupport()){
-        printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
+        printDebugLog('\n', "ERROR: validation layers requested, but not available!");
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = appName;
-    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
-    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
+    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
     uint32_t instanceExtensionCount = 0;
@@ -177,13 +151,10 @@ static void createInstance(){
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
-    if(checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        printDebugLog("\nAll required extensions are present.", 0, 1);
-    }else{
-        printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
+    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+        printDebugLog('\n', "ERROR: extensions required, but not available!");
         throw std::runtime_error("extensions required, but not available!"); 
     }
-
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -205,10 +176,8 @@ static void createInstance(){
     }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create instance.", 2, 1);
+        printDebugLog('\n', "ERROR: failed to create instance.");
         throw std::runtime_error("failed to create instance.");
-    }else{
-        printDebugLog("Successfully created instance.", 0, 1);
     }
 }
 
@@ -288,7 +257,7 @@ void drawFrame(){
     submitInfo.pCommandBuffers = &commandBuffer;
 
     if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
+        printDebugLog("\nERROR: failed to submit draw command buffer!");
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -312,8 +281,8 @@ std::filesystem::path getProjectRoot(const char *rootName){
 
     for(int i = 0; i < 3; ++i){
         if(strcmp(current.filename().string().c_str(), rootName) == 0){
-            printDebugLog("project root:", 0, 0);
-            printDebugLog(current.string(), 1, 1);
+            printDebugLog('\0', "project root: ");
+            printDebugLog(current, '\n');
             return current;
         }else{
             current = current.parent_path();
