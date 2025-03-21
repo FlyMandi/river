@@ -12,6 +12,7 @@ void initGLFW(){
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
+
     if(nullptr == window){
         printDebugLog("failed to GLFW window!", 0, 2);
         throw std::runtime_error("failed to create GLFW window!");
