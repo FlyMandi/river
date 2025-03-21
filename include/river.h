@@ -32,4 +32,5 @@ extern void cleanupVulkan();
 extern void drawFrame();
 
 extern std::filesystem::path getProjectRoot(const char* rootName);
+extern void clearLogs(const std::filesystem::path &baseDir);
 extern void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
