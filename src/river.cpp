@@ -149,15 +149,44 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
         func(instance, debugMessenger, allocator);
     }
 }
+
+static void setupDebugImageView()
+{
+    //TODO: create debug image (vkCreateImage())
+    //map memory (vkBindImageMemory(), vkMapMemory())
+    //memset to zero it maybe
+}
+
+void copyFramebufferToDebugImageView(VkCommandBuffer commandBuffer, VkImage srcFrame)
+{
+    //TODO: use VkImageMemoryBarrier barriers[] and specs
+    //srcImage to TRANSFER_SRC_OPTIMAL, then TRANSFER_DST_OPTIMAL
+    //vkCmdPipelineBarrier
+    //VkImageCopy copyRegion{};
+    //vkCmdCopyImage(
+    //commandBuffer,
+    //srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //debugImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    //1,
+    //&copyRegion);
+    //vkCmdPipelineBarrier(
+    //cmdBuffer,
+    //VK_PIPELINE_STAGE_TRANSFER_BIT,
+    //VK_PIPELINE_STAGE_HOST_BIT,
+    //0,
+    //0, nullptr,
+    //0, nullptr,
+    //1,
+    //&barrierDstTransferDstToGeneral
+    //);
+}
 #endif
 
 static void createInstance()
 {
     #ifdef DEBUG
         if(!checkValidationLayerSupport()){
-            #ifdef DEBUG
-                printDebugLog("validation layers requested, but not available!");
-            #endif
+            printDebugLog("validation layers requested, but not available!");
             throw std::runtime_error("validation layers requested, but not available!");
         }
     #endif
@@ -216,6 +245,7 @@ void initVulkan()
 
     #ifdef DEBUG
         setupDebugMessenger();
+        setupDebugImageView();
     #endif
 
     createSurface();

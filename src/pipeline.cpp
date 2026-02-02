@@ -263,6 +263,10 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
+    #ifdef DEBUG
+        copyFramebufferToDebugImageView(commandBuffers[currentFrame], swapChainImages[imageIndex]);
+    #endif
+
     vkCmdEndRenderPass(commandBuffer);
 
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
