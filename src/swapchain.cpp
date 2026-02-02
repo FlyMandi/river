@@ -25,10 +25,10 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
 {
     for(const auto &availablePresentMode : availablePresentModes)
     {
-        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
+        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
         {
             #ifdef DEBUG
-                riverLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", RIV_LOG_LEVEL_DEBUG);
+                riverLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", RIV_LOG_LEVEL_DEBUG);
             #endif
             return availablePresentMode;
         }
@@ -36,10 +36,10 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
 
     for(const auto &availablePresentMode : availablePresentModes)
     {
-        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
+        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
         {
             #ifdef DEBUG
-                riverLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", RIV_LOG_LEVEL_DEBUG);
+                riverLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", RIV_LOG_LEVEL_DEBUG);
             #endif
             return availablePresentMode;
         }
