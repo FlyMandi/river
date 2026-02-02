@@ -511,7 +511,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
-    for(int i = 0; i < 256; ++i)
+    for(int i = 0; current.string().length() < RIV_MAX_PATH; ++i)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {

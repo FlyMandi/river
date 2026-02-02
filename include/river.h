@@ -19,6 +19,12 @@ constexpr auto ENGINE_NAME = "River";
 //maybe get rid of this in the future
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
+#ifdef _WIN32
+constexpr uint32_t RIV_MAX_PATH = 260; //bytes
+#else
+constexpr uint32_t RIV_MAX_PATH = 256; //bytes
+#endif
+
 global std::ofstream logFile;
 global uint8_t logLevel;
 
