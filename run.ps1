@@ -4,48 +4,66 @@ param(
     [Parameter(position=1,Mandatory=$false)]
     $OS = "Win64",
     [Parameter(position=2,Mandatory=$false)]
-    $compiler = "MSVC",
+    $compiler = "g++",
     [Parameter(position=3,Mandatory=$false)]
     [switch]$nAMD = $false
 )
 $Platforms = "Win64", "Unix"
 $Configurations = "Debug", "Release"
 
-foreach($platform in $Platforms){
-    foreach($config in $Configurations){
+foreach($platform in $Platforms)
+{
+    foreach($config in $Configurations)
+    {
         $objPath = ".\obj\$platform" + "_$config"
         $binPath = ".\bin\$platform" + "_$config"
-        if(-Not(Test-Path $objPath)){
+
+        if(-Not(Test-Path $objPath))
+        {
             &mkdir $objPath
         }
-        if(-Not(Test-Path $binPath)){
+
+        if(-Not(Test-Path $binPath))
+        {
             &mkdir $binPath
         }
     }
+}
+
+if(-Not(Test-Path ".\build\"))
+{
+    &mkdir ".\build\"
 }
 
 &premake5 ecc
 .\shader_comp.ps1
 
 $target = ".\bin\$OS" + "_$build\River.exe"
-if(Test-Path $target){
+if(Test-Path $target)
+{
     Remove-Item $target
 }
 
-if("MSVC" -eq $compiler){
+if("MSVC" -eq $compiler)
+{
     &premake5 vs2022
 
     $VS = Join-Path $env:PROGRAMFILES "\Microsoft Visual Studio\2022\Community\"
 
-    if($nAMD){ 
+    if($nAMD)
+    { 
         $MSBuild = Join-Path $VS "\MSBuild\Current\bin\" 
-    }else{ 
+    }
+    else
+    {
         $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" 
     }
 
     &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
 
-}elseIf("g++" -eq $compiler){
+}
+elseIf("g++" -eq $compiler)
+{
     &premake5 gmake
 
     Push-Location ".\build\"
