@@ -36,7 +36,7 @@ class CnakeApp{
         }
 
         if(vulkanExtString.find(glfwExtString) == std::string::npos){
-            throw std::runtime_error ("not all needed extensions present.");
+            throw std::runtime_error("not all needed extensions present.");
         }
         std::cout << "\nAll needed extensions are present.";
     }
