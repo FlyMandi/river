@@ -14,18 +14,18 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
 - queue families, the swapchain & present modes
 - vertex & index buffers, vertex & fragment shaders
+- uniform buffer objects and model view projection
 - loading & sampling textures, texels
-- depth buffers
+- depth buffering
 
-### State:
+### State (DEMO):
 - there's a resizeable window
-- it shows a rotating, textured and coloured square.
+- it shows two rotating, textured and coloured squares, one on top of the other.
 
-![ScreenShot of the river test project](assets/1.jpg)
+![Screenshot of the river test project](assets/1.jpg)
 
 ### Next up:
-- depth buffering
-- loading 3D models
+- loading 3D models (tinyobjloader)
 - mipmaps
 - multisampling
 - camera control
@@ -34,7 +34,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - project management, custom filetype
 
 ### Plans:
-- building an editor that's able to save & load models/projects
+- building an editor that's able to save & load river projects
 - learn and implement material shaders, compute shaders, etc
 - create an API to write games with (no scripting, pure C/C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
