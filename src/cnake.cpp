@@ -30,7 +30,7 @@ bool CnakeApp::checkValidationLayerSupport(){
     return true;
 }
 
-bool CnakeApp::verifyExtensionPresence(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt){
+bool CnakeApp::checkExtensionSupport(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt){
     std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
 
     std::cout << "\nVulkan presents:\n";
@@ -68,7 +68,7 @@ void CnakeApp::createInstance(){
     
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    if(!verifyExtensionPresence(glfwExtensions, &extensions)){
+    if(!checkExtensionSupport(glfwExtensions, &extensions)){
         throw std::runtime_error("extensions requested, but not available!"); 
     }
 

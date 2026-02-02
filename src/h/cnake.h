@@ -25,7 +25,7 @@ class CnakeApp{
     GLFWwindow *window;
     VkInstance instance;
 
-    bool verifyExtensionPresence(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt);
+    bool checkExtensionSupport(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt);
     bool checkValidationLayerSupport();
 
     void initWindow();
