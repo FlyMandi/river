@@ -19,6 +19,7 @@ inline std::vector<VkCommandBuffer> commandBuffers;
 inline VkQueue graphicsQueue;
 inline VkQueue presentQueue;
 inline VkQueue transferQueue;
+
 inline std::vector<VkSemaphore> imageAvailableSemaphores;
 inline std::vector<VkSemaphore> renderFinishedSemaphores;
 inline std::vector<VkFence> inFlightFences;
