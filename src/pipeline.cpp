@@ -193,7 +193,9 @@ void createFramebuffers()
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
     for(size_t i = 0; i < swapChainImageViews.size(); ++i){
-        VkImageView attachments[] = { swapChainImageViews[i] };
+        VkImageView attachments[] = { 
+            swapChainImageViews[i] 
+        };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
