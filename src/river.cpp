@@ -5,6 +5,7 @@
 #include "swapchain.h"
 #include "pipeline.h"
 #include "buffer.h"
+#include "image.h"
 
 #include <cstdint>
 #include <cstring>
@@ -244,6 +245,7 @@ void initVulkan()
     createFramebuffers();
 
     createCommandPools();
+    createTextureImage();
 
     createVertexBuffer();
     createUniformBuffers();
