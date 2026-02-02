@@ -13,7 +13,10 @@ void window::initGLFW(){
 
     pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)river::appName + " " + (std::string)river::appVersion).c_str(), nullptr, nullptr);
     if(nullptr == pWindow){
+        river::printDebugLog("failed to GLFW window!", 0, 2);
         throw std::runtime_error("failed to create GLFW window!");
+    }else{
+        river::printDebugLog("Successfully created GLFW window.", 0, 2);
     }
 }
 
@@ -30,6 +33,9 @@ void window::pollEvents(){
 
 void window::createSurface(){
     if(glfwCreateWindowSurface(river::instance, pWindow, nullptr, &surface) != VK_SUCCESS){
+        river::printDebugLog("failed to create window surface!", 0, 2);
         throw std::runtime_error("failed to create window surface!");
+    }else{
+        river::printDebugLog("Successfully created window surface.", 0, 2);
     }
 }
