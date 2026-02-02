@@ -15,13 +15,13 @@
 #define TIMESTAMP 
 
 #ifdef DEBUG
-    #define BUILD_DEBUG true 
+constexpr auto BUILD_DEBUG = true;
 #else
-    #define BUILD_DEBUG false 
+constexpr auto BUILD_DEBUG = false;
 #endif
 
-#define MAX_FRAMES_IN_FLIGHT 2
-#define ENGINE_NAME "River"
+constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
+constexpr auto ENGINE_NAME = "River";
 //TODO: rename this, because when debugging, there is no log (lmao)
 #define DEBUG_LOG appRoot / "debug.log" 
  
