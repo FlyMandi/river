@@ -72,5 +72,6 @@ void pickPhysicalDevice();
 
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
 void createSurface();

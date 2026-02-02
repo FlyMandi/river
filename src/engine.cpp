@@ -1,5 +1,7 @@
 #include "h/engine.h"
+#include <algorithm>
 #include <cstdint>
+#include <limits>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -341,6 +343,32 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> avail
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
+VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
+
+    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
+        if(isDebugMode){
+            std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
+            std::cout << "swap height: " << capabilities.currentExtent.height << '\n';
+        }
+        return capabilities.currentExtent; 
+    }else{
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+
+        VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+
+        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+        if(isDebugMode){
+            std::cout << "swap width: " << actualExtent.width << '\n';
+            std::cout << "swap height: " << actualExtent.height << '\n';
+        }
+
+        return actualExtent;
+    }
+}
+
 void createLogicalDevice(){
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -393,7 +421,7 @@ void createSwapChain(){
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    //VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 }
 
 void createInstance(){
