@@ -11,8 +11,7 @@ void initEditor()
     //create new project
     //exit
     
-    //TODO:
-    //upon loading or creating, load layout
+    //TODO: upon loading or creating, load layout
     //this is all layout info that should be stored in a manifest somewhere
     WIDTH = 1920;
     HEIGHT = 1080;
