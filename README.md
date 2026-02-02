@@ -22,20 +22,21 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### State (DEMO):
 - there's a fully resizeable window with correct and proper vulkan instantiation
-- it shows a rotating, textured 3D model, loaded from a .obj file
+- it shows a rotating, textured 3D model, loaded from a .obj/.jpg
 
 ![Screenshot of the river test project](assets/preview.png)
 
 ### Next up:
 - mipmaps
 - multisampling
+- normals
+- materials
 - camera control
 - a GUI (imgui / clay)
 - a default project.
 - project management, custom filetype
 
 ### Plans:
-- learn and implement material shaders, compute shaders, etc
 - create an API to write games with (no scripting, pure C/C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
 - add a wireframe view via hotkey
