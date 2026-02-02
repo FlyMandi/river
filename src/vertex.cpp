@@ -3,6 +3,7 @@
 #include "river.h"
 #include "device.h"
 #include <cstring>
+#include <set>
 #include "vertex.h"
 
 const std::vector<Vertex> vertices =
@@ -53,63 +54,80 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-void createVertexBuffer()
+void createBuffer(  VkDeviceSize            bufferSize, 
+                    VkBufferUsageFlags      usageFlags, 
+                    VkMemoryPropertyFlags   memPropertyFlags, 
+                    VkBuffer                &buffer, 
+                    VkDeviceMemory          &bufferMemory,
+                    std::set<uint32_t>      &uniqueQueueFamilies)
 {
-    VkBufferCreateInfo vertexBufferInfo{};
-    vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vertexBufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
-    vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = bufferSize;
+    bufferInfo.usage = usageFlags;
 
-    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.transferIndex){
-        vertexBufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+    if(uniqueQueueFamilies.size() == 1){
+        bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
     }else{
-        vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
-    uint32_t queueFamilyIndices[] = {
+    static std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(), uniqueQueueFamilies.end());
+
+    bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
+    bufferInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+
+    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS){
+        #ifdef DEBUG
+            printDebugLog('\0', "failed to create buffer! usage flags: ");
+            printDebugLog(usageFlags);
+        #endif
+        throw std::runtime_error("failed to create buffer!");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findSuitableMemoryType(memRequirements.memoryTypeBits, memPropertyFlags);
+
+    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS){
+        #ifdef DEBUG
+            printDebugLog("failed to allocate buffer memory! usage flags: ");
+            printDebugLog(usageFlags);
+        #endif
+        throw std::runtime_error("failed to allocate buffer memory!");
+    }
+    #ifdef DEBUG
+        printDebugLog('\0', "allocated buffer memory: ");
+        printDebugLog(allocInfo.allocationSize);
+        printDebugLog("B, usage flags: ");
+        printDebugLog(usageFlags, '\n');
+    #endif
+
+    vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
+}
+
+void createVertexBuffer()
+{
+    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+    static std::set<uint32_t> queueFamilies = 
+    {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex
     };
 
-    vertexBufferInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
-    vertexBufferInfo.pQueueFamilyIndices = queueFamilyIndices;
-
-    if(vkCreateBuffer(logicalDevice, &vertexBufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
-        #ifdef DEBUG
-            printDebugLog("failed to create vertex buffer!");
-        #endif
-        throw std::runtime_error("failed to create vertex buffer!");
-    }
-    #ifdef DEBUG
-        printDebugLog('\0', "created vertex buffer.", '\n');
-    #endif
-
-    VkMemoryRequirements vertexBufferMemoryRequirements;
-    vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &vertexBufferMemoryRequirements);
-
-    VkMemoryPropertyFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = vertexBufferMemoryRequirements.size;
-    allocInfo.memoryTypeIndex = findSuitableMemoryType(vertexBufferMemoryRequirements.memoryTypeBits, flags);
-
-    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS){
-        #ifdef DEBUG
-            printDebugLog("failed to allocate vertex buffer memory!");
-        #endif
-        throw std::runtime_error("failed to allocate vertex buffer memory!");
-    }
-    #ifdef DEBUG
-        printDebugLog('\0', "allocated vertex buffer memory: ");
-        printDebugLog(allocInfo.allocationSize);
-        printDebugLog("B", '\n');
-    #endif
-
-    vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);
+    createBuffer(   bufferSize, 
+                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    vertexBuffer,
+                    vertexBufferMemory,
+                    queueFamilies);
 
     void* vertexBufferBegin;
-    vkMapMemory(logicalDevice, vertexBufferMemory, 0, vertexBufferInfo.size, 0, &vertexBufferBegin);
-    std::memcpy(vertexBufferBegin, vertices.data(), (size_t)vertexBufferInfo.size);
+    vkMapMemory(logicalDevice, vertexBufferMemory, 0, bufferSize, 0, &vertexBufferBegin);
+    std::memcpy(vertexBufferBegin, vertices.data(), (size_t)bufferSize);
     vkUnmapMemory(logicalDevice, vertexBufferMemory);
 }
