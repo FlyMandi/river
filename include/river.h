@@ -6,39 +6,30 @@
 #include <vector>
 
 #if defined(DEBUG) || defined(_DEBUG)
-    const bool build_DEBUG = true;
+    #define BUILD_DEBUG true 
 #else
-    const bool build_DEBUG = false;
+    #define BUILD_DEBUG false 
 #endif
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
-
-namespace river{
-
-inline const char *engineName = "River";
+#define MAX_FRAMES_IN_FLIGHT 2
+#define ENGINE_NAME "River"
+//TODO: evaluate this fucker
+#define DEBUG_LOG appRoot / "debug.log" 
+ 
 inline const char *appName;
 inline const char *appVersion;
 
 inline std::filesystem::path appRoot;
-inline std::filesystem::path debugLog;
 
 inline VkInstance instance;
 inline VkDebugUtilsMessengerEXT debugMessenger;
 
-//TODO: move queues & command buffers to diff file 
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 extern void initVulkan();
 extern void cleanupVulkan();
 
 extern void drawFrame();
 
-extern void getProjectRoot(const char* rootName);
+extern std::filesystem::path getProjectRoot(const char* rootName);
 extern void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
-
-inline const std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation" 
-};
-
-inline bool firstOpen = true;
-
-}

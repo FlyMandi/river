@@ -26,7 +26,7 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices device::findQueueFamilies(VkPhysicalDevice device){
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
     static QueueFamilyIndices indices;
     static uint32_t queueFamilyCount = 0;
 
@@ -42,7 +42,7 @@ QueueFamilyIndices device::findQueueFamilies(VkPhysicalDevice device){
             indices.graphicsFamily = i;
         }
         
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, window::surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
         if(presentSupport){
             indices.presentFamily = i;
         }
@@ -57,10 +57,9 @@ QueueFamilyIndices device::findQueueFamilies(VkPhysicalDevice device){
 }
 
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
-    using namespace device;
     uint32_t score = 0;
 
-    QueueFamilyIndices indices = device::findQueueFamilies(device);
+    QueueFamilyIndices indices = findQueueFamilies(device);
     if(!indices.isComplete()){ 
         return 0; 
     }
@@ -89,41 +88,40 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    river::printDebugLog(deviceProperties.deviceName, 0, 1);
-    river::printDebugLog("score: ", 0, 0);
-    river::printDebugLog(std::to_string(score), 0, 2);
+    printDebugLog(deviceProperties.deviceName, 0, 1);
+    printDebugLog("score: ", 0, 0);
+    printDebugLog(std::to_string(score), 0, 2);
 
     return score;
 }
 
-SwapChainSupportDetails device::querySwapChainSupport(VkPhysicalDevice device){
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device){
     SwapChainSupportDetails details;
     uint32_t formatCount;
     uint32_t presentModeCount;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, window::surface, &details.capabilities);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, window::surface, &formatCount, nullptr);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, window::surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
 
     if(0 != formatCount){
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, window::surface, &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
     }
 
     if(0 != presentModeCount){
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, window::surface, &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
     }
 
     return details;
 }
 
-void device::pickPhysicalDevice(){
-    using namespace river;
+void pickPhysicalDevice(){
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
     
-    vkEnumeratePhysicalDevices(river::instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
         printDebugLog("\nERROR: failed to find any GPU with vulkan support!", 2, 1);
         throw std::runtime_error("failed to find any GPU with vulkan support!");
@@ -134,7 +132,7 @@ void device::pickPhysicalDevice(){
     std::vector<VkPhysicalDevice> devices(deviceCount);
     std::multimap<uint32_t, VkPhysicalDevice> suitabilityCandidates;
 
-    vkEnumeratePhysicalDevices(river::instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
     for(const auto& device : devices){
         uint32_t score = rateDeviceSuitability(device);
@@ -150,14 +148,14 @@ void device::pickPhysicalDevice(){
     }
 }
 
-void device::createLogicalDevice(){
-    using namespace river;
-    static QueueFamilyIndices indices = device::findQueueFamilies(device::physicalDevice);
+void createLogicalDevice()
+{
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-    static std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    static std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
-    static float queuePriority = 1.0f;
+    float queuePriority = 1.0f;
     for(uint32_t queueFamily : uniqueQueueFamilies){
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -177,7 +175,7 @@ void device::createLogicalDevice(){
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    if(build_DEBUG){
+    if(BUILD_DEBUG){
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
     }else{
@@ -189,6 +187,6 @@ void device::createLogicalDevice(){
         throw std::runtime_error("failed to create logical device!");
     }
 
-    vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &pipeline::graphicsQueue);
-    vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &pipeline::presentQueue);
+    vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
