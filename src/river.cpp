@@ -13,7 +13,7 @@
 #include <filesystem>
 #include <iostream>
 
-static const char* logLevelStamps[] =
+constexpr const char* logLevelStamps[] =
 {
     "[RIV_TRACE]: ",
     "[RIV_DEBUG]: ",
@@ -22,16 +22,17 @@ static const char* logLevelStamps[] =
     "[RIV_ASSER]: "
 };
 
-static const char* logLevelANSI[] =
+constexpr const char* logLevelANSI[] =
 {
     "\033[30;1;1m",
     "\033[37;1;1m",
     "\033[33;1;1m",
     "\033[31;1;1m",
-    "\033[31;1;7m"
+    "\033[31;1;7m",
+    "\033[35;1;7m"
 };
 
-static const char* clearANSI = "\033[0m";
+constexpr const char* clearANSI = "\033[0m";
 
 RiverLogLevel severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
 {
@@ -178,9 +179,12 @@ static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT 
 {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType =    VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT     |
+                                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT  |
+                                VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
 }
 
@@ -206,80 +210,6 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
     }
 }
 #endif
-
-void riverLog(const char* text, const RiverLogLevel level)
-{
-    if(level < logLevel)
-    {
-        return;
-    }
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cout << logLevelANSI[level];
-
-    std::cout << '\n' << std::put_time(&buf, "[%T] ") << logLevelStamps[level];
-
-    if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
-    {
-        std::cerr << text << clearANSI;
-        return;
-    }
-
-    std::cout << text << clearANSI;
-}
-
-void riverAssert(bool condition, const char* assertFailureMsg)
-{
-    if(condition)
-    {
-        return;
-    }
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cerr << '\n' << std::put_time(&buf, "[%T] ") << logLevelANSI[RIV_LOG_LEVEL_ASSERT]
-        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << clearANSI;
-
-    abort();
-}
-
-void riverAssertVkSuccess(VkResult result, const char* assertFailureMsg)
-{
-    if(result == VK_SUCCESS)
-    {
-        return;
-    }
-
-    uint32_t logLevel = RIV_LOG_LEVEL_ASSERT;
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cerr << '\n' << logLevelANSI[logLevel] << std::put_time(&buf, "[%T] ") << logLevelStamps[logLevel]
-        << riverTranslateVkResult(result) << ": " << assertFailureMsg << clearANSI;
-
-    abort();
-}
-
-void riverThrow(const char *throwMsg)
-{
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cerr << '\n' << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << std::put_time(&buf, "[%T] ")
-        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI;
-}
 
 static std::vector<const char*> getRequiredExtensions()
 {
@@ -585,4 +515,76 @@ void clearLogs(const std::filesystem::path &baseDir)
             std::filesystem::remove(log);
         }
     }
+}
+
+std::string riverTimestamp()
+{
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm buf{};
+
+#ifdef _WIN32
+    localtime_s(&buf, &now);
+#else
+    localtime_r(&now, &buf);
+#endif
+    if ((buf.tm_hour > 23) || (buf.tm_hour < 0) ||
+        (buf.tm_min  > 59) || (buf.tm_min  < 0) ||
+        (buf.tm_sec  > 60) || (buf.tm_sec  < 0))
+    {
+      return "[??:??:??] ";
+    }
+
+    return std::format ("[{:02}:{:02}:{:02}] ", buf.tm_hour, buf.tm_min, buf.tm_sec);
+}
+
+void riverLog(const char* text, const RiverLogLevel level)
+{
+    if(level < logLevel)
+    {
+        return;
+    }
+
+    if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
+    {
+        std::cerr << logLevelANSI[level] << riverTimestamp()
+            << logLevelStamps[level] << text << clearANSI << '\n';
+        return;
+    }
+
+    std::cout << logLevelANSI[level] << riverTimestamp()
+        << logLevelStamps[level] << text << clearANSI << '\n';
+}
+
+void riverAssert(bool condition, const char* assertFailureMsg)
+{
+    if(condition)
+    {
+        return;
+    }
+
+    std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
+        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << clearANSI << '\n';
+
+    abort();
+}
+
+void riverAssertVkSuccess(VkResult result, const char* assertFailureMsg)
+{
+    if(result == VK_SUCCESS)
+    {
+        return;
+    }
+
+    uint32_t logLevel = RIV_LOG_LEVEL_ASSERT;
+
+    std::cerr << logLevelANSI[logLevel] << riverTimestamp() << logLevelStamps[logLevel]
+        << riverTranslateVkResult(result) << ": " << assertFailureMsg << clearANSI << '\n';
+
+    abort();
+}
+
+void riverThrow(const char *throwMsg)
+{
+    std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
+        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI << '\n';
 }

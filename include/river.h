@@ -5,8 +5,6 @@
 #include <filesystem>
 #include <vector>
 
-#define TIMESTAMP
-
 inline uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
@@ -48,7 +46,7 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_WARN      = 2,
     RIV_LOG_LEVEL_ERROR     = 3,
     RIV_LOG_LEVEL_ASSERT    = 4,
-    RIV_LOG_LEVEL_UNDEFINED = -4711
+    RIV_LOG_LEVEL_UNDEFINED = 5
 };
 
 const char* riverTranslateVkResult(VkResult code);
