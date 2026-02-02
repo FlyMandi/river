@@ -57,7 +57,7 @@ static const char* logLevelStamps[] =
 {
     "[RIV_TRACE]: ",
     "[RIV_DEBUG]: ",
-    "[RIV_WARN]:  ",
+    "[RIV_WARNI]: ",
     "[RIV_ERROR]: ",
 };
 
