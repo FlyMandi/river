@@ -8,13 +8,13 @@ inline VkPipeline graphicsPipeline;
 inline VkPipelineLayout graphicsPipelineLayout;
 
 inline VkDescriptorSetLayout descriptorSetLayout;
-inline std::vector<VkDescriptorSet> descriptorSets;
+inline std::vector<VkDescriptorSet> descriptorSets{};
 
 inline VkCommandPool graphicsCommandPool;
 inline VkCommandPool transferCommandPool;
 inline VkDescriptorPool descriptorPool;
 
-inline std::vector<VkCommandBuffer> commandBuffers;
+inline std::vector<VkCommandBuffer> commandBuffers{};
 
 inline VkQueue graphicsQueue;
 inline VkQueue presentQueue;
