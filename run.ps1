@@ -1,4 +1,5 @@
-param(
+param
+(
     [Parameter(position=0,Mandatory=$false)]
     $build = "Debug",
     [Parameter(position=1,Mandatory=$false)]
