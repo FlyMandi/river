@@ -408,13 +408,6 @@ void drawFrame()
             &imageIndex
         );
 
-    if(imagesInFlight[imageIndex] != VK_NULL_HANDLE)
-    {
-        vkWaitForFences(logicalDevice, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-    }
-
-    imagesInFlight[imageIndex] = inFlightFences[currentFrame];
-
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         recreateSwapchain();
@@ -425,7 +418,6 @@ void drawFrame()
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
-    destroyDeferredResources(&frameResources[currentFrame]);
     vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
     updateUniformBuffer(currentFrame);
@@ -443,7 +435,7 @@ void drawFrame()
 
     drawSubmitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
     drawSubmitInfo.waitSemaphoreCount = 1;
-    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
+    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[imageIndex];
     drawSubmitInfo.signalSemaphoreCount = 1;
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
@@ -464,7 +456,7 @@ void drawFrame()
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
+    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[imageIndex];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;

@@ -108,7 +108,6 @@ void createSwapchain()
 
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
     swapchainImages.resize(swapchainImageCount, VK_NULL_HANDLE);
-    imagesInFlight.resize(swapchainImageCount, VK_NULL_HANDLE);
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, swapchainImages.data());
 
     swapchainImageFormat = surfaceFormat.format;
@@ -179,16 +178,16 @@ void createRenderPass()
 
 void destroyDeferredResources(FrameResource *frame)
 {
-    if(frame->hasFramebuffer)
+    if(frame->framebuffer2Destroy != VK_NULL_HANDLE)
     {
         vkDestroyFramebuffer(logicalDevice, frame->framebuffer2Destroy, nullptr);
-        frame->hasFramebuffer = VK_FALSE;
+        frame->framebuffer2Destroy = VK_NULL_HANDLE;
     }
 
-    if(frame->hasImageView)
+    if(frame->imageView2Destroy != VK_NULL_HANDLE)
     {
         vkDestroyImageView(logicalDevice, frame->imageView2Destroy, nullptr);
-        frame->hasImageView = VK_FALSE;
+        frame->imageView2Destroy = VK_NULL_HANDLE;
     }
 };
 
@@ -229,16 +228,7 @@ void recreateSwapchain()
         glfwWaitEvents();
     }
 
-    riverLog(std::format("trying to recreate swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
-
-    for (size_t i = 0; i < imagesInFlight.size(); ++i)
-    {
-        if(imagesInFlight[i] != VK_NULL_HANDLE)
-        {
-            vkWaitForFences(logicalDevice, 1, &imagesInFlight[i], VK_TRUE, UINT64_MAX);
-            imagesInFlight[i] = VK_NULL_HANDLE;
-        }
-    }
+    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
 
     for(size_t i = 0; i < swapchainImageCount; ++i)
     {
@@ -246,9 +236,6 @@ void recreateSwapchain()
         frameResources[i].imageView2Destroy = swapchainImageViews[i];
         destroyDeferredResources(&frameResources[i]);
     }
-
-    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
-    riverLog("cleaned up swapchain.", RIV_LOG_LEVEL_TRACE);
 
     createSwapchain();
     createSwapImageViews();

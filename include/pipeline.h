@@ -21,9 +21,8 @@ inline VkQueue presentQueue;
 inline VkQueue transferQueue;
 
 inline std::vector<VkSemaphore> imageAvailableSemaphores(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
-inline std::vector<VkSemaphore> renderFinishedSemaphores(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+inline std::vector<VkSemaphore> renderFinishedSemaphores{VK_NULL_HANDLE};
 inline std::vector<VkFence> inFlightFences(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
-inline std::vector<VkFence> imagesInFlight{VK_NULL_HANDLE};
 
 inline VkBool32 framebufferResized = VK_FALSE;
 

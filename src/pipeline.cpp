@@ -385,6 +385,10 @@ void cleanupSemaphores()
         imageAvailableSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed imageAvailableSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
 
+    }
+
+    for(size_t i = 0; i < swapchainImages.size(); ++i)
+    {
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
         renderFinishedSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed renderFinishedSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
@@ -393,7 +397,7 @@ void cleanupSemaphores()
 
 void createSyncObjects()
 {
-    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    renderFinishedSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
@@ -408,6 +412,18 @@ void createSyncObjects()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
+    for(size_t i = 0; i < swapchainImages.size(); ++i)
+    {
+        if(renderFinishedSemaphores[i] == VK_NULL_HANDLE)
+        {
+            riverAssertVkSuccess
+            (
+                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
+                std::format("failed to create renderFinishedSemaphore No. {}", i)
+            );
+        }
+    }
+
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         if(imageAvailableSemaphores[i] == VK_NULL_HANDLE)
@@ -416,15 +432,6 @@ void createSyncObjects()
             (
                 vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
                 std::format("failed to create imageAvailableSemaphore No. {}", i)
-            );
-        }
-
-        if(renderFinishedSemaphores[i] == VK_NULL_HANDLE)
-        {
-            riverAssertVkSuccess
-            (
-                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
-                std::format("failed to create renderFinishedSemaphore No. {}", i)
             );
         }
 

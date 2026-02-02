@@ -20,10 +20,8 @@ inline uint32_t swapchainImageCount;
 struct FrameResource
 {
     VkFramebuffer framebuffer2Destroy;
-    VkBool32 hasFramebuffer;
 
     VkImageView imageView2Destroy;
-    VkBool32 hasImageView;
 };
 
 inline FrameResource frameResources[MAX_FRAMES_IN_FLIGHT];
