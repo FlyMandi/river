@@ -5,6 +5,7 @@
 #include "GLFW/glfw3.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <map>
