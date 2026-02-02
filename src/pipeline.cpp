@@ -377,61 +377,60 @@ void createCommandBuffers()
     );
 }
 
-void cleanupSemaphores()
+void cleanupSyncObjects()
 {
-    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-    {
-        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
-        imageAvailableSemaphores[i] = VK_NULL_HANDLE;
-        riverLog(std::format("destroyed imageAvailableSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
-
-    }
-
     for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
-        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
-        renderFinishedSemaphores[i] = VK_NULL_HANDLE;
-        riverLog(std::format("destroyed renderFinishedSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
+        vkDestroySemaphore(logicalDevice, imageReadyForWriteSemaphores[i], nullptr);
+        imageReadyForWriteSemaphores[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed imageReadyForWriteSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
+
+        vkDestroySemaphore(logicalDevice, imageReadyForPresentSemaphores[i], nullptr);
+        imageReadyForPresentSemaphores[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed imageReadyForPresentSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
+
+        vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+        inFlightFences[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed inFlightFence No. {}", i), RIV_LOG_LEVEL_TRACE);
     }
+    vkDestroySemaphore(logicalDevice, acquireSemaphore, nullptr);
+    acquireSemaphore = VK_NULL_HANDLE;
+    riverLog("destroyed acquireSemaphore.", RIV_LOG_LEVEL_TRACE);
 }
 
 void createSyncObjects()
 {
-    renderFinishedSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
-    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    imageReadyForWriteSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
+    imageReadyForPresentSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
+    inFlightFences.resize(swapchainImages.size(), VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    for(size_t i = 0; i < swapchainImages.size(); ++i)
-    {
-    }
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
+    riverAssertVkSuccess
+    (
+        vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &acquireSemaphore),
+        "failed to create acquireSemaphore."
+    );
+
     for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
-        if(renderFinishedSemaphores[i] == VK_NULL_HANDLE)
-        {
-            riverAssertVkSuccess
-            (
-                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
-                std::format("failed to create renderFinishedSemaphore No. {}", i)
-            );
-        }
-    }
+        riverAssertVkSuccess
+        (
+            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageReadyForPresentSemaphores[i]),
+            std::format("failed to create imageReadyForPresentSemaphore No. {}", i)
+        );
 
-    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-    {
-        if(imageAvailableSemaphores[i] == VK_NULL_HANDLE)
+        if(imageReadyForWriteSemaphores[i] == VK_NULL_HANDLE)
         {
             riverAssertVkSuccess
             (
-                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
-                std::format("failed to create imageAvailableSemaphore No. {}", i)
+                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageReadyForWriteSemaphores[i]),
+                std::format("failed to create imageReadyForWriteSemaphore No. {}", i)
             );
         }
 

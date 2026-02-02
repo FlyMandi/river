@@ -20,8 +20,10 @@ inline VkQueue graphicsQueue;
 inline VkQueue presentQueue;
 inline VkQueue transferQueue;
 
-inline std::vector<VkSemaphore> imageAvailableSemaphores(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
-inline std::vector<VkSemaphore> renderFinishedSemaphores{VK_NULL_HANDLE};
+inline std::vector<VkSemaphore> imageReadyForWriteSemaphores{VK_NULL_HANDLE};
+inline std::vector<VkSemaphore> imageReadyForPresentSemaphores{VK_NULL_HANDLE};
+inline VkSemaphore acquireSemaphore = VK_NULL_HANDLE;
+
 inline std::vector<VkFence> inFlightFences(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
 inline VkBool32 framebufferResized = VK_FALSE;
@@ -45,6 +47,6 @@ extern void createDescriptorPool();
 extern void createDescriptorSets();
 
 extern void createSyncObjects();
-extern void cleanupSemaphores();
+extern void cleanupSyncObjects();
 
 extern void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

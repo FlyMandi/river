@@ -349,7 +349,7 @@ void cleanupVulkan()
 {
     vkDeviceWaitIdle(logicalDevice);
 
-    cleanupSemaphores();
+    cleanupSyncObjects();
     cleanupSwapchain();
 
     vkDestroySampler(logicalDevice, textureSampler, nullptr);
@@ -403,7 +403,7 @@ void drawFrame()
             logicalDevice,
             swapchain,
             UINT64_MAX,
-            imageAvailableSemaphores[currentFrame],
+            acquireSemaphore,
             VK_NULL_HANDLE,
             &imageIndex
         );
@@ -413,7 +413,7 @@ void drawFrame()
         recreateSwapchain();
         return;
     }
-    else
+    else if(result != VK_SUBOPTIMAL_KHR)
     {
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
@@ -425,18 +425,29 @@ void drawFrame()
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
+    std::array<VkSemaphore, 1> waitSemaphores =
+    {
+        acquireSemaphore
+    };
+
+    std::array<VkSemaphore, 1> signalSemaphores =
+    {
+        imageReadyForPresentSemaphores[imageIndex]
+    };
+
     VkPipelineStageFlags waitStages[] =
     {
+        VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
     };
 
     VkSubmitInfo drawSubmitInfo{};
     drawSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    drawSubmitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
-    drawSubmitInfo.waitSemaphoreCount = 1;
-    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[imageIndex];
-    drawSubmitInfo.signalSemaphoreCount = 1;
+    drawSubmitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
+    drawSubmitInfo.pWaitSemaphores = waitSemaphores.data();
+    drawSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
+    drawSubmitInfo.pSignalSemaphores = signalSemaphores.data();
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
     drawSubmitInfo.commandBufferCount = 1;
@@ -456,11 +467,15 @@ void drawFrame()
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[imageIndex];
+    presentInfo.pWaitSemaphores = &imageReadyForPresentSemaphores[imageIndex];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;
     presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+
+    //wip
+    std::swap(imageReadyForWriteSemaphores[imageIndex], acquireSemaphore);
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
 

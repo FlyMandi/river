@@ -16,21 +16,10 @@ inline std::vector<VkFramebuffer> swapchainFramebuffers{};
 
 inline uint32_t swapchainImageCount;
 
-//HACK: only one of each right now, eventually all of those will be arrays
-struct FrameResource
-{
-    VkFramebuffer framebuffer2Destroy;
-
-    VkImageView imageView2Destroy;
-};
-
-inline FrameResource frameResources[MAX_FRAMES_IN_FLIGHT];
-
 extern void createSwapchain();
 extern void createSwapImageViews();
 extern void createRenderPass();
 
-extern void destroyDeferredResources(FrameResource *frame);
 extern void cleanupSwapchain();
 extern void recreateSwapchain();
 
