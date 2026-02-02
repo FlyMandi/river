@@ -224,7 +224,7 @@ void createFramebuffers
         std::array<VkImageView, 2> attachments =
         {
             engine.swapchainImageViews[i],
-            depthImageView
+            engine.depthImageView
         };
 
         VkFramebufferCreateInfo framebufferCreateInfo{};
@@ -282,11 +282,14 @@ void recordCommandBuffer
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, engine.graphicsPipeline);
 
-    VkBuffer vertexBuffers[] = {vertexBuffer};
+    VkBuffer vertexBuffers[] =
+    {
+        engine.vertexBuffer
+    };
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-    vkCmdBindIndexBuffer(commandBuffer, vertexBuffer, vertSize, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(commandBuffer, engine.vertexBuffer, engine.vertSize, VK_INDEX_TYPE_UINT32);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -316,7 +319,7 @@ void recordCommandBuffer
         nullptr
     );
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(vertexIndices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(engine.vertexIndices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -600,7 +603,7 @@ void createDescriptorSets
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         VkDescriptorBufferInfo descriptorBufferInfo{};
-        descriptorBufferInfo.buffer = uniformBuffers[i];
+        descriptorBufferInfo.buffer = engine.uniformBuffers[i];
         descriptorBufferInfo.offset = 0;
         descriptorBufferInfo.range = sizeof(UniformBufferObject);
 

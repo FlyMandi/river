@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
-#include <glm/glm.hpp>
 
 #include "river.h"
 
@@ -10,44 +9,11 @@
 #include <array>
 #include <filesystem>
 
-struct Vertex
-{
-    glm::vec3 position;
-    glm::vec3 colour;
-    glm::vec2 textureCoordinate;
-
-    bool operator==(const Vertex& other) const
-    {
-        return  position            == other.position   &&
-                colour              == other.colour     &&
-                textureCoordinate   == other.textureCoordinate;
-    }
-};
-
-struct UniformBufferObject
-{
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 projection;
-};
-
-//TODO:#57: rid of inline global scope vars
-inline std::vector<Vertex> vertices;
-inline std::vector<uint32_t> vertexIndices;
-
-inline VkBuffer vertexBuffer;
-inline VkDeviceMemory vertexBufferMemory;
-inline VkDeviceSize vertSize;
-
-inline VkImage depthImage;
-inline VkDeviceMemory depthImageMemory;
-inline VkImageView depthImageView;
-
-inline std::vector<VkBuffer> uniformBuffers{};
-inline std::vector<VkDeviceMemory> uniformBuffersMemory{};
-inline std::vector<void*> uniformBuffersMapped{};
-
-extern void loadModel(const std::filesystem::path &modelPath);
+extern void loadModel
+(
+    EngineData                  &engine,
+    const std::filesystem::path &modelPath
+);
 
 extern void createBuffer
 (

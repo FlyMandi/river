@@ -1,8 +1,9 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-#include "vulkan/vulkan_core.h"
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
+#include <glm/glm.hpp>
 
 #include <filesystem>
 #include <vector>
@@ -35,6 +36,27 @@ struct QueueFamilyIndices
     uint32_t presentIndex  = UINT32_MAX;
 };
 
+struct Vertex
+{
+    glm::vec3 position;
+    glm::vec3 colour;
+    glm::vec2 textureCoordinate;
+
+    bool operator==(const Vertex& other) const
+    {
+        return  position            == other.position   &&
+                colour              == other.colour     &&
+                textureCoordinate   == other.textureCoordinate;
+    }
+};
+
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
+};
+
 struct ProjectManifest
 {
     std::string             projectName         = "RIV_UNINITIALIZED_STRING";
@@ -56,6 +78,8 @@ struct UserSettings
 
     VkPresentModeKHR    presentMode;
 };
+
+//maybe chop this up in swapchain / device / pipeline / buffer structs if it gets too big
 
 struct EngineData
 {
@@ -106,6 +130,21 @@ struct EngineData
     std::vector<VkFence>                inFlightFences{VK_NULL_HANDLE};
 
     VkBool32                            framebufferResized = VK_FALSE;
+
+    std::vector<Vertex>                 vertices;
+    std::vector<uint32_t>               vertexIndices;
+
+    VkBuffer                            vertexBuffer;
+    VkDeviceMemory                      vertexBufferMemory;
+    VkDeviceSize                        vertSize;
+
+    VkImage                             depthImage;
+    VkDeviceMemory                      depthImageMemory;
+    VkImageView                         depthImageView;
+
+    std::vector<VkBuffer>               uniformBuffers{};
+    std::vector<VkDeviceMemory>         uniformBuffersMemory{};
+    std::vector<void*>                  uniformBuffersMapped{};
 };
 
 enum RiverLogLevel
@@ -125,7 +164,10 @@ extern void initVulkan
     const UserSettings      &settings
 );
 
-extern void cleanupVulkan(EngineData &engine);
+extern void cleanupVulkan
+(
+    EngineData &engine
+);
 
 extern void drawFrame
 (
@@ -133,8 +175,16 @@ extern void drawFrame
     const UserSettings  &settings
 );
 
-extern std::filesystem::path getProjectRoot(const char *rootName);
-extern void riverSetupLog(const std::filesystem::path &path);
+extern std::filesystem::path getProjectRoot
+(
+    const char *rootName
+);
+
+extern void riverSetupLog
+(
+    const std::filesystem::path &path
+);
+
 extern void riverCloseLog();
 
 #ifdef DEBUG
@@ -150,9 +200,30 @@ const std::vector<const char*> validationLayers =
 };
 #endif
 
-const char* riverTranslateVkResult(VkResult code);
+const char* riverTranslateVkResult
+(
+    VkResult code
+);
 
-extern void riverLog(const std::string_view text, const RiverLogLevel level);
-extern void riverAssert(bool condition, const std::string_view assertFailureMsg);
-extern void riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg);
-extern void riverThrow(const std::string_view throwMsg);
+extern void riverLog
+(
+    const std::string_view text,
+    const RiverLogLevel level
+);
+
+extern void riverAssert
+(
+    bool condition,
+    const std::string_view assertFailureMsg
+);
+
+extern void riverAssertVkSuccess
+(
+    VkResult result,
+    const std::string_view assertFailureMsg
+);
+
+extern void riverThrow
+(
+    const std::string_view throwMsg
+);

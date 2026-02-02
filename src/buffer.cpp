@@ -34,8 +34,11 @@ template<> struct std::hash<Vertex>
     }
 };
 
-void loadModel(const std::filesystem::path &modelPath)
-{
+void loadModel
+(
+    EngineData                  &engine,
+    const std::filesystem::path &modelPath
+){
     tinyobj::attrib_t attributes;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -73,11 +76,11 @@ void loadModel(const std::filesystem::path &modelPath)
 
             if(!uniqueVertices.contains(vertex))
             {
-                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                vertices.emplace_back(vertex);
+                uniqueVertices[vertex] = static_cast<uint32_t>(engine.vertices.size());
+                engine.vertices.emplace_back(vertex);
             }
 
-            vertexIndices.emplace_back(uniqueVertices[vertex]);
+            engine.vertexIndices.emplace_back(uniqueVertices[vertex]);
         }
     }
 }
@@ -206,10 +209,10 @@ void createVertexBuffer
 (
     EngineData &engine
 ){
-    vertSize = sizeof(vertices[0]) * vertices.size();
-    VkDeviceSize indexSize = sizeof(vertexIndices[0]) * vertexIndices.size();
+    engine.vertSize = sizeof(engine.vertices[0]) * engine.vertices.size();
+    VkDeviceSize indexSize = sizeof(engine.vertexIndices[0]) * engine.vertexIndices.size();
 
-    VkDeviceSize bufferSize = vertSize + indexSize;
+    VkDeviceSize bufferSize = engine.vertSize + indexSize;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -233,12 +236,12 @@ void createVertexBuffer
 
     void* pData;
 
-    vkMapMemory(engine.logicalDevice, stagingBufferMemory, 0, vertSize, 0, &pData);
-    ::memcpy(pData, vertices.data(), static_cast<size_t>(vertSize));
+    vkMapMemory(engine.logicalDevice, stagingBufferMemory, 0, engine.vertSize, 0, &pData);
+    ::memcpy(pData, engine.vertices.data(), static_cast<size_t>(engine.vertSize));
     vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
-    vkMapMemory(engine.logicalDevice, stagingBufferMemory, vertSize, indexSize, 0, &pData);
-    ::memcpy(pData, vertexIndices.data(), static_cast<size_t>(indexSize));
+    vkMapMemory(engine.logicalDevice, stagingBufferMemory, engine.vertSize, indexSize, 0, &pData);
+    ::memcpy(pData, engine.vertexIndices.data(), static_cast<size_t>(indexSize));
     vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
     createBuffer
@@ -247,12 +250,12 @@ void createVertexBuffer
         bufferSize,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        vertexBuffer,
-        vertexBufferMemory,
+        engine.vertexBuffer,
+        engine.vertexBufferMemory,
         queueFamilies
     );
 
-    copyBuffer(engine, stagingBuffer, vertexBuffer, bufferSize);
+    copyBuffer(engine, stagingBuffer, engine.vertexBuffer, bufferSize);
 
     vkDestroyBuffer(engine.logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(engine.logicalDevice, stagingBufferMemory, nullptr);
@@ -264,9 +267,9 @@ void createUniformBuffers
 ){
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
 
-    uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-    uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+    engine.uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    engine.uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    engine.uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
@@ -282,19 +285,19 @@ void createUniformBuffers
             uniformBufferSize,
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            uniformBuffers[i],
-            uniformBuffersMemory[i],
+            engine.uniformBuffers[i],
+            engine.uniformBuffersMemory[i],
             uniqueFamilyIndices
         );
 
         vkMapMemory
         (
             engine.logicalDevice,
-            uniformBuffersMemory[i],
+            engine.uniformBuffersMemory[i],
             0,
             uniformBufferSize,
             0,
-            &uniformBuffersMapped[i]
+            &engine.uniformBuffersMapped[i]
         );
     };
 }
@@ -323,7 +326,7 @@ void updateUniformBuffer
 
     uniformBuffer.projection[1][1] *= -1;
 
-    ::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
+    ::memcpy(engine.uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
 }
 
 VkFormat findSupportedFormat
@@ -380,22 +383,22 @@ void createDepthResources
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        depthImage,
-        depthImageMemory
+        engine.depthImage,
+        engine.depthImageMemory
     );
 
-    depthImageView =    createImageView
-                        (
-                            engine,
-                            depthImage,
-                            depthFormat,
-                            VK_IMAGE_ASPECT_DEPTH_BIT
-                        );
+    engine.depthImageView = createImageView
+                            (
+                                engine,
+                                engine.depthImage,
+                                depthFormat,
+                                VK_IMAGE_ASPECT_DEPTH_BIT
+                            );
 
     transitionImageLayout
     (
         engine,
-        depthImage,
+        engine.depthImage,
         depthFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL

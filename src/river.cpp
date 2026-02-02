@@ -351,7 +351,7 @@ void initVulkan
     createTextureImageView(engine);
     createTextureSampler(engine);
 
-    loadModel(manifest.projectModelPath);
+    loadModel(engine, manifest.projectModelPath);
     createVertexBuffer(engine);
     createUniformBuffers(engine);
 
@@ -377,8 +377,8 @@ void cleanupVulkan
     vkFreeMemory(engine.logicalDevice, textureImageMemory, nullptr);
     vkDestroyImageView(engine.logicalDevice, textureImageView, nullptr);
 
-    vkDestroyBuffer(engine.logicalDevice, vertexBuffer, nullptr);
-    vkFreeMemory(engine.logicalDevice, vertexBufferMemory, nullptr);
+    vkDestroyBuffer(engine.logicalDevice, engine.vertexBuffer, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.vertexBufferMemory, nullptr);
 
     vkDestroyDescriptorPool(engine.logicalDevice, engine.descriptorPool, nullptr);
     vkDestroyDescriptorSetLayout(engine.logicalDevice, engine.descriptorSetLayout, nullptr);
@@ -390,8 +390,8 @@ void cleanupVulkan
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        vkDestroyBuffer(engine.logicalDevice, uniformBuffers[i], nullptr);
-        vkFreeMemory(engine.logicalDevice, uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(engine.logicalDevice, engine.uniformBuffers[i], nullptr);
+        vkFreeMemory(engine.logicalDevice, engine.uniformBuffersMemory[i], nullptr);
     }
 
     vkDestroyCommandPool(engine.logicalDevice, engine.graphicsCommandPool, nullptr);

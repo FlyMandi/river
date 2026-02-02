@@ -233,9 +233,9 @@ void cleanupSwapchain
 (
     const EngineData &engine
 ){
-    vkDestroyImageView(engine.logicalDevice, depthImageView, nullptr);
-    vkDestroyImage(engine.logicalDevice, depthImage, nullptr);
-    vkFreeMemory(engine.logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImageView(engine.logicalDevice, engine.depthImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, engine.depthImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.depthImageMemory, nullptr);
 
     for(size_t i = 0; i < engine.swapchainFramebuffers.size(); ++i)
     {
