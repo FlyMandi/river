@@ -34,11 +34,6 @@ extern void drawFrame();
 extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
 
-//TODO:#37: eventually add log levels: [TRACE], [DEBUG], [WARN], [ERROR]
-//pass as argument to function, [DEBUG] by default
-//obv trace shows all, error shows least
-
-//FIXME: WIP
 enum RiverLogLevel
 {
     RIV_LOG_LEVEL_TRACE = 0,
