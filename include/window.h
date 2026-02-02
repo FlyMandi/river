@@ -5,8 +5,8 @@
 
 inline GLFWwindow *window;
 
-inline uint32_t WIDTH;
-inline uint32_t HEIGHT;
+inline uint32_t riverWindowWidth;
+inline uint32_t riverWindowHeight;
 
 inline VkSurfaceKHR surface;
 

@@ -12,11 +12,11 @@ void initEditor()
     //exit
 
     //HACK: currently no project manifest, so all hardcoded.
-    WIDTH = 1920;
-    HEIGHT = 1080;
-    appName = "riverTest";
-    appVersion = "0.0.0";
-    appRoot = getProjectRoot("river");
+    riverWindowWidth = 1920;
+    riverWindowHeight = 1080;
+    riverAppName = "riverTest";
+    riverAppVersion = "0.0.0";
+    riverAppRoot = getProjectRoot("river");
 }
 
 void loopEditor()

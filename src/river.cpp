@@ -177,7 +177,7 @@ static void createInstance()
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = appName;
+    appInfo.pApplicationName = riverAppName;
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);

@@ -17,10 +17,10 @@ constexpr auto ENGINE_NAME = "River";
 //if specified logLevel is 4+, only asserts will be thrown
 constexpr uint8_t logLevel = 0;
 
-inline const char *appName;
-inline const char *appVersion;
+inline const char *riverAppName;
+inline const char *riverAppVersion;
 
-inline std::filesystem::path appRoot;
+inline std::filesystem::path riverAppRoot;
 
 inline VkInstance instance;
 inline VkDebugUtilsMessengerEXT debugMessenger;

@@ -50,8 +50,8 @@ void createGraphicsPipeline()
 {
     //HACK: compiled shaders should live in some bin folder, project specific
     //for now, they'll live in river's bin.
-    const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
-    const std::filesystem::path fragPath = appRoot / "bin\\fragTest.frag.spv";
+    const std::filesystem::path vertPath = riverAppRoot / "bin\\vertTest.vert.spv";
+    const std::filesystem::path fragPath = riverAppRoot / "bin\\fragTest.frag.spv";
 
     auto vertShaderCode = readFile(vertPath);
     auto fragShaderCode = readFile(fragPath);
