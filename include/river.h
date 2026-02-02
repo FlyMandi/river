@@ -43,24 +43,17 @@ extern void drawFrame();
 extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
 
+#ifdef DEBUG
+
 void printDebugLog(const auto &text){
-    if(!BUILD_DEBUG){
-        return; 
-    }
     std::cout << text;
 }
 
 void printDebugLog(const auto &text, const char &newline){
-    if(!BUILD_DEBUG){
-        return; 
-    }
     std::cout << text << newline;
 }
 
 void printDebugLog(const char &tab, const auto &text){
-    if(!BUILD_DEBUG){
-        return; 
-    }
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
     tm buf;
@@ -70,9 +63,6 @@ void printDebugLog(const char &tab, const auto &text){
 }
 
 void printDebugLog(const char &tab, const auto &text, const char &newline){
-    if(!BUILD_DEBUG){
-        return; 
-    }
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
     tm buf;
@@ -80,3 +70,15 @@ void printDebugLog(const char &tab, const auto &text, const char &newline){
 
     std::cout << std::put_time(&buf, "[%T] ") << tab << text << newline;
 }
+
+#else
+
+void printDebugLog(const auto& text){ return; }
+
+void printDebugLog(const char &tab, const auto &text){ return; }
+
+void printDebugLog(const auto &text, const char &newline){ return; }
+
+void printDebugLog(const char &tab, const auto &text, const char &newline){ return; }
+
+#endif
