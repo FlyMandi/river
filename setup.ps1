@@ -1,7 +1,11 @@
-if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue)){
-   if(Get-Command scoop -ErrorAction SilentlyContinue){ 
+if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
+{
+   if(Get-Command scoop -ErrorAction SilentlyContinue)
+   { 
         &scoop install premake
-   }else{
+   }
+   else
+   {
         $sourceRepo = "premake/premake-core"
         $namePattern = "*windows.zip"
         $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
@@ -12,44 +16,60 @@ if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue)){
         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
         Remove-Item $tempZIP -Force
    }
-}else{
+}
+else
+{
     Write-Host "Found premake5."
 }
 
 [System.Version]$installVersion = "1.4.309.0"
 
-function Install-VulkanSDK{
+function Install-VulkanSDK
+{
     Write-Host "Installing Vulkan SDK version $installVersion`:`n"
 
-    if($IsWindows){ 
+    if($IsWindows)
+    {
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/windows/VulkanSDK-$installVersion-Installer.exe
         Write-Host "`nExpect a UAC prompt." 
         &.\VulkanSDK-$installVersion-Installer.exe
-    }elseif($isLinux){
+    }
+    elseif($isLinux)
+    {
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/linux/vulkansdk-linux-x86_64-$installVersion.tar.xz
         Write-Host "`nVulkanSDK version $installVersion has been downloaded, but not installed."
         Write-Host "Now install the SDK the rest of the way." 
         Write-Host "`nIf you need help, read the article below:"
         Write-Host "https://www.amd.com/en/resources/support-articles/faqs/GPU-636.html"
 
-    }elseif($IsMacOS){
+    }
+    elseif($IsMacOS)
+    {
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/mac/vulkansdk-macos-$installVersion.zip
     }
 
 }
 
-if([string]::IsNullOrEmpty($env:VULKAN_SDK)){
+if([string]::IsNullOrEmpty($env:VULKAN_SDK))
+{
     Install-VulkanSDK
-}elseIf(Test-Path $env:VULKAN_SDK){
+}
+elseIf(Test-Path $env:VULKAN_SDK)
+{
     $vkVersion = [System.Version](Get-Item $env:VULKAN_SDK).Name
 
-    if($vkVersion -lt $installVersion) {
+    if($vkVersion -lt $installVersion)
+    {
         Write-Host "Found older Vulkan SDK installation, version $vkVersion"
         Install-VulkanSDK
-    }else{
+    }
+    else
+    {
         Write-Host "Found valid Vulkan SDK installation, version $vkVersion"
     }
-}else{
+}
+else
+{
     throw "ERROR: $env:VULKAN_SDK does not point to a valid directory."
 }
 
