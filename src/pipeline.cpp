@@ -376,13 +376,13 @@ void createDescriptorPool()
 
 void createDescriptorSets()
 {
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    std::vector<VkDescriptorSetLayout> setLayouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
 
     VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
     descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     descriptorSetAllocInfo.descriptorPool = descriptorPool;
     descriptorSetAllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    descriptorSetAllocInfo.pSetLayouts = descriptorSetLayouts.data();
+    descriptorSetAllocInfo.pSetLayouts = setLayouts.data();
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT); 
     if(vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
