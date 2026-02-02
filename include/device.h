@@ -19,8 +19,8 @@ inline VkPhysicalDevice physicalDevice;
 inline VkPhysicalDeviceProperties deviceProperties;
 inline VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
 inline VkPhysicalDeviceFeatures deviceFeatures;
-inline VkDevice logicalDevice;
 
+inline VkDevice logicalDevice;
 
 extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 extern void findQueueFamilies(VkPhysicalDevice device);
