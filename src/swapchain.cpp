@@ -1,5 +1,6 @@
-#include "river.h"
 #include "vulkan/vulkan_core.h"
+
+#include "river.h"
 #include "window.h"
 #include "device.h"
 #include "swapchain.h"

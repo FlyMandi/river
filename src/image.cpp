@@ -1,14 +1,15 @@
-#include "vulkan/vulkan_core.h"
-#include <filesystem>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include "vulkan/vulkan_core.h"
 
 #include "river.h"
 #include "device.h"
 #include "pipeline.h"
 #include "buffer.h"
 #include "image.h"
+
+#include <filesystem>
 
 static void copyBufferToImage
 (
