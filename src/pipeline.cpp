@@ -309,10 +309,15 @@ VkCommandBuffer beginSingleTimeCommands()
     VkCommandBufferAllocateInfo commandbufAllocInfo{};
     commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     commandbufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    commandbufAllocInfo.commandPool = graphicsCommandPool;
+    commandbufAllocInfo.commandPool = transferCommandPool;
+    commandbufAllocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(logicalDevice, &commandbufAllocInfo, &commandBuffer);
+    riverAssertVkSuccess
+    (
+        vkAllocateCommandBuffers(logicalDevice, &commandbufAllocInfo, &commandBuffer),
+        "failed to allocate single time command buffer!"
+    );
 
     VkCommandBufferBeginInfo commandbufBeginInfo{};
     commandbufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -332,18 +337,11 @@ void endSingleTimeCommands(VkCommandBuffer commandBuffer)
     singleTimeSubmitInfo.commandBufferCount = 1;
     singleTimeSubmitInfo.pCommandBuffers = &commandBuffer;
 
-    VkFence oneTimeFence;
-    VkFenceCreateInfo oneTimeFenceCreateInfo{};
-    oneTimeFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    vkCreateFence(logicalDevice, &oneTimeFenceCreateInfo, nullptr, &oneTimeFence);
+    vkQueueSubmit(transferQueue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
 
-    vkQueueSubmit(graphicsQueue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(transferQueue);
 
-    //FIXME: fence!
-    //vkQueueWaitIdle(graphicsQueue);
-    vkWaitForFences(logicalDevice, 1, &oneTimeFence, VK_FALSE, UINT64_MAX);
-
-    vkFreeCommandBuffers(logicalDevice, graphicsCommandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(logicalDevice, transferCommandPool, 1, &commandBuffer);
 }
 
 void createCommandBuffers()

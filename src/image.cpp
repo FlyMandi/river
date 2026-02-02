@@ -85,7 +85,7 @@ void createImage
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
 
-    //NOTE: in an edge case, this format might not be supported. conversions will be done eventually
+    //in an edge case, this format might not be supported. conversions will be done eventually
     imageCreateInfo.format = format;
     imageCreateInfo.tiling = tiling;
     imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -116,5 +116,4 @@ void createImage
     );
 
     vkBindImageMemory(logicalDevice, image, imageMem, 0);
-    //FIXME:#50: WIP
 }

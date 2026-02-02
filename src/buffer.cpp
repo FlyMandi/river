@@ -125,53 +125,16 @@ void createBuffer
 
 void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 {
-    VkFence transferFence;
-
-    VkFenceCreateInfo transferFenceCreateInfo{};
-    transferFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-
-    riverAssertVkSuccess
-    (
-        vkCreateFence(logicalDevice, &transferFenceCreateInfo, nullptr, &transferFence),
-        "failed to create transfer fence!"
-    );
-
-    VkCommandBufferAllocateInfo transferAllocInfo{};
-    transferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    transferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    transferAllocInfo.commandPool = transferCommandPool;
-    transferAllocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer transferCommandBuffer;
-    vkAllocateCommandBuffers(logicalDevice, &transferAllocInfo, &transferCommandBuffer);
-
-    VkCommandBufferBeginInfo transferBeginInfo{};
-    transferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    transferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(transferCommandBuffer, &transferBeginInfo);
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkBufferCopy transferCopyRegion{};
+    transferCopyRegion.size = bufferSize;
     transferCopyRegion.srcOffset = 0;
     transferCopyRegion.dstOffset = 0;
-    transferCopyRegion.size = bufferSize;
 
-    vkCmdCopyBuffer(transferCommandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
 
-    vkEndCommandBuffer(transferCommandBuffer);
-
-    VkSubmitInfo transferSubmitInfo{};
-    transferSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    transferSubmitInfo.commandBufferCount = 1;
-    transferSubmitInfo.pCommandBuffers = &transferCommandBuffer;
-
-    vkQueueSubmit(transferQueue, 1, &transferSubmitInfo, transferFence);
-
-    vkWaitForFences(logicalDevice, 1, &transferFence, VK_TRUE, UINT64_MAX);
-
-    vkFreeCommandBuffers(logicalDevice, transferCommandPool, 1, &transferCommandBuffer);
-
-    vkDestroyFence(logicalDevice, transferFence, nullptr);
+    endSingleTimeCommands(commandBuffer);
 }
 
 void createVertexBuffer()
