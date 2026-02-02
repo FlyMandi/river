@@ -15,6 +15,7 @@ foreach($platform in $Platforms){
 }
 
 &premake5 gmake
+&premake5 ecc
 Push-Location ".\build\"
 &make
 Pop-Location
