@@ -1,4 +1,5 @@
 #include "h/cnake.h"
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
 #include <iostream>
@@ -29,20 +30,26 @@ bool CnakeApp::checkValidationLayerSupport(){
     return true;
 }
 
-void CnakeApp::verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
-    std::string vulkanExtString = "";
+bool CnakeApp::verifyExtensionPresence(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt){
     std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
-    std::cout << "\nVulkan presents:\n";
 
-    for(const auto &extension : vulkanExt){
-        vulkanExtString += extension.extensionName;
+    std::cout << "\nVulkan presents:\n";
+    for(const auto &extension : *vulkanExt){
         std::cout << '\t' << extension.extensionName << '\n';
     }
 
-    if(vulkanExtString.find(*glfwExt) == std::string::npos){
-        throw std::runtime_error("not all needed extensions present.");
+    bool extFound = false;
+
+    for(const auto &extension : *vulkanExt){
+        if(0 == strcmp(extension.extensionName, *glfwExt)){
+            extFound = true;
+            break;
+        }
     }
-    std::cout << "\nAll needed extensions are present.";
+
+    if(!extFound){ return false; } 
+
+    return true;
 }
 
 void CnakeApp::initWindow(){
@@ -55,15 +62,17 @@ void CnakeApp::initWindow(){
 }
 
 void CnakeApp::createInstance(){
-    uint32_t extensionCount = 0;
-    uint32_t glfwExtensionCount = 0;
-
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
     std::vector<VkExtensionProperties> extensions(extensionCount); 
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
+    
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    verifyExtensionPresence(glfwExtensions, extensions);
+
+    if(!verifyExtensionPresence(glfwExtensions, &extensions)){
+        throw std::runtime_error("extensions requested, but not available!"); 
+    }
+
+    std::cout << "\nAll needed extensions are present.";
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
