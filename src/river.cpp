@@ -10,17 +10,32 @@
 #include <cstring>
 #include <ctime>
 
+#ifdef DEBUG
+uint8_t severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
+{
+    switch(severity)
+    {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:           return 0;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:              return 1;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:           return 2;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:             return 3;
+        default:                                                        return 4;
+    }
+}
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
     VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+    VkDebugUtilsMessageTypeFlagsEXT             messageType,
     const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
     void                                        *userData
 ){
-    //TODO:#47: translate VL message severity into RIV_
-    //secondly, can I know which layer is outputting the msg?
-    riverLog("VL says:", RIV_LOG_LEVEL_DEBUG);
-    riverLog(callbackData->pMessage, RIV_LOG_LEVEL_DEBUG);
+    //TODO:#47: can I know which layer is outputting the msg?
+    std::cout << "\033[33;1;1m";
+    riverLog("VL Says: ", severityTranslation(messageSeverity));
+    riverLog(callbackData->pMessage, severityTranslation(messageSeverity), false);
+    std::cout << "\033[0m";
+
     return VK_FALSE;
 }
 
@@ -42,59 +57,11 @@ static VkResult CreateDebugUtilsMessengerEXT
     }
 }
 
-static std::vector<const char*> getRequiredExtensions()
-{
-    uint32_t glfwExtensionCount = 0;
-    const char** glfwExtensions;
-
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
-    #ifdef DEBUG
-        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
-    #endif
-
-    return extensions;
-}
-
-static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
-{
-    riverLog("Present:", RIV_LOG_LEVEL_DEBUG);
-    for(const auto &extension : *instanceExt)
-    {
-        riverLog(extension.extensionName, RIV_LOG_LEVEL_DEBUG);
-    }
-    riverLog("Required:", RIV_LOG_LEVEL_DEBUG);
-
-    for(const auto &required : *requiredExt)
-    {
-        VkBool32 extFound = VK_FALSE;
-        
-            for(const auto &present : *instanceExt)
-            {
-                if(0 == strcmp(required, present.extensionName))
-                {
-                    riverLog(required, RIV_LOG_LEVEL_DEBUG);
-                    extFound = VK_TRUE;
-                    break;
-                }
-            }
-        if(!extFound)
-        {
-            riverLog("extension not found: ", RIV_LOG_LEVEL_WARN);
-            riverLog(required, RIV_LOG_LEVEL_WARN);
-
-            return VK_FALSE; 
-        } 
-    }
-    return VK_TRUE;
-}
-
 static VkBool32 checkValidationLayerSupport()
 {
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    
+
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
@@ -116,7 +83,7 @@ static VkBool32 checkValidationLayerSupport()
         {
             riverLog("validation layer not found: ", RIV_LOG_LEVEL_WARN);
             riverLog(layer, RIV_LOG_LEVEL_WARN);
-            return VK_FALSE; 
+            return VK_FALSE;
         }
     }
 
@@ -125,15 +92,14 @@ static VkBool32 checkValidationLayerSupport()
 
 static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
 {
-    createInfo = {}; 
+    createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
 }
 
-#ifdef DEBUG
 static void setupDebugMessenger()
 {
 
@@ -157,6 +123,54 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 }
 #endif
 
+static std::vector<const char*> getRequiredExtensions()
+{
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions;
+
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+    #ifdef DEBUG
+        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    #endif
+
+    return extensions;
+}
+
+static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
+{
+    riverLog("Present:", RIV_LOG_LEVEL_DEBUG);
+    for(const auto &extension : *instanceExt)
+    {
+        riverLog(extension.extensionName, RIV_LOG_LEVEL_DEBUG);
+    }
+    riverLog("Required:", RIV_LOG_LEVEL_DEBUG);
+
+    for(const auto &required : *requiredExt)
+    {
+        VkBool32 extFound = VK_FALSE;
+
+            for(const auto &present : *instanceExt)
+            {
+                if(0 == strcmp(required, present.extensionName))
+                {
+                    riverLog(required, RIV_LOG_LEVEL_DEBUG);
+                    extFound = VK_TRUE;
+                    break;
+                }
+            }
+        if(!extFound)
+        {
+            riverLog("extension not found: ", RIV_LOG_LEVEL_WARN);
+            riverLog(required, RIV_LOG_LEVEL_WARN);
+
+            return VK_FALSE;
+        }
+    }
+    return VK_TRUE;
+}
+
 static void createInstance()
 {
     #ifdef DEBUG
@@ -173,7 +187,7 @@ static void createInstance()
 
     uint32_t instanceExtensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
-    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
+    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
@@ -193,9 +207,9 @@ static void createInstance()
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     #ifdef DEBUG
-        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
-        
+
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
     #else
@@ -269,7 +283,7 @@ void cleanupVulkan()
     vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-    
+
     //OPTIM: do we need to wait for fences here?
     vkWaitForFences(logicalDevice, 1, inFlightFences.data(), VK_TRUE, UINT64_MAX);
 
@@ -289,7 +303,7 @@ void cleanupVulkan()
     vkDestroyDevice(logicalDevice, nullptr);
 
     #ifdef DEBUG
-        DestroyDebugUtilsMessengerEXT(nullptr); 
+        DestroyDebugUtilsMessengerEXT(nullptr);
     #endif
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -312,7 +326,7 @@ void drawFrame()
         recreateSwapchain();
         return;
     }
-    else 
+    else
     {
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
@@ -344,7 +358,7 @@ void drawFrame()
         "failed to submit draw command buffer!"
     );
 
-    VkSwapchainKHR swapchains[] = 
+    VkSwapchainKHR swapchains[] =
     {
         swapchain
     };

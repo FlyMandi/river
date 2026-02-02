@@ -69,7 +69,7 @@ static const std::string logLevelStamps[] =
 inline void riverLog
 (
     const auto &text,
-    const RiverLogLevel &level,
+    const uint8_t &level,
     const bool newLine = true
 ){
     if(level < logLevel)
