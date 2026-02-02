@@ -193,9 +193,20 @@ void destroyDeferredResources(FrameResource *frame)
 
 void cleanupSwapchain()
 {
-    //TODO:#45: time all the functions that lead to resizing, where are we stopping?
-    //WIP
+    std::vector<VkSemaphore> semaphores;
+    semaphores.reserve(imageAvailableSemaphores.size() + renderFinishedSemaphores.size());
+    semaphores.insert(semaphores.end(), imageAvailableSemaphores.begin(), imageAvailableSemaphores.end());
+    semaphores.insert(semaphores.end(), renderFinishedSemaphores.begin(), renderFinishedSemaphores.end());
+
+    VkSemaphoreWaitInfo semaphoreWaitInfo{};
+    semaphoreWaitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+    semaphoreWaitInfo.semaphoreCount = static_cast<uint32_t>(semaphores.size());
+    semaphoreWaitInfo.pSemaphores = semaphores.data();
+
+    vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
+    riverLog("waited for semaphores.", RIV_LOG_LEVEL_TRACE);
     vkWaitForFences(logicalDevice, MAX_FRAMES_IN_FLIGHT, inFlightFences.data(), VK_TRUE, UINT64_MAX);
+    riverLog("waited for fences.", RIV_LOG_LEVEL_TRACE);
 
     for(size_t i = 0; i < swapchainImageCount; ++i)
     {
@@ -205,12 +216,11 @@ void cleanupSwapchain()
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
+    riverLog("cleaned up swapchain.", RIV_LOG_LEVEL_TRACE);
 }
 
 void recreateSwapchain()
 {
-    riverLog("recreating swapchain...", RIV_LOG_LEVEL_TRACE);
-
     int width = 0;
     int height = 0;
 
@@ -220,6 +230,8 @@ void recreateSwapchain()
         glfwGetFramebufferSize(window, &width, &height);
         glfwWaitEvents();
     }
+
+    riverLog(std::format("trying to recreate swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 
     cleanupSwapchain();
 

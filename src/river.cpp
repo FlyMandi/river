@@ -347,18 +347,6 @@ void initVulkan()
 
 void cleanupVulkan()
 {
-    std::vector<VkSemaphore> semaphores;
-    semaphores.reserve(imageAvailableSemaphores.size() + renderFinishedSemaphores.size());
-    semaphores.insert(semaphores.end(), imageAvailableSemaphores.begin(), imageAvailableSemaphores.end());
-    semaphores.insert(semaphores.end(), renderFinishedSemaphores.begin(), renderFinishedSemaphores.end());
-
-    VkSemaphoreWaitInfo semaphoreWaitInfo{};
-    semaphoreWaitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-    semaphoreWaitInfo.semaphoreCount = static_cast<uint32_t>(semaphores.size());
-    semaphoreWaitInfo.pSemaphores = semaphores.data();
-
-    vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
-
     cleanupSwapchain();
 
     vkDestroySampler(logicalDevice, textureSampler, nullptr);
@@ -502,6 +490,7 @@ void getProjectRoot(const char *rootName)
         {
             projectRoot = current;
             projectLog  = current / "log" / "river.log";
+            riverLog(std::format("set project root to {}", current.string()), RIV_LOG_LEVEL_TRACE);
         }
         current = current.parent_path();
     }
