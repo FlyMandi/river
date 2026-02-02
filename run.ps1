@@ -1,2 +1,4 @@
 param ( $config = "release" )
-&".\bin\$config\Cnake.exe"
+Push-Location ".\bin\$config"
+&".\Cnake.exe"
+Pop-Location
