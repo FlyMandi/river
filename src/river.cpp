@@ -1,6 +1,6 @@
 #include "river.h"
-
-#include "h/engine.h"
+#include "engine.h"
+#include "device.h"
 
 void river::initVulkan(){
     using namespace engine;
@@ -23,31 +23,31 @@ void river::initVulkan(){
 void river::cleanupVulkan(){
     using namespace engine;
 
-    vkDeviceWaitIdle(device);
+    vkDeviceWaitIdle(device::logicalDevice);
 
-    vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
-    vkDestroyFence(device, inFlightFence, nullptr);
+    vkDestroySemaphore(device::logicalDevice, imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(device::logicalDevice, renderFinishedSemaphore, nullptr);
+    vkDestroyFence(device::logicalDevice, inFlightFence, nullptr);
 
-    vkDestroyCommandPool(device, commandPool, nullptr);
+    vkDestroyCommandPool(device::logicalDevice, commandPool, nullptr);
 
     for(const auto &framebuffer : swapChainFramebuffers){
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
+        vkDestroyFramebuffer(device::logicalDevice, framebuffer, nullptr);
     }
 
-    vkDestroyPipeline(device, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-    vkDestroyRenderPass(device, renderPass, nullptr);
+    vkDestroyPipeline(device::logicalDevice, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device::logicalDevice, pipelineLayout, nullptr);
+    vkDestroyRenderPass(device::logicalDevice, renderPass, nullptr);
 
     for(const auto &imageView : swapChainImageViews){
-        vkDestroyImageView(device, imageView, nullptr);
+        vkDestroyImageView(device::logicalDevice, imageView, nullptr);
     }
 
-    vkDestroySwapchainKHR(device, swapChain, nullptr);
-    vkDestroyDevice(device, nullptr);
+    vkDestroySwapchainKHR(device::logicalDevice, swapChain, nullptr);
+    vkDestroyDevice(device::logicalDevice, nullptr);
 
     if(build_DEBUG){
-        DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); 
+        device::DestroyDebugUtilsMessengerEXT(instance, device::debugMessenger, nullptr); 
     }
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -59,10 +59,10 @@ void river::drawFrame(){
 
     uint32_t imageIndex;
 
-    vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(device, 1, &inFlightFence);
+    vkWaitForFences(device::logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+    vkResetFences(device::logicalDevice, 1, &inFlightFence);
 
-    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(device::logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
     
     vkResetCommandBuffer(commandBuffer, 0);
     recordCommandBuffer(commandBuffer, imageIndex);
