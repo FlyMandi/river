@@ -29,6 +29,7 @@ extern void initVulkan();
 extern void cleanupVulkan();
 
 extern void drawFrame();
+extern void createDescriptorSetLayout();
 
 extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
