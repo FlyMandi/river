@@ -44,6 +44,7 @@ if("MSVC" -eq $compiler){
         $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" 
     }
 
+    #TODO: switch to cl + radlink combo?  
     &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
 
 }elseIf("g++" -eq $compiler){
