@@ -13,10 +13,18 @@ const uint32_t HEIGHT = 1080;
 GLFWwindow *window;
 
 void run(){
-    initWindow();
+    initGLFW();
     initVulkan();
+
     gameLoop();
-    cleanup();
+
+    vulkanCleanup();
+    GLFWcleanup();
+}
+
+void GLFWcleanup(){
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 void gameLoop(){
@@ -25,7 +33,7 @@ void gameLoop(){
     }
 }
 
-void initWindow(){
+void initGLFW(){
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
