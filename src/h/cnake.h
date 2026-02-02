@@ -13,7 +13,6 @@ class CnakeApp{
     GLFWwindow *window;
 
     //TODO: remove copy constructor & operator
-    //add default constructor that binds CnakeApp to Engine
 
     void initWindow();
     void gameLoop();

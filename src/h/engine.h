@@ -17,6 +17,9 @@ class Engine{
     const bool enableValidationLayers = true;
 #endif
 
+    //TODO: delete copy operator & constructor
+    //deal with constructors & destructors, default constructors
+
     uint32_t instanceExtensionCount = 0;
     uint32_t glfwExtensionCount = 0;
 
