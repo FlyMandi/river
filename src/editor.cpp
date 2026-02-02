@@ -14,7 +14,8 @@ void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &e
 
     manifest.projectName = "riverTest";
     manifest.projectVersion = "0.0.0";
-    manifest.logLevel = 0;
+
+    logLevel = 0;
 
     std::string name = manifest.projectName;
     name += " " + manifest.projectVersion;

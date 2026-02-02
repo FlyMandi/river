@@ -18,10 +18,10 @@ constexpr auto ENGINE_NAME = "River";
 
 global_var VkInstance instance;
 global_var std::ofstream logFile;
+global_var uint8_t logLevel;
 
 struct ProjectManifest
 {
-    uint8_t logLevel;
     const char* projectName = "RIV_UNINITIALIZED_PROJECT";
     std::string projectVersion = "RIV_UNINITIALIZED_VERSION";
     std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PROJECT_ROOT";
