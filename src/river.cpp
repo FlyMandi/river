@@ -200,6 +200,12 @@ void initVulkan(){
 void cleanupVulkan(){
     vkDeviceWaitIdle(logicalDevice);
 
+    cleanupSwapChain();
+
+    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
@@ -207,21 +213,6 @@ void cleanupVulkan(){
     }
 
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
-
-    for(const auto &framebuffer : swapChainFramebuffers){
-        vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
-    }
-
-    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
-    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-
-    for(const auto &imageView : swapChainImageViews){
-        vkDestroyImageView(logicalDevice, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
-    vkDestroyDevice(logicalDevice, nullptr);
 
     if(BUILD_DEBUG){
         DestroyDebugUtilsMessengerEXT( nullptr); 
