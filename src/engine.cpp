@@ -327,7 +327,7 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     }
 
     if(config_DEBUG){
-        std::cout << deviceProperties.deviceName << ": score " << score << '\n';
+        std::cout << '\n' << deviceProperties.deviceName << ": score " << score << '\n';
     }
 
     return score;
@@ -421,7 +421,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         if(config_DEBUG){
             std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
-            std::cout << "swap height: " << capabilities.currentExtent.height << '\n';
+            std::cout << "swap height: " << capabilities.currentExtent.height << "\n\n";
         }
         return capabilities.currentExtent; 
     }else{
@@ -435,7 +435,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
 
         if(config_DEBUG){
             std::cout << "swap width: " << actualExtent.width << '\n';
-            std::cout << "swap height: " << actualExtent.height << '\n';
+            std::cout << "swap height: " << actualExtent.height << "\n\n";
         }
 
         return actualExtent;
