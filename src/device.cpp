@@ -76,6 +76,9 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     uint32_t score = 0;
 
     if(!findQueueFamilies(device)){ 
+        logicalQueueFamilies.graphicsIndex= -1;
+        logicalQueueFamilies.presentIndex = -1;
+        logicalQueueFamilies.transferIndex = -1;
         return 0; 
     }
 
