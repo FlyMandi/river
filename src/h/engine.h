@@ -11,7 +11,7 @@
 #ifdef NDEBUG
     const bool isDebugMode = false;
 #else 
-    const bool isDebugMode = true;
+    const bool config_DEBUG = true;
 #endif
 
 const std::vector<const char*> validationLayers = {
@@ -75,6 +75,7 @@ void createInstance();
 void createLogicalDevice();
 void createSwapChain();
 void createImageViews();
+void createGraphicsPipeline();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
