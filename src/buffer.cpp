@@ -249,7 +249,7 @@ void updateUniformBuffer(uint32_t currentImage)
     ::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
 }
 
-static VkFormat findSupportedFormat
+VkFormat findSupportedFormat
 (
     const std::vector<VkFormat> &candidates,
     VkImageTiling               tiling,

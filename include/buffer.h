@@ -54,6 +54,13 @@ extern uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
 extern void createVertexBuffer();
 extern void createUniformBuffers();
 
+VkFormat findSupportedFormat
+(
+    const std::vector<VkFormat> &candidates,
+    VkImageTiling               tiling,
+    VkFormatFeatureFlags        features
+);
+
 extern void updateUniformBuffer(uint32_t currentImage);
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
