@@ -17,7 +17,8 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if(vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
+    if(vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create shader module!");
         #endif
@@ -30,7 +31,8 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
 static std::vector<char> readFile(const std::filesystem::path &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if(!file.is_open()){
+    if(!file.is_open())
+    {
         throw std::runtime_error("failed to open file!");
     }
 
@@ -152,7 +154,8 @@ void createGraphicsPipeline()
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-    if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
+    if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create pipeline layout!");
         #endif
@@ -177,7 +180,8 @@ void createGraphicsPipeline()
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
-    if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
+    if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create graphics pipeline!");
         #endif
@@ -192,8 +196,10 @@ void createFramebuffers()
 {
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
-    for(size_t i = 0; i < swapChainImageViews.size(); ++i){
-        VkImageView attachments[] = { 
+    for(size_t i = 0; i < swapChainImageViews.size(); ++i)
+    {
+        VkImageView attachments[] = 
+        { 
             swapChainImageViews[i] 
         };
 
@@ -206,7 +212,8 @@ void createFramebuffers()
         framebufferInfo.height = swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
+        if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
+        {
             #ifdef DEBUG
                 printDebugLog("failed to create framebuffer!");
             #endif
@@ -220,7 +227,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
+    if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to begin recording command buffer!");
         #endif
@@ -269,7 +277,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     vkCmdEndRenderPass(commandBuffer);
 
-    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
+    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to record command buffer!");
         #endif
@@ -284,7 +293,8 @@ void createCommandPools()
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     graphicsPoolInfo.queueFamilyIndex = logicalQueueFamilies.graphicsIndex;
 
-    if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS){
+    if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create graphics command pool!");
         #endif
@@ -296,7 +306,8 @@ void createCommandPools()
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     transferPoolInfo.queueFamilyIndex = logicalQueueFamilies.transferIndex;
 
-    if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS){
+    if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create transfer command pool!");
         #endif
@@ -314,7 +325,8 @@ void createCommandBuffers()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-    if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS){
+    if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to allocate command buffers!");
         #endif
@@ -335,16 +347,18 @@ void createSyncObjects()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
-    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
-        if((vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS 
-            || (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS){
-
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        if( (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS ||
+            (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS
+        ){
             #ifdef DEBUG
                 printDebugLog(&"failed to create semaphore for frame " [currentFrame]);
             #endif
             throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
         }
-        if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS){
+        if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS)
+        {
             #ifdef DEBUG
                 printDebugLog(&"failed to create fence for frame " [currentFrame]);
             #endif
