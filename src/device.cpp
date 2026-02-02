@@ -22,7 +22,8 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device)
 
     std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-    for(const auto &extension : availableExtensions){
+    for(const auto &extension : availableExtensions)
+    {
         requiredExtensions.erase(extension.extensionName);
     }
 
@@ -43,28 +44,31 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 
     for(int i = 0; const auto &queueFamily : physicalQueueFamilies)
     {
-        if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
+        if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
             indices.graphicsIndex = i;
         }
 
-        if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT && i != indices.graphicsIndex){
+        if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT && i != indices.graphicsIndex)
+        {
             indices.transferIndex = i; 
         }
         
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-        if(presentSupport){
+        if(presentSupport)
+        {
             indices.presentIndex = i;
         }
 
-        if( indices.graphicsIndex != -1 && 
-            indices.transferIndex != -1 &&
-            indices.presentIndex != -1){ 
+        if(indices.graphicsIndex != -1 && indices.transferIndex != -1 && indices.presentIndex != -1)
+        { 
             break; 
         }
         ++i;
     }
 
-    if(indices.transferIndex == -1){
+    if(indices.transferIndex == -1)
+    {
         indices.transferIndex = indices.graphicsIndex;
     }
 
@@ -75,41 +79,49 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
 {
     static uint32_t score = 0;
 
-    static QueueFamilyIndices deviceIndices = findQueueFamilies(device);
-    if(deviceIndices.graphicsIndex == -1 || deviceIndices.transferIndex == -1 || deviceIndices.presentIndex == -1){ 
+    static QueueFamilyIndices indices = findQueueFamilies(device);
+    if(indices.graphicsIndex == -1 || indices.transferIndex == -1 || indices.presentIndex == -1)
+    { 
         return 0; 
     }
 
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-    if(!deviceFeatures.geometryShader){ 
+    if(!deviceFeatures.geometryShader)
+    { 
         return 0; 
     }
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
-    if(!extensionsSupported){
+    if(!extensionsSupported)
+    {
         return 0;
-
-    }else{
+    }
+    else
+    {
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
-        if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()){
+        if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
+        {
             return 0;
         }
     }
     
-    if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
+    if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+    {
         score += 1000;
     }
     score += deviceProperties.limits.maxImageDimension1D;
     score += deviceProperties.limits.maxImageDimension2D/10;
     score += deviceProperties.limits.maxImageDimension3D/100;
 
-    if(deviceIndices.presentIndex == deviceIndices.graphicsIndex){
+    if(indices.presentIndex == indices.graphicsIndex)
+    {
         score += 500;
     }
     
-    if(deviceIndices.transferIndex != deviceIndices.graphicsIndex){
+    if(indices.transferIndex != indices.graphicsIndex)
+    {
         score += 250;
     }
 
@@ -132,12 +144,14 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device)
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
 
-    if(0 != formatCount){
+    if(0 != formatCount)
+    {
         details.formats.resize(formatCount);
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
     }
 
-    if(0 != presentModeCount){
+    if(0 != presentModeCount)
+    {
         details.presentModes.resize(presentModeCount);
         vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
     }
@@ -163,12 +177,14 @@ void pickPhysicalDevice()
 
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-    for(const auto& device : devices){
+    for(const auto& device : devices)
+    {
         uint32_t score = rateDeviceSuitability(device);
         suitabilityCandidates.insert(std::make_pair(score, device));
     }
 
-    if(suitabilityCandidates.rbegin()->first > 0){
+    if(suitabilityCandidates.rbegin()->first > 0)
+    {
         physicalDevice = suitabilityCandidates.rbegin()->second; 
 
         static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
@@ -179,8 +195,9 @@ void pickPhysicalDevice()
         #ifdef DEBUG
             printDebugLog('\0', "found suitable GPU.", '\n');
         #endif
-
-    }else{
+    }
+    else
+    {
         #ifdef DEBUG
             printDebugLog("failed to find a suitable GPU!");
         #endif
@@ -191,14 +208,16 @@ void pickPhysicalDevice()
 void createLogicalDevice()
 {
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {
+    std::set<uint32_t> uniqueQueueFamilies = 
+    {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex,
         logicalQueueFamilies.presentIndex
     };
 
     float queuePriority = 1.0f;
-    for(uint32_t queueFamily : uniqueQueueFamilies){
+    for(uint32_t queueFamily : uniqueQueueFamilies)
+    {
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.queueFamilyIndex = queueFamily;
