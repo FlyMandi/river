@@ -20,12 +20,10 @@ class EnginePipeline{
     static std::vector<char> readFile(const std::string &filepath);
 
     void createGraphicsPipeline(const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
-
     void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
 
  public:
     EnginePipeline(class EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
-
     ~EnginePipeline(){}
 
     EnginePipeline(const EnginePipeline&) = delete;
@@ -35,5 +33,3 @@ class EnginePipeline{
 };
 
 }  //namespace engine 
-    
-
