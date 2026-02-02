@@ -63,4 +63,18 @@ void createVertexBuffer()
         printDebugLog('\0', "failed to create vertex buffer!");
         throw std::runtime_error("failed to create vertex buffer!");
     }
+
+    vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &vertexBufferMemoryRequirements);
+
+    VkMemoryPropertyFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = vertexBufferMemoryRequirements.size;
+    allocInfo.memoryTypeIndex = findSuitableMemoryType(vertexBufferMemoryRequirements.memoryTypeBits, flags);
+
+    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS){
+        printDebugLog("failed to allocate vertex buffer memory!");
+        throw std::runtime_error("failed to allocate vertex buffer memory!");
+    }
 }
