@@ -19,7 +19,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - depth buffering
 
 ### State (DEMO):
-- there's a resizeable window
+- there's a fully resizeable window with correct and proper vulkan instantiation
 - it shows two rotating, textured and coloured squares, one on top of the other.
 
 ![Screenshot of the river test project](assets/1.jpg)
@@ -34,7 +34,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - project management, custom filetype
 
 ### Plans:
-- building an editor that's able to save & load river projects
 - learn and implement material shaders, compute shaders, etc
 - create an API to write games with (no scripting, pure C/C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
