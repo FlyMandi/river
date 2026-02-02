@@ -6,7 +6,6 @@
 #include "pipeline.h"
 
 #include <cstring>
-#include <ctime>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
