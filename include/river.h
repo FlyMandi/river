@@ -19,7 +19,7 @@ constexpr auto ENGINE_NAME = "River";
 global_var VkInstance instance;
 global_var std::ofstream logFile;
 
-struct projectManifest
+struct ProjectManifest
 {
     uint8_t logLevel;
     const char* projectName = "RIV_UNINITIALIZED_PROJECT";
@@ -30,7 +30,7 @@ struct projectManifest
     std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
 };
 
-struct userSettings
+struct UserSettings
 {
     uint32_t windowHeight;
     uint32_t windowWidth;
@@ -38,9 +38,10 @@ struct userSettings
     VkPresentModeKHR presentMode;
 };
 
-struct engineData
+struct EngineData
 {
     GLFWwindow *window;
+    const char* windowName;
 
     VkSurfaceKHR surface;
 };
@@ -55,7 +56,7 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_UNDEFINED = 5
 };
 
-extern void initVulkan(const projectManifest &manifest);
+extern void initVulkan(const ProjectManifest &manifest);
 extern void cleanupVulkan();
 
 extern void drawFrame();

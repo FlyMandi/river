@@ -307,7 +307,7 @@ static void createInstance()
     );
 }
 
-void initVulkan(const projectManifest &manifest)
+void initVulkan(const ProjectManifest &manifest)
 {
     createInstance();
 

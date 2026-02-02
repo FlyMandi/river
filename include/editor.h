@@ -2,6 +2,6 @@
 
 #include "river.h"
 
-extern void initEditor(projectManifest &manifest);
+extern void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &engine);
 extern void loopEditor();
 extern void cleanupEditor();
