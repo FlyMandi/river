@@ -9,8 +9,11 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### Concepts this project has taught me so far:
 - building a graphical application ""from scratch""
+- writing platform-agnostic code, no direct interface with WIN32/POSIX
+- debugging said code (currently via logging, raddbg and renderdoc)
 - synchronization primitives
 - the Vulkan graphics pipeline
+- command buffers, framebuffers
 - swapchain & present modes
 - shader basics
 - vertex buffers
@@ -18,8 +21,14 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ### State:
 - there's a window...
 - ...you can resize it!
-- the window shows a hardcoded triangle...
+- the window shows only a hardcoded triangle...
 - ...the triangle took 1000+ lines of code!
+
+### Next up:
+- finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
+- camera control
+- a GUI
+- a default project
 
 ### Plans:
 - building an editor that's able to save & load models/projects
