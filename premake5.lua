@@ -4,7 +4,7 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 workspace("River")
     configurations({ "Debug", "Release" })
-    platforms({ "Win64"}) --TODO: add Unix
+    platforms({"Win64"})
     location("build")
 
     project("River")
