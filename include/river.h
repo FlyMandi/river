@@ -14,12 +14,6 @@
 
 #define TIMESTAMP 
 
-#ifdef DEBUG
-constexpr auto BUILD_DEBUG = true;
-#else
-constexpr auto BUILD_DEBUG = false;
-#endif
-
 constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
 inline int currentFrame = 0;
 
@@ -76,15 +70,4 @@ void printDebugLog(const char &tab, const auto &text, const char &newline){
 
     std::cout << std::put_time(&buf, "[%T] ") << tab << text << newline;
 }
-
-#else
-
-void printDebugLog(const auto& text){ return; }
-
-void printDebugLog(const char &tab, const auto &text){ return; }
-
-void printDebugLog(const auto &text, const char &newline){ return; }
-
-void printDebugLog(const char &tab, const auto &text, const char &newline){ return; }
-
 #endif
