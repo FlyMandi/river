@@ -2,8 +2,12 @@
 #include "river.h"
 #include <filesystem>
 
-void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &engine)
-{
+void initEditor
+(
+    EngineData          &engine,
+    ProjectManifest     &manifest,
+    const UserSettings  &settings
+){
     //TODO:#40: main menu GUI. buttons:
     //load project
     //create new project
@@ -17,9 +21,7 @@ void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &e
 
     logLevel = 0;
 
-    std::string name = manifest.projectName;
-    name += " " + manifest.projectVersion;
-    engine.windowName = name.c_str();
+    engine.windowName = manifest.projectName + " " + manifest.projectVersion;
 
     manifest.projectRoot = getProjectRoot("river");
     manifest.projectLog = manifest.projectRoot / "log" / "river.log";
@@ -36,19 +38,22 @@ void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &e
     riverSetupLog(manifest.projectLog);
 }
 
-void loopEditor(EngineData &engine)
-{
+void loopEditor
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+){
     //TODO:#39: draw & exist only in specified viewport area
     //be able to have multiple viewports that can be paused (frozen) and resumed at will
     while(!glfwWindowShouldClose(engine.window))
     {
         glfwPollEvents();
-        drawFrame();
+        drawFrame(engine.surface, engine.window, settings.presentMode);
     }
 }
 
-void cleanupEditor()
+void cleanupEditor(EngineData &engine)
 {
-    cleanupVulkan();
+    cleanupVulkan(engine);
     riverCloseLog();
 }

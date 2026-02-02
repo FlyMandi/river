@@ -1,5 +1,6 @@
 #pragma once
 
+#include "river.h"
 #include "swapchain.h"
 #include "vulkan/vulkan_core.h"
 
@@ -28,7 +29,7 @@ inline std::vector<VkFence> inFlightFences(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE)
 
 inline VkBool32 framebufferResized = VK_FALSE;
 
-extern void createGraphicsPipeline();
+extern void createGraphicsPipeline(const ProjectManifest &manifest);
 extern void createFramebuffers();
 
 extern void createCommandPools();

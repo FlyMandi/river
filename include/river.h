@@ -22,7 +22,7 @@ global_var uint8_t logLevel;
 
 struct ProjectManifest
 {
-    const char* projectName = "RIV_UNINITIALIZED_CSTRING";
+    std::string projectName = "RIV_UNINITIALIZED_STRING";
     std::string projectVersion = "RIV_UNINITIALIZED_STRING";
     std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PATH";
     std::filesystem::path projectLog = "RIV_UNINITIALIZED_PATH";
@@ -44,8 +44,8 @@ struct UserSettings
 
 struct EngineData
 {
-    GLFWwindow *window;
-    const char* windowName;
+    GLFWwindow  *window;
+    std::string windowName;
 
     VkSurfaceKHR surface;
 };
@@ -60,8 +60,14 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_UNDEFINED = 5
 };
 
-extern void initVulkan(const ProjectManifest &manifest);
-extern void cleanupVulkan();
+extern void initVulkan
+(
+    EngineData              &engine,
+    const ProjectManifest   &manifest,
+    const UserSettings      &settings
+);
+
+extern void cleanupVulkan(EngineData &engine);
 
 extern void drawFrame
 (

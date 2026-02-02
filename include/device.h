@@ -41,5 +41,5 @@ extern QueueFamilyIndices findQueueFamilies
     const VkSurfaceKHR      &surface
 );
 
-extern void pickPhysicalDevice();
+extern void pickPhysicalDevice(const VkSurfaceKHR &surface);
 extern void createLogicalDevice();

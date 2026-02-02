@@ -7,8 +7,13 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
     framebufferResized = VK_TRUE;
 }
 
-void initGLFW(GLFWwindow* window, int width, int height, const char* windowName)
-{
+void initGLFW
+(
+    GLFWwindow  *window,
+    const char* windowName,
+    int         width,
+    int         height
+){
     glfwInit();
 
     //TODO:#49: choose monitor, refresh rate, videoMode, etc
@@ -35,8 +40,11 @@ void cleanupGLFW(GLFWwindow *window)
     glfwTerminate();
 }
 
-void createSurface(GLFWwindow *window, VkSurfaceKHR &surface)
-{
+void createSurface
+(
+    GLFWwindow      *window,
+    VkSurfaceKHR    &surface
+){
     //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
     riverAssertVkSuccess

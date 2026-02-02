@@ -262,7 +262,7 @@ static void createInstance(const ProjectManifest &manifest)
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = manifest.projectName;
+    appInfo.pApplicationName = manifest.projectName.c_str();
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
@@ -309,9 +309,9 @@ static void createInstance(const ProjectManifest &manifest)
 
 void initVulkan
 (
+    EngineData              &engine,
     const ProjectManifest   &manifest,
-    const UserSettings      &settings,
-    const EngineData        &engine
+    const UserSettings      &settings
 ){
     createInstance(manifest);
 
@@ -319,8 +319,8 @@ void initVulkan
         setupDebugMessenger();
     #endif
 
-    createSurface();
-    pickPhysicalDevice();
+    createSurface(engine.window, engine.surface);
+    pickPhysicalDevice(engine.surface);
     createLogicalDevice();
 
     createSwapchain(engine.surface, engine.window, settings.presentMode);
@@ -328,7 +328,7 @@ void initVulkan
 
     createRenderPass();
     createDescriptorSetLayout();
-    createGraphicsPipeline();
+    createGraphicsPipeline(manifest);
 
     createCommandPools();
     createDepthResources();

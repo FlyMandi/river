@@ -8,16 +8,20 @@ int WinMain()
 int main()
 #endif
 {
+    EngineData      engine;
     ProjectManifest manifest;
-    UserSettings settings;
-    EngineData engine;
+    UserSettings    settings;
 
-    initEditor(manifest, settings, engine);
-    initGLFW(engine.window, settings.windowWidth, settings.windowHeight, engine.windowName);
-    initVulkan(manifest);
+    //HACK: evtl be loaded from file inside initEditor
+    settings.windowWidth = 1920;
+    settings.windowHeight = 1080;
 
-    loopEditor();
+    initEditor(engine, manifest, settings);
+    initGLFW(engine.window, engine.windowName.c_str(), settings.windowWidth, settings.windowHeight);
+    initVulkan(engine, manifest, settings);
 
-    cleanupGLFW();
-    cleanupEditor();
+    loopEditor(engine, settings);
+
+    cleanupGLFW(engine.window);
+    cleanupEditor(engine);
 }
