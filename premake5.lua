@@ -1,5 +1,4 @@
 ---@diagnostic disable: undefined-global
-require("ecc/ecc")
 workspace("Cnake")
 configurations({ "Debug", "Release" })
 location("build")
@@ -25,8 +24,6 @@ newaction({
 	execute = function()
 		print("clean the build...")
 		os.rmdir("./build/")
-		os.remove("compile_commands.json")
-		os.rmdir("./.cache/")
 		print("done.")
 	end,
 })
