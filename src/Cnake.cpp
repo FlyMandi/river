@@ -4,6 +4,7 @@
 #include "vulkan/vulkan_core.h"
 
 #include <stdexcept>
+#include <format>
 
 namespace engine{
 
@@ -44,7 +45,27 @@ void Cnake::createPipeline(){
     enginePipeline = std::make_unique<EnginePipeline>(engineDevice, pipelineConfig, "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv");
 }
 
-void Cnake::createCommandBuffers(){}
+void Cnake::createCommandBuffers(){
+    commandBuffers.resize(engineSwapChain.imageCount());
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = engineDevice.getCommandPool();
+    allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+
+    if(vkAllocateCommandBuffers(engineDevice.device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS){
+        throw std::runtime_error("failed to create command buffers.");
+    }
+
+    for(int i = 0; i < commandBuffers.size(); ++i){
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if(vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS){
+            throw std::runtime_error(std::format("CommandBuffer {} failed to begin recording.", i));
+        }
+    }
+}
 void Cnake::drawFrame(){}
 
 } //namespace engine
