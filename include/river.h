@@ -157,6 +157,9 @@ struct EngineData
     VkDeviceMemory                      textureImageMemory;
 
     VkSampler                           textureSampler;
+
+    EngineData& operator=(const EngineData&) = delete;
+    EngineData& operator=(const EngineData&&) = delete;
 };
 
 enum RiverLogLevel
