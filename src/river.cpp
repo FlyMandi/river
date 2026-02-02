@@ -278,7 +278,8 @@ void drawFrame(){
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR){
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized){
+        framebufferResized = false;
         recreateSwapChain();
 
     }else if(result != VK_SUCCESS){
