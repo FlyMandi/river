@@ -15,3 +15,35 @@ workspace("Cnake")
         includedirs({ "./include/", "./vendor/glfw-3.4-win64/include/", "%{VULKAN_SDK}/Include/" })
         syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/glfw-3.4-win64/lib-vc2022/" })
         files({ "**.h", "**.c", "**.hpp", "**.cpp" })
+
+filter("configurations:Debug")
+    -- defines{"DEBUG", "_DEBUG"}
+    -- staticruntime("off")
+    runtime("Debug")
+    symbols("On")
+    ignoredefaultlibraries({ "MSVCRT" })
+    targetsuffix "_d"
+
+filter("configurations:Release")
+    -- staticruntime("off")
+    runtime("Release")
+    -- symbols("Off")
+    optimize("On")
+
+filter("platforms:Win64")
+    system("Windows")
+    architecture("x86_64")
+
+    newaction({
+        trigger = "clean",
+        description = "clean the software",
+        execute = function()
+            print("clean the build...")
+            os.rmdir("./build/")
+            os.rmdir("./bin/")
+            os.remove("BuildRules.xml")
+            os.remove("BuildRules.props")
+            os.remove("BuildRules.targets")
+            print("done.")
+        end,
+    })
