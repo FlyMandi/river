@@ -193,7 +193,7 @@ internal void populateDebugMessengerCreateInfo
 
 internal void setupDebugMessenger
 (
-    const VkInstance &instance
+    EngineData &engine
 ){
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
@@ -201,20 +201,24 @@ internal void setupDebugMessenger
 
     riverAssertVkSuccess
     (
-        CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger),
+        CreateDebugUtilsMessengerEXT(engine.instance, &createInfo, nullptr, &engine.debugMessenger),
         "failed to set up debug messenger."
     );
 }
 
 internal void DestroyDebugUtilsMessengerEXT
 (
-    const VkInstance            &instance,
+    const EngineData            &engine,
     const VkAllocationCallbacks *allocator
 ){
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr
+                                                        (
+                                                            engine.instance,
+                                                            "vkDestroyDebugUtilsMessengerEXT"
+                                                        );
     if(nullptr != func)
     {
-        func(instance, debugMessenger, allocator);
+        func(engine.instance, engine.debugMessenger, allocator);
     }
 }
 #endif
@@ -329,7 +333,7 @@ void initVulkan
     createInstance(engine, manifest);
 
     #ifdef DEBUG
-        setupDebugMessenger(engine.instance);
+        setupDebugMessenger(engine);
     #endif
 
     createSurface(engine);
@@ -397,7 +401,7 @@ void cleanupVulkan
     vkDestroyDevice(engine.logicalDevice, nullptr);
 
     #ifdef DEBUG
-        DestroyDebugUtilsMessengerEXT(engine.instance, nullptr);
+        DestroyDebugUtilsMessengerEXT(engine, nullptr);
     #endif
 
     vkDestroySurfaceKHR(engine.instance, engine.surface, nullptr);
@@ -515,7 +519,15 @@ std::filesystem::path getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            riverLog(std::format("set project root to {}", current.string()), RIV_LOG_LEVEL_TRACE);
+            riverLog
+            (
+                std::format
+                (
+                    "set project root to {} with strlen {}",
+                    current.string(), current.string().length()
+                ),
+                RIV_LOG_LEVEL_TRACE
+            );
             return current;
         }
         current = current.parent_path();

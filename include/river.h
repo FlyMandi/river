@@ -13,7 +13,10 @@
 #define global      static
 #define internal    static
 
+//fix dangling globals
 global uint32_t currentFrame = 0;
+global std::ofstream logFile;
+global uint8_t logLevel;
 
 constexpr auto ENGINE_NAME = "River";
 //maybe get rid of this in the future
@@ -24,9 +27,6 @@ constexpr uint32_t RIV_MAX_PATH = 260; //bytes
 #else
 constexpr uint32_t RIV_MAX_PATH = 256; //bytes
 #endif
-
-global std::ofstream logFile;
-global uint8_t logLevel;
 
 struct SwapchainSupportDetails
 {
@@ -97,6 +97,10 @@ struct EngineData
 {
     EngineData& operator=(const EngineData&) = delete;
     EngineData& operator=(const EngineData&&) = delete;
+
+    #ifdef DEBUG
+        VkDebugUtilsMessengerEXT debugMessenger;
+    #endif
 
     GLFWwindow                          *window;
     std::string                         windowName;
@@ -210,7 +214,6 @@ extern void riverSetupLog
 extern void riverCloseLog();
 
 #ifdef DEBUG
-global VkDebugUtilsMessengerEXT debugMessenger;
 
 const std::vector<const char*> validationLayers =
 {
