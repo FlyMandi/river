@@ -1,25 +1,12 @@
 param
 (
     [Parameter(position=0,Mandatory=$false)]
-    $build = "Debug",
-    [Parameter(position=1,Mandatory=$false)]
-    $OS = "Win64",
-    [Parameter(position=2,Mandatory=$false)]
-    $compiler = "",
-    [Parameter(position=3,Mandatory=$false)]
-    [switch]$nAMD = $false
+    $build = "Debug"
 )
-if($compiler -eq "" -and $IsWindows)
-{
-    $compiler = "MSVC"
-}
-elseIf($compiler -eq "" -and $IsLinux)
-{
-    $compiler = "clang"
-}
 
-$Platforms = "Win64", "Unix"
+$Platforms = "Win64", "Linux"
 $Configurations = "Debug", "Release"
+$target = ""
 
 foreach($platform in $Platforms)
 {
@@ -45,66 +32,28 @@ if(-Not(Test-Path "./build/"))
     &mkdir "./build/"
 }
 
-if($build -eq "release" -and (-Not(Test-Path "./log/")))
+if(-Not(Test-Path "./log/"))
 {
     &mkdir "./log/"
 }
 
 &premake5 ecc
 
-$target = "./bin/$OS" + "_$build/River.exe"
-
-$sourceFiles = Get-ChildItem "./src/" -File
-$sourceFiles += Get-ChildItem "./include/" -File
-
-$includes = "$env:VULKAN_SDK/1.4.313.2/Include"
-$includes += "./vendor/glfw-3.4-win64/include/"
-$includes += "./vendor/stb/"
-
-foreach($file in $sourceFiles)
-{
-    $sourceFilePaths += $file.FullName
-    $sourceFilePaths += " "
-}
-#flags
-#switch over to the linux version of the Vulkan SDK and the MSVC C++ stl, rid myself of MSVC
-
-if("MSVC" -eq $compiler)
-{
-    &premake5 vs2022
-
-    $VS = Join-Path $env:PROGRAMFILES "/Microsoft Visual Studio/2022/Community/"
-
-    if($nAMD)
-    {
-        $MSBuild = Join-Path $VS "/MSBuild/Current/bin/"
-    }
-    else
-    {
-        $MSBuild = Join-Path $VS "/MSBuild/Current/bin/amd64/"
-    }
-
-    &"$MSBuild/MSBuild.exe" ./build/River.sln -p:Configuration=$build
-}
-elseIf("clang" -eq $compiler)
-{
-    #TODO: check if makefiles can't help, also try/fix this
-    foreach($include in $includes)
-    {
-        $arguments += "-I$include"
-    }
-
-    $arguments += "-o ./build/"
-
-    Invoke-Expression "clang $sourceFilePaths $arguments"
-}
-elseIf("g++" -eq $compiler)
+if($IsLinux)
 {
     &premake5 gmake
 
-    Push-Location "./build/"
-    &make
-    Pop-Location
+    #TODO: use clang with generated makefiles?
+
+    $target = "./bin/Linux" + "_$build/river"
+}
+elseIf($IsWindows)
+{
+    &premake5 vs2022
+
+    &MSBuild ./build/River.sln -p:Configuration=$build
+
+    $target = "./bin/Win64" + "_$build/river.exe"
 }
 
 if(0 -eq $LASTEXITCODE)
@@ -114,7 +63,7 @@ if(0 -eq $LASTEXITCODE)
     &./shader_comp.ps1
 }
 
-if(0 -eq $LASTEXITCODE -and $build -eq "debug")
+if($isWindows -and 0 -eq $LASTEXITCODE -and $build -eq "debug")
 {
     Write-Host "`ngenerating rdi debug info..."
 
@@ -124,5 +73,5 @@ if(0 -eq $LASTEXITCODE -and $build -eq "debug")
 if(0 -eq $LASTEXITCODE)
 {
     Write-Host "`nrunning $target..."
-    &$target
+    Invoke-Expression $target
 }
