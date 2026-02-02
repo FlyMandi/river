@@ -662,6 +662,10 @@ void createRenderPass(){
     if((vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
         throw std::runtime_error("failed to create render pass!");
     }
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
 }
 
 void createGraphicsPipeline(){
@@ -920,13 +924,16 @@ void drawFrame(){
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    submitInfo.pSignalSemaphores = signalSemaphores;
-    submitInfo.signalSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+    submitInfo.signalSemaphoreCount = 1;
 
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
 }
