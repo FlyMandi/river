@@ -81,6 +81,9 @@ void createGraphicsPipeline();
 void createFramebuffers();
 void createCommandPool();
 void createCommandBuffer();
+void createSyncObjects();
+
+void drawFrame();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
