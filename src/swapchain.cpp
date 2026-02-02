@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "river.h"
 #include "vulkan/vulkan_core.h"
 #include "window.h"
@@ -205,6 +206,16 @@ void cleanupSwapChain(){
 }
 
 void recreateSwapChain(){
+    int width = 0;
+    int height = 0;
+
+    glfwGetFramebufferSize(window, &width, &height);
+    while(width == 0 || height == 0){
+        glfwGetFramebufferSize(window, &width, &height);
+        printDebugLog('\0', "window minimized.", '\n');
+        glfwWaitEvents();
+    }
+
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapChain();
