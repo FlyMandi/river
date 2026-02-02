@@ -20,9 +20,18 @@ inline const char *riverAppVersion;
 inline std::filesystem::path riverAppRoot;
 
 inline VkInstance instance;
-inline VkDebugUtilsMessengerEXT debugMessenger;
+
+extern void initVulkan();
+extern void cleanupVulkan();
+
+extern void drawFrame();
+
+extern std::filesystem::path getProjectRoot(const char *rootName);
+extern void clearLogs(const std::filesystem::path &baseDir);
 
 #ifdef DEBUG
+inline VkDebugUtilsMessengerEXT debugMessenger;
+
 const std::vector<const char*> validationLayers =
 {
     "VK_LAYER_KHRONOS_validation",
@@ -32,14 +41,6 @@ const std::vector<const char*> validationLayers =
     "VK_LAYER_RTSS"
 };
 #endif
-
-extern void initVulkan();
-extern void cleanupVulkan();
-
-extern void drawFrame();
-
-extern std::filesystem::path getProjectRoot(const char *rootName);
-extern void clearLogs(const std::filesystem::path &baseDir);
 
 enum RiverLogLevel
 {
