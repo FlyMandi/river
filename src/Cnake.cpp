@@ -1,21 +1,11 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include "vulkan/vulkan_core.h"
+#include "h/cnake.h"
 
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
 
-class CnakeApp{
-    const char *version = "Cnake 0.0.0";
-    const uint32_t WIDTH = 1920;
-    const uint32_t HEIGHT = 1080;
-
-    GLFWwindow *window;
-    VkInstance instance;
-
-    void initWindow(){
+    void CnakeApp::initWindow(){
         glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -24,7 +14,7 @@ class CnakeApp{
         window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
     }
 
-    void verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
+    void CnakeApp::verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
         std::string vulkanExtString = "";
         std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
         std::cout << "\nVulkan presents:\n";
@@ -40,7 +30,7 @@ class CnakeApp{
         std::cout << "\nAll needed extensions are present.";
     }
 
-    void createInstance(){
+    void CnakeApp::createInstance(){
         uint32_t extensionCount = 0;
         uint32_t glfwExtensionCount = 0;
 
@@ -71,40 +61,25 @@ class CnakeApp{
         }
     }
 
-    void initVulkan(){
+    void CnakeApp::initVulkan(){
         createInstance();
     }
 
-    void gameLoop(){
+    void CnakeApp::gameLoop(){
         while(!glfwWindowShouldClose(window)){
            glfwPollEvents(); 
         }
     }
 
-    void cleanup(){
+    void CnakeApp::cleanup(){
         vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(window);
         glfwTerminate();
     }
 
- public:
-    void run(){
+    void CnakeApp::run(){
         initWindow();
         initVulkan();
         gameLoop();
         cleanup();
     }
-};
-
-int main(){
-    CnakeApp app;
-
-    try{
-        app.run();
-    }catch(const std::exception &e){
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
