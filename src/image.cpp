@@ -409,11 +409,8 @@ void createImage
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.flags = 0;
 
-    riverAssertVkSuccess
-    (
-        vkCreateImage(engine.logicalDevice, &imageCreateInfo, nullptr, &image),
-        "failed to create image!"
-    );
+    VkResult result = vkCreateImage(engine.logicalDevice, &imageCreateInfo, nullptr, &image);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create image!");
 
     VkMemoryRequirements imageMemRequirements;
     vkGetImageMemoryRequirements(engine.logicalDevice, image, &imageMemRequirements);
@@ -423,11 +420,8 @@ void createImage
     mAllocInfo.allocationSize = imageMemRequirements.size;
     mAllocInfo.memoryTypeIndex = findSuitableMemoryType(engine, imageMemRequirements.memoryTypeBits, memPropFlags);
 
-    riverAssertVkSuccess
-    (
-        vkAllocateMemory(engine.logicalDevice, &mAllocInfo, nullptr, &imageMem),
-        "failed to allocate image memory!"
-    );
+    result = vkAllocateMemory(engine.logicalDevice, &mAllocInfo, nullptr, &imageMem);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to allocate image memory!");
 
     vkBindImageMemory(engine.logicalDevice, image, imageMem, 0);
 }
@@ -452,11 +446,9 @@ VkImageView createImageView
     viewCreateInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageView;
-    riverAssertVkSuccess
-    (
-        vkCreateImageView(engine.logicalDevice, &viewCreateInfo, nullptr, &imageView),
-        "failed to create texture image view!"
-    );
+
+    VkResult result = vkCreateImageView(engine.logicalDevice, &viewCreateInfo, nullptr, &imageView);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create texture image view!");
 
     return imageView;
 }
@@ -483,9 +475,6 @@ void createTextureSampler
     samplerCreateInfo.minLod = 0.0f;
     samplerCreateInfo.maxLod = static_cast<float>(engine.mipLevels);
 
-    riverAssertVkSuccess
-    (
-        vkCreateSampler(engine.logicalDevice, &samplerCreateInfo, nullptr, &engine.textureSampler),
-        "failed to create texture sampler!"
-    );
+    VkResult result = vkCreateSampler(engine.logicalDevice, &samplerCreateInfo, nullptr, &engine.textureSampler);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create texture sampler!");
 }

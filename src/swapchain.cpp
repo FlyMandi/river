@@ -120,11 +120,8 @@ void createSwapchain
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    riverAssertVkSuccess
-    (
-        vkCreateSwapchainKHR(engine.logicalDevice, &createInfo, nullptr, &engine.swapchain),
-        "failed to create swap chain!"
-    );
+    VkResult result = vkCreateSwapchainKHR(engine.logicalDevice, &createInfo, nullptr, &engine.swapchain);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create swap chain!");
 
     vkGetSwapchainImagesKHR(engine.logicalDevice, engine.swapchain, &engine.swapchainImageCount, nullptr);
     engine.swapchainImages.resize(engine.swapchainImageCount);
@@ -233,11 +230,8 @@ void createRenderPass
     renderPassCreateInfo.dependencyCount = 1;
     renderPassCreateInfo.pDependencies = &dependency;
 
-    riverAssertVkSuccess
-    (
-        vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &engine.renderPass),
-        "failed to create render pass!"
-    );
+    VkResult result = vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &engine.renderPass);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create render pass!");
 }
 
 void cleanupSwapchain

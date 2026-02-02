@@ -45,11 +45,8 @@ void loadModel
     std::string warn;
     std::string error;
 
-    riverAssert
-    (
-        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, modelPath.string().c_str()),
-        (warn + error)
-    );
+    bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, modelPath.string().c_str());
+    RIV_ASSERT(result, (warn + error));
 
     std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
@@ -163,11 +160,8 @@ void createBuffer
     bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
     bufferInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 
-    riverAssertVkSuccess
-    (
-        vkCreateBuffer(engine.logicalDevice, &bufferInfo, nullptr, &buffer),
-        "failed to create buffer!"
-    );
+    VkResult result = vkCreateBuffer(engine.logicalDevice, &bufferInfo, nullptr, &buffer);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create buffer!");
 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(engine.logicalDevice, buffer, &memRequirements);
@@ -177,11 +171,8 @@ void createBuffer
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findSuitableMemoryType(engine, memRequirements.memoryTypeBits, memPropFlags);
 
-    riverAssertVkSuccess
-    (
-        vkAllocateMemory(engine.logicalDevice, &allocInfo, nullptr, &bufferMemory),
-        "failed to allocate buffer!"
-    );
+    result = vkAllocateMemory(engine.logicalDevice, &allocInfo, nullptr, &bufferMemory);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to allocate buffer!");
 
     vkBindBufferMemory(engine.logicalDevice, buffer, bufferMemory, 0);
 }

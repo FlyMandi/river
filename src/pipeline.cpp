@@ -21,11 +21,8 @@ internal VkShaderModule createShaderModule
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    riverAssertVkSuccess
-    (
-        vkCreateShaderModule(engine.logicalDevice, &createInfo, nullptr, &shaderModule),
-        "failed to create shader module!"
-    );
+    VkResult result = vkCreateShaderModule(engine.logicalDevice, &createInfo, nullptr, &shaderModule);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create shader module!");
 
     return shaderModule;
 }
@@ -34,7 +31,7 @@ internal std::vector<char> readFile(const std::filesystem::path &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-    riverAssert(file.is_open(), "failed to open file! check cwd.");
+    RIV_ASSERT(file.is_open(), "failed to open file! check cwd.");
 
     size_t fileSize = static_cast<size_t>(file.tellg());
     std::vector<char> buffer(fileSize);
@@ -42,7 +39,7 @@ internal std::vector<char> readFile(const std::filesystem::path &filename)
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    riverAssert(buffer.size() == fileSize, "failed to correctly read from file!");
+    RIV_ASSERT(buffer.size() == fileSize, "failed to correctly read from file!");
 
     file.close();
     return buffer;
@@ -164,17 +161,14 @@ void createGraphicsPipeline
     pipelineLayoutCreateInfo.setLayoutCount = 1;
     pipelineLayoutCreateInfo.pSetLayouts = &engine.descriptorSetLayout;
 
-    riverAssertVkSuccess
-    (
-        vkCreatePipelineLayout
-        (
-            engine.logicalDevice,
-            &pipelineLayoutCreateInfo,
-            nullptr,
-            &engine.graphicsPipelineLayout
-        ),
-        "failed to create pipeline layout!"
-    );
+    VkResult result =   vkCreatePipelineLayout
+                        (
+                            engine.logicalDevice,
+                            &pipelineLayoutCreateInfo,
+                            nullptr,
+                            &engine.graphicsPipelineLayout
+                        );
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create pipeline layout!");
 
     VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
     graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -194,19 +188,16 @@ void createGraphicsPipeline
     graphicsPipelineCreateInfo.renderPass = engine.renderPass;
     graphicsPipelineCreateInfo.subpass = 0;
 
-    riverAssertVkSuccess
-    (
-        vkCreateGraphicsPipelines
-        (
-            engine.logicalDevice,
-            VK_NULL_HANDLE,
-            1,
-            &graphicsPipelineCreateInfo,
-            nullptr,
-            &engine.graphicsPipeline
-        ),
-        "failed to create graphics pipeline!"
-    );
+    result =    vkCreateGraphicsPipelines
+                (
+                    engine.logicalDevice,
+                    VK_NULL_HANDLE,
+                    1,
+                    &graphicsPipelineCreateInfo,
+                    nullptr,
+                    &engine.graphicsPipeline
+                );
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create graphics pipeline!");
 
     vkDestroyShaderModule(engine.logicalDevice, vertShaderModule, nullptr);
     vkDestroyShaderModule(engine.logicalDevice, fragShaderModule, nullptr);
@@ -235,17 +226,14 @@ void createFramebuffers
         framebufferCreateInfo.height = engine.swapchainExtent.height;
         framebufferCreateInfo.layers = 1;
 
-        riverAssertVkSuccess
-        (
-            vkCreateFramebuffer
-            (
-                engine.logicalDevice,
-                &framebufferCreateInfo,
-                nullptr,
-                &engine.swapchainFramebuffers[i]
-            ),
-            "failed to create framebuffer!"
-        );
+        VkResult result =   vkCreateFramebuffer
+                            (
+                                engine.logicalDevice,
+                                &framebufferCreateInfo,
+                                nullptr,
+                                &engine.swapchainFramebuffers[i]
+                            );
+        RIV_ASSERT_VK_SUCCESS(result, "failed to create framebuffer!");
     }
 }
 
@@ -258,11 +246,8 @@ void recordCommandBuffer
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    riverAssertVkSuccess
-    (
-        vkBeginCommandBuffer(commandBuffer, &beginInfo),
-        "failed to begin recording command buffer!"
-    );
+    VkResult result = vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to begin recording command buffer!");
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -322,7 +307,7 @@ void recordCommandBuffer
 
     vkCmdEndRenderPass(commandBuffer);
 
-    riverAssertVkSuccess(vkEndCommandBuffer(commandBuffer), "failed to end recording command buffer!");
+    RIV_ASSERT_VK_SUCCESS(vkEndCommandBuffer(commandBuffer), "failed to end recording command buffer!");
 }
 
 void createCommandPools
@@ -334,22 +319,16 @@ void createCommandPools
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     graphicsPoolInfo.queueFamilyIndex = engine.logicalQueueFamilies.graphicsIndex;
 
-    riverAssertVkSuccess
-    (
-        vkCreateCommandPool(engine.logicalDevice, &graphicsPoolInfo, nullptr, &engine.graphicsCommandPool),
-        "failed to create graphics command pool!"
-    );
+    VkResult result = vkCreateCommandPool(engine.logicalDevice, &graphicsPoolInfo, nullptr, &engine.graphicsCommandPool);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create graphics command pool!");
 
     VkCommandPoolCreateInfo transferPoolInfo{};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     transferPoolInfo.queueFamilyIndex = engine.logicalQueueFamilies.transferIndex;
 
-    riverAssertVkSuccess
-    (
-        vkCreateCommandPool(engine.logicalDevice, &transferPoolInfo, nullptr, &engine.transferCommandPool),
-        "failed to create transfer command pool!"
-    );
+    result = vkCreateCommandPool(engine.logicalDevice, &transferPoolInfo, nullptr, &engine.transferCommandPool);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create transfer command pool!");
 }
 
 VkCommandBuffer setupCommandBuffer
@@ -364,11 +343,8 @@ VkCommandBuffer setupCommandBuffer
     commandbufAllocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    riverAssertVkSuccess
-    (
-        vkAllocateCommandBuffers(engine.logicalDevice, &commandbufAllocInfo, &commandBuffer),
-        "failed to allocate single time command buffer!"
-    );
+    VkResult result = vkAllocateCommandBuffers(engine.logicalDevice, &commandbufAllocInfo, &commandBuffer);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to allocate single time command buffer!");
 
     VkCommandBufferBeginInfo commandbufBeginInfo{};
     commandbufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -397,11 +373,8 @@ void flushCommandBuffer
     VkFenceCreateInfo fenceCreateInfo{};
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-    riverAssertVkSuccess
-    (
-        vkCreateFence(engine.logicalDevice, &fenceCreateInfo, nullptr, &queueFence),
-        "failed to create queue fence!"
-    );
+    VkResult result = vkCreateFence(engine.logicalDevice, &fenceCreateInfo, nullptr, &queueFence);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create queue fence!");
 
     vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, queueFence);
 
@@ -423,11 +396,8 @@ void createCommandBuffers
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = static_cast<uint32_t>(engine.commandBuffers.size());
 
-    riverAssertVkSuccess
-    (
-        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, engine.commandBuffers.data()),
-        "failed to allocate command buffers!"
-    );
+    VkResult result = vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, engine.commandBuffers.data());
+    RIV_ASSERT_VK_SUCCESS(result, "failed to allocate command buffers!");
 }
 
 void cleanupSyncObjects
@@ -468,48 +438,36 @@ void createSyncObjects
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    riverAssertVkSuccess
-    (
-        vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &engine.acquireSemaphore),
-        "failed to create acquireSemaphore."
-    );
+    VkResult result = vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &engine.acquireSemaphore);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create acquireSemaphore.");
 
     for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        riverAssertVkSuccess
-        (
-            vkCreateSemaphore
-            (
-                engine.logicalDevice,
-                &semaphoreInfo,
-                nullptr,
-                &engine.imageReadyForPresentSemaphores[i]
-            ),
-            std::format("failed to create imageReadyForPresentSemaphore No. {}", i)
-        );
+        VkResult result =   vkCreateSemaphore
+                            (
+                                engine.logicalDevice,
+                                &semaphoreInfo,
+                                nullptr,
+                                &engine.imageReadyForPresentSemaphores[i]
+                            );
+        RIV_ASSERT_VK_SUCCESS(result, std::format("failed to create imageReadyForPresentSemaphore No. {}", i));
 
         if(engine.imageReadyForWriteSemaphores[i] == VK_NULL_HANDLE)
         {
-            riverAssertVkSuccess
-            (
-                vkCreateSemaphore
-                (
-                    engine.logicalDevice,
-                    &semaphoreInfo,
-                    nullptr,
-                    &engine.imageReadyForWriteSemaphores[i]
-                ),
-                std::format("failed to create imageReadyForWriteSemaphore No. {}", i)
-            );
+            VkResult result =   vkCreateSemaphore
+                                (
+                                    engine.logicalDevice,
+                                    &semaphoreInfo,
+                                    nullptr,
+                                    &engine.imageReadyForWriteSemaphores[i]
+                                );
+            RIV_ASSERT_VK_SUCCESS(result, std::format("failed to create imageReadyForWriteSemaphore No. {}", i));
         }
 
         if(engine.inFlightFences[i] == VK_NULL_HANDLE)
         {
-            riverAssertVkSuccess
-            (
-                vkCreateFence(engine.logicalDevice, &fenceInfo, nullptr, &engine.inFlightFences[i]),
-                std::format("failed to create inFlightFence No. {}", i)
-            );
+            VkResult result = vkCreateFence(engine.logicalDevice, &fenceInfo, nullptr, &engine.inFlightFences[i]);
+            RIV_ASSERT_VK_SUCCESS(result, std::format("failed to create inFlightFence No. {}", i));
         }
     }
 }
@@ -543,17 +501,14 @@ void createDescriptorSetLayout
     descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     descriptorSetLayoutCreateInfo.pBindings = bindings.data();
 
-    riverAssertVkSuccess
-    (
-        vkCreateDescriptorSetLayout
-        (
-            engine.logicalDevice,
-            &descriptorSetLayoutCreateInfo,
-            nullptr,
-            &engine.descriptorSetLayout
-        ),
-        "failed to create descriptor set layout!"
-    );
+    VkResult result =   vkCreateDescriptorSetLayout
+                        (
+                            engine.logicalDevice,
+                            &descriptorSetLayoutCreateInfo,
+                            nullptr,
+                            &engine.descriptorSetLayout
+                        );
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create descriptor set layout!");
 }
 
 void createDescriptorPool
@@ -573,11 +528,8 @@ void createDescriptorPool
     descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorPoolCreateInfo.flags = 0;
 
-    riverAssertVkSuccess
-    (
-        vkCreateDescriptorPool(engine.logicalDevice, &descriptorPoolCreateInfo, nullptr, &engine.descriptorPool),
-        "failed to create descriptor pool."
-    );
+    VkResult result = vkCreateDescriptorPool(engine.logicalDevice, &descriptorPoolCreateInfo, nullptr, &engine.descriptorPool);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create descriptor pool.");
 }
 
 void createDescriptorSets
@@ -593,11 +545,8 @@ void createDescriptorSets
     descriptorSetAllocInfo.pSetLayouts = setLayouts.data();
 
     engine.descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    riverAssertVkSuccess
-    (
-        vkAllocateDescriptorSets(engine.logicalDevice, &descriptorSetAllocInfo, engine.descriptorSets.data()),
-        "failed to allocate descriptor sets!"
-    );
+    VkResult result = vkAllocateDescriptorSets(engine.logicalDevice, &descriptorSetAllocInfo, engine.descriptorSets.data());
+    RIV_ASSERT_VK_SUCCESS(result, "failed to allocate descriptor sets!");
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {

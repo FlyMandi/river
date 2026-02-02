@@ -199,11 +199,8 @@ internal void setupDebugMessenger
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
-    riverAssertVkSuccess
-    (
-        CreateDebugUtilsMessengerEXT(engine.instance, &createInfo, nullptr, &engine.debugMessenger),
-        "failed to set up debug messenger."
-    );
+    VkResult result = CreateDebugUtilsMessengerEXT(engine.instance, &createInfo, nullptr, &engine.debugMessenger);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to set up debug messenger.");
 }
 
 internal void DestroyDebugUtilsMessengerEXT
@@ -212,10 +209,10 @@ internal void DestroyDebugUtilsMessengerEXT
     const VkAllocationCallbacks *allocator
 ){
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr
-                                                        (
-                                                            engine.instance,
-                                                            "vkDestroyDebugUtilsMessengerEXT"
-                                                        );
+                                                    (
+                                                        engine.instance,
+                                                        "vkDestroyDebugUtilsMessengerEXT"
+                                                    );
     if(nullptr != func)
     {
         func(engine.instance, engine.debugMessenger, allocator);
@@ -274,7 +271,7 @@ internal void createInstance
     const ProjectManifest   &manifest
 ){
     #ifdef DEBUG
-        riverAssert(checkValidationLayerSupport(), "validation layers requested, but not available!");
+        RIV_ASSERT(checkValidationLayerSupport(), "validation layers requested, but not available!");
     #endif
 
     VkApplicationInfo appInfo{};
@@ -292,11 +289,8 @@ internal void createInstance
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
 
-    riverAssert
-    (
-        checkInstanceExtensions(&requiredExtensions, &instanceExtensions),
-        "extensions required, but not available!"
-    );
+    bool resultBool = checkInstanceExtensions(&requiredExtensions, &instanceExtensions);
+    RIV_ASSERT(resultBool, "extensions required, but not available!");
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -317,11 +311,8 @@ internal void createInstance
         createInfo.pNext = nullptr;
     #endif
 
-    riverAssertVkSuccess
-    (
-        vkCreateInstance(&createInfo, nullptr, &engine.instance),
-        "failed to create instance."
-    );
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &engine.instance);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create instance.");
 }
 
 void initVulkan
@@ -435,7 +426,7 @@ void drawFrame
     }
     else if(result != VK_SUBOPTIMAL_KHR)
     {
-        riverAssertVkSuccess(result, "failed to acquire swapchain image!");
+        RIV_ASSERT_VK_SUCCESS(result, "failed to acquire swapchain image!");
     }
 
     vkResetFences(engine.logicalDevice, 1, &engine.inFlightFences[currentFrame]);
@@ -473,11 +464,8 @@ void drawFrame
     drawSubmitInfo.commandBufferCount = 1;
     drawSubmitInfo.pCommandBuffers = &engine.commandBuffers[currentFrame];
 
-    riverAssertVkSuccess
-    (
-        vkQueueSubmit(engine.graphicsQueue, 1, &drawSubmitInfo, engine.inFlightFences[currentFrame]),
-        "failed to submit draw command buffer!"
-    );
+    result = vkQueueSubmit(engine.graphicsQueue, 1, &drawSubmitInfo, engine.inFlightFences[currentFrame]);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to submit draw command buffer!");
 
     VkSwapchainKHR swapchains[] =
     {
@@ -505,7 +493,7 @@ void drawFrame
     }
     else
     {
-        riverAssertVkSuccess(result, "failed to present swapchain image!");
+        RIV_ASSERT_VK_SUCCESS(result, "failed to present swapchain image!");
     }
 
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
@@ -537,18 +525,12 @@ std::filesystem::path getProjectRoot(const char *rootName)
 
 void riverSetupLog(const std::filesystem::path &path)
 {
-#ifdef DEBUG
-    return;
-#endif
     logFile.open(path, std::ios::trunc);
-    riverAssert(logFile.is_open(), "failed to open log file!");
+    RIV_ASSERT(logFile.is_open(), "failed to open log file!");
 }
 
 void riverCloseLog()
 {
-#ifdef DEBUG
-    return;
-#endif
     if(logFile.is_open())
     {
         logFile.close();
@@ -603,37 +585,27 @@ void riverLog(const std::string_view text, const RiverLogLevel level)
 #endif
 }
 
-void riverAssert(bool condition, const std::string_view assertFailureMsg)
+bool riverAssert(bool condition, const std::string_view assertFailureMsg)
 {
     if(condition)
     {
-        return;
+        return true;
     }
 
-#ifdef DEBUG
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
         << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << clearANSI << '\n';
-#else
-    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << '\n' << std::flush;
-#endif
 
     abort();
 }
 
-void riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg)
+bool riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg)
 {
     if(result == VK_SUCCESS)
     {
-        return;
+        return true;
     }
-#ifdef DEBUG
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT]
         << riverTranslateVkResult(result) << ": " << assertFailureMsg << clearANSI << '\n';
-
-#else
-    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << riverTranslateVkResult(result)
-        << ": " <<  assertFailureMsg << '\n' << std::flush;
-#endif
 
     abort();
 }
@@ -642,9 +614,6 @@ void riverThrow(const std::string_view throwMsg)
 {
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
         << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI << '\n';
-#ifndef DEBUG
-    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << '\n' << std::flush;
-#endif
 
     abort();
 }

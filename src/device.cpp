@@ -257,11 +257,8 @@ void createLogicalDevice
         createInfo.enabledLayerCount = 0;
     #endif
 
-    riverAssertVkSuccess
-    (
-        vkCreateDevice(engine.physicalDevice, &createInfo, nullptr, &engine.logicalDevice),
-        "failed to create logical device."
-    );
+    VkResult result = vkCreateDevice(engine.physicalDevice, &createInfo, nullptr, &engine.logicalDevice);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to create logical device.");
 
     vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.graphicsIndex, 0, &engine.graphicsQueue);
     vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.transferIndex, 0, &engine.transferQueue);

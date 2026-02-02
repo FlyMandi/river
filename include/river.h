@@ -23,9 +23,17 @@ constexpr auto ENGINE_NAME = "River";
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 #ifdef _WIN32
-constexpr uint32_t RIV_MAX_PATH = 260; //bytes
+    constexpr uint32_t RIV_MAX_PATH = 260; //bytes
 #else
-constexpr uint32_t RIV_MAX_PATH = 256; //bytes
+    constexpr uint32_t RIV_MAX_PATH = 256; //bytes
+#endif
+
+#ifdef DEBUG
+    #define RIV_ASSERT              riverAssert
+    #define RIV_ASSERT_VK_SUCCESS   riverAssertVkSuccess
+#else
+    #define RIV_ASSERT              0 && riverAssert
+    #define RIV_ASSERT_VK_SUCCESS   0 && riverAssertVkSuccess
 #endif
 
 struct SwapchainSupportDetails
@@ -238,13 +246,13 @@ extern void riverLog
     const RiverLogLevel level
 );
 
-extern void riverAssert
+extern bool riverAssert
 (
     bool condition,
     const std::string_view assertFailureMsg
 );
 
-extern void riverAssertVkSuccess
+extern bool riverAssertVkSuccess
 (
     VkResult result,
     const std::string_view assertFailureMsg

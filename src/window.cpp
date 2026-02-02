@@ -32,7 +32,7 @@ void initGLFW
                         nullptr
                     );
 
-    riverAssert(nullptr != engine.window, "failed to create GLFW window!");
+    RIV_ASSERT(nullptr != engine.window, "failed to create GLFW window!");
 
     glfwSetWindowUserPointer(engine.window, &engine);
     glfwSetFramebufferSizeCallback(engine.window, framebufferResizeCallback);
@@ -48,9 +48,6 @@ void createSurface(EngineData &engine)
 {
     //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
-    riverAssertVkSuccess
-    (
-        glfwCreateWindowSurface(engine.instance, engine.window, nullptr, &engine.surface),
-        "failed to create window surface!"
-    );
+    VkResult result = glfwCreateWindowSurface(engine.instance, engine.window, nullptr, &engine.surface);
+    RIV_ASSERT_VK_SUCCESS(result,  "failed to create window surface!");
 }
