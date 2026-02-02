@@ -31,10 +31,8 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
 static std::vector<char> readFile(const std::filesystem::path &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if(!file.is_open())
-    {
-        throw std::runtime_error("failed to open file!");
-    }
+
+    riverAssert(file.is_open(), "failed to open file! check cwd.");
 
     size_t fileSize = (size_t)file.tellg();
     std::vector<char> buffer(fileSize);
@@ -42,10 +40,7 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    if(buffer.size() != fileSize)
-    {
-        riverLog("failed to correctly read from file!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssert(buffer.size() == fileSize, "failed to correctly read from file!");
 
     file.close();
     return buffer;
