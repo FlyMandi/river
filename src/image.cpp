@@ -52,16 +52,57 @@ void createTextureImage()
 
     stbi_image_free(pixels);
 
+    //FIXME:#50: WIP
+}
+
+void createImage
+(
+    uint32_t            &width,
+    uint32_t            &height,
+    VkFormat            &format,
+    VkImageTiling       &tiling,
+    VkImageUsageFlags   &usage,
+    VkImage             &image,
+    VkDeviceMemory      &imageMem
+){
     VkImageCreateInfo imageCreateInfo{};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.extent.width = static_cast<uint32_t>(texWidth);
-    imageCreateInfo.extent.height = static_cast<uint32_t>(texHeight);
+    imageCreateInfo.extent.width = width;
+    imageCreateInfo.extent.height = height;
     imageCreateInfo.extent.depth = 1;
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
+
+    //NOTE: in an edge case, this format might not be supported. conversions will be done eventually
     imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    //FIXME:#50: WIP
+    imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageCreateInfo.flags = 0;
+
+    riverAssertVkSuccess
+    (
+        vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage),
+        "failed to create texture image!"
+    );
+
+    VkMemoryRequirements imageMemRequirements;
+    vkGetImageMemoryRequirements(logicalDevice, textureImage, &imageMemRequirements);
+
+    VkMemoryAllocateInfo mAllocInfo{};
+    mAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    mAllocInfo.allocationSize = imageMemRequirements.size;
+    mAllocInfo.memoryTypeIndex = findSuitableMemoryType(imageMemRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    riverAssertVkSuccess
+    (
+        vkAllocateMemory(logicalDevice, &mAllocInfo, nullptr, &textureImageMemory),
+        "failed to allocate texture image memory!"
+    );
+
+    vkBindImageMemory(logicalDevice, textureImage, textureImageMemory, 0);
 }
