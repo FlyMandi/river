@@ -7,8 +7,8 @@
 constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
 
 inline VkSwapchainKHR swapchain;
-inline VkFormat swapChainImageFormat;
-inline VkExtent2D swapChainExtent;
+inline VkFormat swapchainImageFormat;
+inline VkExtent2D swapchainExtent;
 
 inline std::vector<VkImage> swapchainImages;
 inline std::vector<VkImageView> swapchainImageViews;
