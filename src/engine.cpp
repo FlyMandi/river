@@ -583,9 +583,32 @@ static std::vector<char> readFile(const std::string &filename){
     return buffer;
 }
 
+VkShaderModule createShaderModule(const std::vector<char> &code){
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+    VkShaderModule shaderModule;
+    
+    if(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
+        throw std::runtime_error("failed to create shader module!");
+    }
+
+    return shaderModule;
+}
+
 void createGraphicsPipeline(){
     if(config_DEBUG){ std::cout << "current directory: " << std::filesystem::current_path() << '\n'; }
 
     auto vertShaderCode = readFile("..\\..\\src\\shaders\\vertTest.vert");
     auto fragShaderCode = readFile("..\\..\\src\\shaders\\fragTest.frag");
+
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+    //code
+
+    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(device, fragShaderModule, nullptr);
 }
