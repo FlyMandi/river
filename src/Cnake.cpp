@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <array>
 #include <format>
+#include <filesystem>
 
 namespace engine{
 
@@ -46,7 +47,14 @@ void Cnake::createPipeline(){
     EnginePipeline::defaultPipelineConfigInfo(pipelineConfig, engineSwapChain.width(), engineSwapChain.height());
     pipelineConfig.renderPass = engineSwapChain.getRenderPass(); 
     pipelineConfig.pipelineLayout = pipelineLayout; 
-    enginePipeline = std::make_unique<EnginePipeline>(engineDevice, pipelineConfig, "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv");
+
+    std::string vert = "src/shaders/simple_shader.vert.spv";
+    std::string frag = "src/shaders/simple_shader.frag.spv";
+    if(!std::filesystem::exists(vert) || !std::filesystem::exists(frag)){
+        throw std::runtime_error("could not find the necessary shaders for pipeline construction.");
+    }
+
+    enginePipeline = std::make_unique<EnginePipeline>(engineDevice, pipelineConfig, vert, frag); 
 }
 
 void Cnake::createCommandBuffers(){
