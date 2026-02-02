@@ -19,10 +19,11 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if(vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-    {
-        riverLog("failed to create shader module!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule),
+        "failed to create shader module!"
+    );
 
     return shaderModule;
 }
@@ -152,10 +153,11 @@ void createGraphicsPipeline()
     pipelineLayoutCreateInfo.setLayoutCount = 1;
     pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
 
-    if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout) != VK_SUCCESS)
-    {
-        riverLog("failed to create pipeline layout!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreatePipelineLayout(logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout),
+        "failed to create pipeline layout!"
+    );
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -175,10 +177,11 @@ void createGraphicsPipeline()
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
-    if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS)
-    {
-        riverLog("failed to create graphics pipeline!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline),
+        "failed to create graphics pipeline!"
+    );
 
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
     vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
@@ -204,10 +207,11 @@ void createFramebuffers()
         framebufferInfo.height = swapchainExtent.height;
         framebufferInfo.layers = 1;
 
-        if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
-        {
-            riverLog("failed to create framebuffer!", RIV_LOG_LEVEL_ERROR);
-        }
+        riverAssertVkSuccess
+        (
+            vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapchainFramebuffers[i]),
+            "failed to create framebuffer!"
+        );
     }
 }
 
@@ -216,10 +220,11 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS)
-    {
-        riverLog("failed to begin recording command buffer!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkBeginCommandBuffer(commandBuffer, &beginInfo),
+        "failed to begin recording command buffer!"
+    );
     
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
 
@@ -262,7 +267,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     vkCmdEndRenderPass(commandBuffer);
 
-    riverAssertVkSuccess(vkEndCommandBuffer(commandBuffer), "failed to record command buffer!");
+    riverAssertVkSuccess(vkEndCommandBuffer(commandBuffer), "failed to end recording command buffer!");
 }
 
 void createCommandPools()
@@ -274,8 +279,8 @@ void createCommandPools()
 
     riverAssertVkSuccess
     (
-            vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
-            "failed to create graphics command pool!"
+        vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
+        "failed to create graphics command pool!"
     );
 
     VkCommandPoolCreateInfo transferPoolInfo{};
@@ -394,10 +399,11 @@ void createDescriptorSets()
     descriptorSetAllocInfo.pSetLayouts = setLayouts.data();
 
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT); 
-    if(vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        riverLog("failed to allocate descriptor sets!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()),
+        "failed to allocate descriptor sets!"
+    );
 
     //TODO:#41: descriptors WIP
 }

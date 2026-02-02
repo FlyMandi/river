@@ -128,10 +128,11 @@ void createSwapchain()
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain) != VK_SUCCESS)
-    {
-        riverLog("failed to create swap chain!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain),
+        "failed to create swap chain!"
+    );
 
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
     swapchainImages.resize(swapchainImageCount);
@@ -164,10 +165,11 @@ void createImageViews()
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
-        {
-            riverLog("failed to create image views!", RIV_LOG_LEVEL_ERROR);
-        }
+        riverAssertVkSuccess
+        (
+            vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapchainImageViews[i]),
+            "failed to create image views!"
+        );
     }
 }
 
@@ -211,10 +213,11 @@ void createRenderPass()
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS)
-    {
-        riverLog("failed to create render pass!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass),
+        "failed to create render pass!"
+    );
 }
 
 void destroyDeferredResources(FrameResource *frame)

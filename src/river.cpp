@@ -139,10 +139,11 @@ static void setupDebugMessenger()
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
-    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
-    {
-        riverLog("failed to set up debug messenger.", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger),
+        "failed to set up debug messenger."
+    );
 }
 
 static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator)
@@ -158,10 +159,7 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 static void createInstance()
 {
     #ifdef DEBUG
-        if(!checkValidationLayerSupport())
-        {
-            riverLog("validation layers requested, but not available!", RIV_LOG_LEVEL_ERROR);
-        }
+        riverAssert(checkValidationLayerSupport(), "validation layers requested, but not available!");
     #endif
 
     VkApplicationInfo appInfo{};
@@ -178,10 +176,12 @@ static void createInstance()
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
-    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions))
-    {
-        riverLog("extensions required, but not available!", RIV_LOG_LEVEL_ERROR);
-    }
+
+    riverAssert
+    (
+        checkInstanceExtensions(&requiredExtensions, &instanceExtensions),
+        "extensions required, but not available!"
+    );
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -202,10 +202,11 @@ static void createInstance()
         createInfo.pNext = nullptr;
     #endif
 
-    if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
-    {
-        riverLog("failed to create instance.", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateInstance(&createInfo, nullptr, &instance),
+        "failed to create instance."
+    );
 }
 
 void initVulkan()
@@ -359,9 +360,9 @@ void drawFrame()
         framebufferResized = VK_FALSE;
         recreateSwapchain();
     }
-    else if(result != VK_SUCCESS)
+    else
     {
-        riverLog("failed to present swapchain image!", RIV_LOG_LEVEL_ERROR);
+        riverAssertVkSuccess(result, "failed to present swapchain image!");
     }
 
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
@@ -428,8 +429,9 @@ void riverLog(const auto &text, const RiverLogLevel level)
             std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ERROR]: " << text << '\n';
             return;
 
-        default:
-            return;
+        case RIV_LOG_LEVEL_ASSERT:
+            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ASSERT]: " << text << '\n';
+            abort();
     }
 }
 

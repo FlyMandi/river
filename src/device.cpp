@@ -196,7 +196,7 @@ void pickPhysicalDevice()
     }
     else
     {
-        riverLog("failed to find a suitable GPU!", RIV_LOG_LEVEL_ERROR);
+        riverLog("failed to find a suitable GPU!", RIV_LOG_LEVEL_ASSERT);
     }
 }
 
@@ -238,9 +238,11 @@ void createLogicalDevice()
         createInfo.enabledLayerCount = 0;
     #endif
 
-    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS){
-        riverLog("failed to create logical device.", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice),
+        "failed to create logical device."
+    );
 
     vkGetDeviceQueue(logicalDevice, logicalQueueFamilies.graphicsIndex, 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, logicalQueueFamilies.transferIndex, 0, &transferQueue);
