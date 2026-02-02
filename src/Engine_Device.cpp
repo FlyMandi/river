@@ -47,6 +47,14 @@ void DestroyDebugUtilsMessengerEXT(
     }
 }
 
+EngineDevice::EngineDevice(EngineWindow& window) : window{window} {
+    createInstance();
+    setupDebugMessenger();
+    pickPhysicalDevice();
+    createLogicalDevice();
+    createCommandPool();
+}
+
 EngineDevice::~EngineDevice(){
     vkDestroyCommandPool(device_, commandPool, nullptr);
     vkDestroyDevice(device_, nullptr);
