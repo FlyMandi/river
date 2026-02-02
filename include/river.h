@@ -11,7 +11,6 @@ inline uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
 
-//if specified logLevel is 4+, only asserts will be thrown
 constexpr uint8_t logLevel = 0;
 
 inline const char *riverAppName;
