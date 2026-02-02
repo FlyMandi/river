@@ -1,3 +1,4 @@
+#include "river.h"
 #include "window.h"
 
 #include <string>
@@ -8,7 +9,7 @@ void window::initGLFW(){
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
+    pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)river::appName + " " + (std::string)river::appVersion).c_str(), nullptr, nullptr);
 }
 
 void window::cleanupGLFW(){

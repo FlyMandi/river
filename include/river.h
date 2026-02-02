@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined(DEBUG) || defined(_DEBUG)
+    const bool build_DEBUG = true;
+#else
+    const bool build_DEBUG = false;
+#endif
+
 namespace river{
 
 inline const char *engineName = "River";
