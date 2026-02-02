@@ -95,7 +95,8 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     VkPhysicalDeviceFeatures toRateDeviceFeatures{};
     vkGetPhysicalDeviceFeatures(device, &toRateDeviceFeatures);
 
-    if(!toRateDeviceFeatures.samplerAnisotropy || !toRateDeviceFeatures.geometryShader)
+    if( !toRateDeviceFeatures.samplerAnisotropy ||
+        !toRateDeviceFeatures.geometryShader)
     {
         return 0;
     }
