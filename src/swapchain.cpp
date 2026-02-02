@@ -40,9 +40,9 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        printDebugLog('\0', "swap width: ");
-        printDebugLog(capabilities.currentExtent.width, '\n');
-        printDebugLog('\0', "swap height: ");
+        printDebugLog('\0', "swap size: ");
+        printDebugLog(capabilities.currentExtent.width);
+        printDebugLog("x");
         printDebugLog(capabilities.currentExtent.height, '\n');
 
         return capabilities.currentExtent;
