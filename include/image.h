@@ -18,6 +18,7 @@ VkImageView createImageView(VkImage image, VkFormat format);
 
 extern void createTextureImage();
 extern void createTextureImageView();
+extern void createTextureSampler();
 
 inline VkImage textureImage;
 inline VkImageView textureImageView;

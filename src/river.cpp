@@ -401,6 +401,7 @@ void initVulkan()
 
     createTextureImage();
     createTextureImageView();
+    createTextureSampler();
 
     createVertexBuffer();
     createUniformBuffers();
