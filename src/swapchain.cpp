@@ -191,3 +191,25 @@ void createRenderPass(){
         throw std::runtime_error("failed to create render pass!");
     }
 }
+
+void cleanupSwapChain(){
+    for(size_t i = 0; i < swapChainFramebuffers.size(); ++i){
+        vkDestroyFramebuffer(logicalDevice, swapChainFramebuffers[i], nullptr);
+    }
+
+    for(size_t i = 0; i < swapChainImageViews.size(); ++i){
+        vkDestroyImageView(logicalDevice, swapChainImageViews[i], nullptr);
+    }
+
+    vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
+}
+
+void recreateSwapChain(){
+    vkDeviceWaitIdle(logicalDevice);
+
+    cleanupSwapChain();
+
+    createSwapChain();
+    createImageViews();
+    createFramebuffers();
+}
