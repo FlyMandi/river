@@ -83,6 +83,8 @@ void createVertexBuffer()
         printDebugLog('\0', "allocated vertex buffer memory.", '\n');
     }
 
+    vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);
+
     void* vertexBufferBegin;
     vkMapMemory(logicalDevice, vertexBufferMemory, 0, vertexBufferInfo.size, 0, &vertexBufferBegin);
     memcpy(vertexBufferBegin, vertices.data(), (size_t)vertexBufferInfo.size);
