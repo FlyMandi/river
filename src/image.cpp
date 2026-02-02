@@ -52,18 +52,29 @@ void createTextureImage()
 
     stbi_image_free(pixels);
 
-    //FIXME:#50: WIP
+    createImage
+    (
+        texWidth,
+        texHeight,
+        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        textureImage,
+        textureImageMemory
+    );
 }
 
 void createImage
 (
-    uint32_t            &width,
-    uint32_t            &height,
-    VkFormat            &format,
-    VkImageTiling       &tiling,
-    VkImageUsageFlags   &usage,
-    VkImage             &image,
-    VkDeviceMemory      &imageMem
+    uint32_t                width,
+    uint32_t                height,
+    VkFormat                format,
+    VkImageTiling           tiling,
+    VkImageUsageFlags       usage,
+    VkMemoryPropertyFlags   memPropFlags,
+    VkImage                 &image,
+    VkDeviceMemory          &imageMem
 ){
     VkImageCreateInfo imageCreateInfo{};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -75,10 +86,10 @@ void createImage
     imageCreateInfo.arrayLayers = 1;
 
     //NOTE: in an edge case, this format might not be supported. conversions will be done eventually
-    imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-    imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageCreateInfo.format = format;
+    imageCreateInfo.tiling = tiling;
     imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageCreateInfo.usage = usage;
     imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -86,12 +97,12 @@ void createImage
 
     riverAssertVkSuccess
     (
-        vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &textureImage),
-        "failed to create texture image!"
+        vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &image),
+        "failed to create image!"
     );
 
     VkMemoryRequirements imageMemRequirements;
-    vkGetImageMemoryRequirements(logicalDevice, textureImage, &imageMemRequirements);
+    vkGetImageMemoryRequirements(logicalDevice, image, &imageMemRequirements);
 
     VkMemoryAllocateInfo mAllocInfo{};
     mAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -100,9 +111,10 @@ void createImage
 
     riverAssertVkSuccess
     (
-        vkAllocateMemory(logicalDevice, &mAllocInfo, nullptr, &textureImageMemory),
-        "failed to allocate texture image memory!"
+        vkAllocateMemory(logicalDevice, &mAllocInfo, nullptr, &imageMem),
+        "failed to allocate image memory!"
     );
 
-    vkBindImageMemory(logicalDevice, textureImage, textureImageMemory, 0);
+    vkBindImageMemory(logicalDevice, image, imageMem, 0);
+    //FIXME:#50: WIP
 }
