@@ -15,6 +15,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - queue families, the swapchain & present modes
 - vertex & index buffers, vertex & fragment shaders
 - loading & sampling textures, texels
+- depth buffers
 
 ### State:
 - there's a resizeable window
