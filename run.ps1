@@ -103,8 +103,8 @@ elseIf("g++" -eq $compiler)
 if(0 -eq $LASTEXITCODE)
 {
     Write-Host "`ncompiled successfully!" -ForegroundColor Green
-    Write-Host "compiling shaders..."
-    .\shader_comp.ps1
+    Write-Host "compiling shaders...`n"
+    &.\shader_comp.ps1
 }
 
 if(0 -eq $LASTEXITCODE -and $build -eq "debug")
