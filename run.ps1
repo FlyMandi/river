@@ -45,7 +45,6 @@ if(-Not(Test-Path ".\build\"))
 }
 
 &premake5 ecc
-.\shader_comp.ps1
 
 $target = ".\bin\$OS" + "_$build\River.exe"
 
@@ -78,7 +77,13 @@ elseIf("g++" -eq $compiler)
 
 if(0 -eq $LASTEXITCODE)
 {
-    Write-Host "compiled successfully!" -ForegroundColor Green
+    Write-Host "`ncompiled successfully!" -ForegroundColor Green
+    Write-Host "compiling shaders..."
+    .\shader_comp.ps1
+}
+
+if(0 -eq $LASTEXITCODE)
+{
     Write-Host "running $target..."
     &$target
 }
