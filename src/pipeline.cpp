@@ -215,6 +215,7 @@ void createFramebuffers()
     }
 }
 
+//TODO:#41: descriptors WIP
 void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
@@ -405,5 +406,24 @@ void createDescriptorSets()
         "failed to allocate descriptor sets!"
     );
 
-    //TODO:#41: descriptors WIP
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        VkDescriptorBufferInfo uniformBufferInfo;
+        uniformBufferInfo.buffer = uniformBuffers[i];
+        uniformBufferInfo.offset = 0;
+        uniformBufferInfo.range = sizeof(UniformBufferObject);
+
+        VkWriteDescriptorSet descriptorSetWrite{};
+        descriptorSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorSetWrite.dstSet = descriptorSets[i];
+        descriptorSetWrite.dstBinding = 0;
+        descriptorSetWrite.dstArrayElement = 0;
+        descriptorSetWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorSetWrite.descriptorCount = 1;
+        descriptorSetWrite.pBufferInfo = &uniformBufferInfo;
+        descriptorSetWrite.pImageInfo = nullptr;
+        descriptorSetWrite.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(logicalDevice, 1, &descriptorSetWrite, 0, nullptr);
+    }
 }
