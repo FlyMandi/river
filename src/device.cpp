@@ -51,20 +51,20 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 
         if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT && i != indices.graphicsIndex)
         {
-            indices.transferIndex = i; 
+            indices.transferIndex = i;
         }
-        
+
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
         if(presentSupport)
         {
             indices.presentIndex = i;
         }
 
-        if( indices.graphicsIndex != UINT32_MAX && 
-            indices.transferIndex != UINT32_MAX && 
+        if( indices.graphicsIndex != UINT32_MAX &&
+            indices.transferIndex != UINT32_MAX &&
             indices.presentIndex != UINT32_MAX
-        ){ 
-            break; 
+        ){
+            break;
         }
         ++i;
     }
@@ -82,19 +82,19 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     static uint32_t score = 0;
 
     static QueueFamilyIndices indices = findQueueFamilies(device);
-    if( indices.graphicsIndex == UINT32_MAX || 
-        indices.transferIndex == UINT32_MAX || 
+    if( indices.graphicsIndex == UINT32_MAX ||
+        indices.transferIndex == UINT32_MAX ||
         indices.presentIndex == UINT32_MAX
-    ){ 
-        return 0; 
+    ){
+        return 0;
     }
 
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
     if(!deviceFeatures.geometryShader)
-    { 
-        return 0; 
+    {
+        return 0;
     }
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -110,7 +110,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
             return 0;
         }
     }
-    
+
     if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
     {
         score += 1000;
@@ -123,7 +123,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     {
         score += 500;
     }
-    
+
     if(indices.transferIndex != indices.graphicsIndex)
     {
         score += 250;
@@ -166,7 +166,7 @@ void pickPhysicalDevice()
 {
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
-    
+
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
         riverLog("failed to find any GPU with vulkan support!", RIV_LOG_LEVEL_ERROR);
@@ -185,7 +185,7 @@ void pickPhysicalDevice()
 
     if(suitabilityCandidates.rbegin()->first > 0)
     {
-        physicalDevice = suitabilityCandidates.rbegin()->second; 
+        physicalDevice = suitabilityCandidates.rbegin()->second;
 
         static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
         logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
@@ -203,7 +203,7 @@ void pickPhysicalDevice()
 void createLogicalDevice()
 {
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = 
+    std::set<uint32_t> uniqueQueueFamilies =
     {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex,
