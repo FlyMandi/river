@@ -11,8 +11,7 @@
 
 #define TIMESTAMP 
 
-constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
-inline int currentFrame = 0;
+inline uint16_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
  
