@@ -2,6 +2,7 @@
 
 #include "river.h"
 #include "device.h"
+#include <cstring>
 #include "vertex.h"
 
 const std::vector<Vertex> vertices =
@@ -52,14 +53,13 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
 
 void createVertexBuffer()
 {
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
+    VkBufferCreateInfo vertexBufferInfo{};
+    vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    vertexBufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
+    vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    bufferInfo.usage = VK_BUFFER_USAGE_2_VERTEX_BUFFER_BIT;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
+    if(vkCreateBuffer(logicalDevice, &vertexBufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
         printDebugLog('\0', "failed to create vertex buffer!");
         throw std::runtime_error("failed to create vertex buffer!");
     }
@@ -78,4 +78,8 @@ void createVertexBuffer()
         printDebugLog("failed to allocate vertex buffer memory!");
         throw std::runtime_error("failed to allocate vertex buffer memory!");
     }
+
+    void* vertexBufferBegin;
+    vkMapMemory(logicalDevice, vertexBufferMemory, 0, vertexBufferInfo.size, 0, &vertexBufferBegin);
+    memcpy(vertexBufferBegin, vertices.data(), (size_t)vertexBufferInfo.size);
 }
