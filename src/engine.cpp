@@ -345,8 +345,7 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
 
     VkBool32 presentSupport = false;
 
-    int i = 0;
-    for(const auto &queueFamily : queueFamilies){
+    for(int i = 0; const auto &queueFamily : queueFamilies){
         if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
             indices.graphicsFamily = i;
         }
