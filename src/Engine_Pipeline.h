@@ -37,7 +37,7 @@ class EnginePipeline{
 
  public:
     EnginePipeline(class EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath);
-    ~EnginePipeline(){}
+    ~EnginePipeline();
 
     EnginePipeline(const EnginePipeline&) = delete;
     EnginePipeline operator=(const EnginePipeline&) = delete;
