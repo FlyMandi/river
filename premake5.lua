@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-global, undefined-field
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 workspace("Cnake")
@@ -8,6 +8,7 @@ location("build")
 project("Cnake")
 kind("WindowedApp")
 language("C++")
+cppdialect("C++20")
 targetdir("bin/%{cfg.buildcfg}")
 includedirs({ "vendor/GLM", "vendor/GLFW/include", "%{VULKAN_SDK}/Include/" })
 
