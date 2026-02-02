@@ -326,8 +326,8 @@ VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> avail
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
             if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
+            return availablePresentMode;
         }
-        return availablePresentMode;
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
