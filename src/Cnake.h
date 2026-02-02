@@ -15,10 +15,10 @@ protected:
 	static void _bind_methods();
 
 public:
-	GDExample();
-	~GDExample();
+	GDExample(); 
+	~GDExample(); 
 
 	void _process(double delta) override;
 };
 
-#endif // CNAKE_H
+#endif
