@@ -86,7 +86,6 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
-VkShaderModule createShaderModule(const std::vector<char> &code);
 
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
