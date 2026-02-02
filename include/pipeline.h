@@ -15,6 +15,8 @@ inline std::vector<VkSemaphore> imageAvailableSemaphores;
 inline std::vector<VkSemaphore> renderFinishedSemaphores;
 inline std::vector<VkFence> inFlightFences;
 
+inline bool framebufferResized = false;
+
 extern void createGraphicsPipeline();
 extern void createFramebuffers();
 extern void createCommandPool();
