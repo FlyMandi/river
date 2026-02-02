@@ -48,7 +48,7 @@ void createTextureImage()
 
     void* data;
     vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
-    std::memcpy(data, pixels, static_cast<size_t>(imageSize));
+    ::memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     stbi_image_free(pixels);

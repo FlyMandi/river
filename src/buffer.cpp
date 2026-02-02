@@ -166,11 +166,11 @@ void createVertexBuffer()
     void* pData;
 
     vkMapMemory(logicalDevice, stagingBufferMemory, 0, vertSize, 0, &pData);
-    std::memcpy(pData, vertices.data(), (size_t)vertSize);
+    ::memcpy(pData, vertices.data(), (size_t)vertSize);
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     vkMapMemory(logicalDevice, stagingBufferMemory, vertSize, indexSize, 0, &pData);
-    std::memcpy(pData, indices.data(), (size_t)indexSize);
+    ::memcpy(pData, indices.data(), (size_t)indexSize);
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     createBuffer
@@ -233,5 +233,5 @@ void updateUniformBuffer(uint32_t currentImage)
 
     uniformBuffer.projection[1][1] *= -1;
 
-    std::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
+    ::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
 }
