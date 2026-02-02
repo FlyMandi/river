@@ -23,7 +23,8 @@ void initGLFW()
 
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
-    if(nullptr == window){
+    if(nullptr == window)
+    {
         #ifdef DEBUG
             printDebugLog('\0', "failed to create GLFW window!", '\n');
         #endif
@@ -44,7 +45,8 @@ void createSurface()
 {
     //TODO: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
-    if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
+    if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog('\n', "failed to create window surface!");
         #endif
