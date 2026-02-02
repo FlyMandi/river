@@ -1,8 +1,10 @@
 param
 (
     [Parameter(position=0,Mandatory=$false)]
-    $build = "Debug"
+    $build = "DEBUG"
 )
+
+Write-Host "Building $build...`n"
 
 $Platforms = "Win64", "Linux"
 $Configurations = "Debug", "Release"
