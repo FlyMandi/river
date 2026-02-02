@@ -247,15 +247,6 @@ void initVulkan()
 void cleanupVulkan()
 {
     //TODO:#38: fences.
-    cleanupSwapchain();
-
-    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
-    vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
-
-    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
-    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-
     std::vector<VkSemaphore> semaphores;
     semaphores.reserve(imageAvailableSemaphores.size() + renderFinishedSemaphores.size());
     semaphores.insert(semaphores.end(), imageAvailableSemaphores.begin(), imageAvailableSemaphores.end());
@@ -267,14 +258,19 @@ void cleanupVulkan()
     semaphoreWaitInfo.pSemaphores = semaphores.data();
 
     vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
+    cleanupSwapchain();
+    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
+    vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 
+    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
     vkWaitForFences(logicalDevice, 1, inFlightFences.data(), VK_TRUE, UINT64_MAX);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
-
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
     }
 

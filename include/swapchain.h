@@ -4,6 +4,8 @@
 
 #include <vector>
 
+constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
+
 inline VkSwapchainKHR swapchain;
 inline VkFormat swapChainImageFormat;
 inline VkExtent2D swapChainExtent;
@@ -12,33 +14,25 @@ inline std::vector<VkImage> swapchainImages;
 inline std::vector<VkImageView> swapchainImageViews;
 inline std::vector<VkFramebuffer> swapchainFramebuffers;
 
-constexpr size_t maxFramebuffers = 1;
-constexpr size_t maxBuffers = 1;
-constexpr size_t maxPipelines = 1;
-constexpr size_t maxRenderPasses = 1;
+inline uint32_t swapchainImageCount;
 
+//HACK: only one of each right now, eventually all of those will be arrays
 struct FrameResource
 {
-    VkFramebuffer framebuffers2Destroy[maxFramebuffers];
-    size_t framebufferCount;
+    VkFramebuffer framebuffer2Destroy;
+    VkBool32 hasFramebuffer;
 
-    VkBuffer buffers2Destroy[maxBuffers];
-    size_t bufferCount;
-
-    VkPipeline pipelines2Destroy[maxPipelines];
-    size_t pipelineCount;
-
-    VkRenderPass renderPasses2Destroy[maxRenderPasses];
-    size_t renderPassCount;
+    VkImageView imageView2Destroy;
+    VkBool32 hasImageView;
 };
 
-constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
 inline FrameResource frameResources[MAX_FRAMES_IN_FLIGHT];
 
 extern void createSwapchain();
 extern void createImageViews();
 extern void createRenderPass();
 
+extern void destroyDeferredResources(FrameResource *frame);
 extern void cleanupSwapchain();
 extern void recreateSwapchain();
 

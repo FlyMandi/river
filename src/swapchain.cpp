@@ -91,18 +91,18 @@ void createSwapchain()
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    swapchainImageCount = swapChainSupport.capabilities.minImageCount + 1;
 
     if( 0 < swapChainSupport.capabilities.maxImageCount && 
-        imageCount > swapChainSupport.capabilities.maxImageCount
+        swapchainImageCount > swapChainSupport.capabilities.maxImageCount
     ){
-        imageCount = swapChainSupport.capabilities.maxImageCount;
+        swapchainImageCount = swapChainSupport.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface;
-    createInfo.minImageCount = imageCount;
+    createInfo.minImageCount = swapchainImageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent; 
@@ -142,9 +142,9 @@ void createSwapchain()
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, nullptr);
-    swapchainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, swapchainImages.data());
+    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
+    swapchainImages.resize(swapchainImageCount);
+    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, swapchainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
@@ -232,16 +232,28 @@ void createRenderPass()
     }
 }
 
-void cleanupSwapchain()
+void destroyDeferredResources(FrameResource *frame)
 {
-    for(size_t i = 0; i < swapchainFramebuffers.size(); ++i)
+    if(frame->hasFramebuffer)
     {
-        vkDestroyFramebuffer(logicalDevice, swapchainFramebuffers[i], nullptr);
+        vkDestroyFramebuffer(logicalDevice, frame->framebuffer2Destroy, nullptr);
+        frame->hasFramebuffer = VK_FALSE;
     }
 
-    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
+    if(frame->hasImageView)
     {
-        vkDestroyImageView(logicalDevice, swapchainImageViews[i], nullptr);
+        vkDestroyImageView(logicalDevice, frame->imageView2Destroy, nullptr);
+        frame->hasImageView = VK_FALSE;
+    }
+};
+
+void cleanupSwapchain()
+{
+    for(size_t i = 0; i < swapchainImageCount; ++i)
+    {
+        frameResources[i].framebuffer2Destroy = swapchainFramebuffers[i];
+        frameResources[i].imageView2Destroy = swapchainImageViews[i];
+        destroyDeferredResources(&frameResources[i]);
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
@@ -253,7 +265,8 @@ void recreateSwapchain()
     int height = 0;
 
     glfwGetFramebufferSize(window, &width, &height);
-    while(width == 0 || height == 0){
+    while(width == 0 || height == 0)
+    {
         glfwGetFramebufferSize(window, &width, &height);
         glfwWaitEvents();
     }
