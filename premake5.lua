@@ -12,7 +12,12 @@ workspace("River")
         cppdialect("C++20")
         targetdir("bin/%{cfg.platform}_%{cfg.buildcfg}")
         objdir("obj/%{cfg.platform}_%{cfg.buildcfg}")
-        includedirs({ "./include/", "./vendor/glfw-3.4-win64/include/", "%{VULKAN_SDK}/Include/" })
+        includedirs({
+            "./include/",
+            "./vendor/glfw-3.4-win64/include/",
+            "./vendor/stb/",
+            "%{VULKAN_SDK}/Include/"
+        })
         syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/glfw-3.4-win64/lib-vc2022/" })
         files({ "./src/*", "./include/*" })
 
