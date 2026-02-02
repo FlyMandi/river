@@ -36,7 +36,7 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSur
 
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
-    persistent std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
+    std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, physicalQueueFamilies.data());
 
     VkBool32 presentSupport = false;

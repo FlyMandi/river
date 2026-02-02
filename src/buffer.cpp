@@ -145,14 +145,14 @@ void createBuffer
     bufferInfo.size = bufferSize;
     bufferInfo.usage = usageFlags;
 
-    if(uniqueQueueFamilies.size() == 1)
+    if(uniqueQueueFamilies.size() > 1)
     {
         bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
     }else{
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
-    persistent std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(), uniqueQueueFamilies.end());
+    std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(), uniqueQueueFamilies.end());
 
     bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
     bufferInfo.pQueueFamilyIndices = queueFamilyIndices.data();
@@ -204,7 +204,7 @@ void createVertexBuffer()
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    persistent std::set<uint32_t> queueFamilies =
+    std::set<uint32_t> queueFamilies =
     {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex
