@@ -1,5 +1,5 @@
-#include "window.h"
 #include "river.h"
+#include "window.h"
 
 #include <stdexcept>
 #include <string>
