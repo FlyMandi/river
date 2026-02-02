@@ -10,7 +10,7 @@ void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &e
     //exit
 
     //HACK: currently no project manifest, so all hardcoded.
-    //later acquire from files, for now hardcoded
+    //later acquire from files
 
     manifest.projectName = "riverTest";
     manifest.projectVersion = "0.0.0";
@@ -24,8 +24,14 @@ void initEditor(ProjectManifest &manifest, UserSettings &settings, EngineData &e
     manifest.projectRoot = getProjectRoot("river");
     manifest.projectLog = manifest.projectRoot / "log" / "river.log";
 
-    manifest.projectModelPath = std::filesystem::canonical(manifest.projectRoot / "assets/models/WB_Vase.obj");
-    manifest.projectTexturePath = std::filesystem::canonical(manifest.projectRoot / "assets/textures/WB_Vase_Mat_Base_color.jpg");
+    manifest.vertexShader = manifest.projectRoot / "bin" / "vertTest.vert.spv";
+    manifest.fragmentShader = manifest.projectRoot / "bin" / "fragTest.frag.spv";
+
+    std::filesystem::path models = manifest.projectRoot / "assets" / "models";
+    std::filesystem::path textures = manifest.projectRoot / "assets" / "textures";
+
+    manifest.projectModelPath = std::filesystem::canonical(models / "WB_Vase.obj");
+    manifest.projectTexturePath = std::filesystem::canonical(textures / "WB_Vase_Mat_Base_color.jpg");
 
     riverSetupLog(manifest.projectLog);
 }

@@ -22,12 +22,16 @@ global_var uint8_t logLevel;
 
 struct ProjectManifest
 {
-    const char* projectName = "RIV_UNINITIALIZED_PROJECT";
-    std::string projectVersion = "RIV_UNINITIALIZED_VERSION";
-    std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PROJECT_ROOT";
-    std::filesystem::path projectLog = "RIV_UNINITIALIZED_PROJECT_LOG";
-    std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_MODEL_PATH";
-    std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
+    const char* projectName = "RIV_UNINITIALIZED_CSTRING";
+    std::string projectVersion = "RIV_UNINITIALIZED_STRING";
+    std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path projectLog = "RIV_UNINITIALIZED_PATH";
+
+    std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_PATH";
+
+    std::filesystem::path vertexShader = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path fragmentShader = "RIV_UNINITIALIZED_PATH";
 };
 
 struct UserSettings

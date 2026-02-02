@@ -48,15 +48,10 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
     return buffer;
 }
 
-void createGraphicsPipeline()
+void createGraphicsPipeline(const ProjectManifest &manifest)
 {
-    //HACK: compiled shaders should live in some bin folder, project specific
-    //for now, they'll live in river's bin.
-    const std::filesystem::path vertPath = projectRoot / "bin\\vertTest.vert.spv";
-    const std::filesystem::path fragPath = projectRoot / "bin\\fragTest.frag.spv";
-
-    auto vertShaderCode = readFile(vertPath);
-    auto fragShaderCode = readFile(fragPath);
+    auto vertShaderCode = readFile(manifest.vertexShader);
+    auto fragShaderCode = readFile(manifest.fragmentShader);
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
