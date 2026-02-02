@@ -1,8 +1,11 @@
 #include "river.h"
 
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <fstream>
+
+bool firstOpen = true;
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
 std::filesystem::path getProjectRoot(const char *rootName){
@@ -25,19 +28,25 @@ std::filesystem::path getProjectRoot(const char *rootName){
 //TODO: flush every time the application is started, prob use a boolean
 void printDebugLog(const std::string &text, std::filesystem::path &logFile, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
-        std::ofstream file(logFile, std::ios::app);
+        if(firstOpen){
+            remove(logFile);
+            firstOpen = false;
+        }
 
-        if(!file.is_open()){
+        std::ofstream log(logFile, std::ios::app);
+        if(!log.is_open()){
             throw std::runtime_error("failed to open file");
         }else{
             for(;tabs > 0; --tabs){
-                file << '\t'; 
+                log << '\t'; 
             }
-                file << text;
+
+                log << text;
+
             for(;newlines > 0; --newlines){
-                file << '\n';
+                log << '\n';
             }
         }
-        file.close();
+        log.close();
     }
 }
