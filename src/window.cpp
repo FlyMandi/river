@@ -1,30 +1,34 @@
-#include "river.h"
 #include "window.h"
 
 #include <stdexcept>
 #include <string>
 
-void window::initGLFW(){
+void Window::initGLFW(){
     glfwInit();
 
     //TODO: add window resizeability
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)river::appName + " " + (std::string)river::appVersion).c_str(), nullptr, nullptr);
+    pWindow = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)windowName + " " + (std::string)windowVersion).c_str(), nullptr, nullptr);
     if(nullptr == pWindow){
-        engine::printDebugLog("\nERROR: failed to create GLFW window!", 0, 1);
         throw std::runtime_error("failed to create GLFW window!");
     }
 }
 
-void window::cleanupGLFW(){
+void Window::cleanupGLFW(){
     glfwDestroyWindow(pWindow);
     glfwTerminate();
 }
 
-void window::pollEvents(){
-//TODO: better use of GLFW event system, there has to be a better way to check for window exit
+void Window::pollEvents(){
+    //TODO: there has to be a better way to check for window exit
     glfwPollEvents();
     SHOULDCLOSE = glfwWindowShouldClose(pWindow);
+}
+
+void Window::createSurface(){
+    if(glfwCreateWindowSurface(instance, pWindow, nullptr, &surface) != VK_SUCCESS){
+        throw std::runtime_error("failed to create window surface!");
+    }
 }

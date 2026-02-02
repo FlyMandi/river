@@ -27,7 +27,6 @@ Device(const Device&) = delete;
 Device operator=(const Device &) = delete;
 ~Device();
 
-VkDebugUtilsMessengerEXT debugMessenger;
 
 VkPhysicalDevice physicalDevice;
 VkPhysicalDeviceProperties deviceProperties;
@@ -38,19 +37,12 @@ VkDevice logicalDevice;
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
-const std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation" 
-};
-
 const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-void DestroyDebugUtilsMessengerEXT(
-        VkInstance                  instance,
-        VkDebugUtilsMessengerEXT    messenger, 
-        const VkAllocationCallbacks *pAllocator
-);
+
+static uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 
 void pickPhysicalDevice();
 void createLogicalDevice();

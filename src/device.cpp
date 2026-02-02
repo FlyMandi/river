@@ -5,15 +5,6 @@
 #include <set>
 #include <map>
 
-void river::Device::createSurface(){
-    if(glfwCreateWindowSurface(instance, window::pWindow, nullptr, &swap::surface) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create window surface!", 2, 1);
-        throw std::runtime_error("failed to create window surface!");
-    }else{
-        printDebugLog("Successfully created window surface.", 0, 1);
-    }
-}
-
 static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     uint32_t extensionCount;
 
@@ -21,7 +12,7 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-    std::set<std::string_view> requiredExtensions(device::deviceExtensions.begin(), device::deviceExtensions.end());
+    std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
     for(const auto &extension : availableExtensions){
         requiredExtensions.erase(extension.extensionName);
@@ -30,7 +21,7 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     return requiredExtensions.empty();
 }
 
-static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
+uint32_t Device::rateDeviceSuitability(VkPhysicalDevice device){
     uint32_t score = 0;
 
     QueueFamilyIndices indices = findQueueFamilies(device);
