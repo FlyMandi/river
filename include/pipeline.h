@@ -4,8 +4,11 @@
 #include <vector>
 
 inline VkRenderPass renderPass;
-inline VkPipelineLayout pipelineLayout;
 inline VkPipeline graphicsPipeline;
+inline VkPipelineLayout pipelineLayout;
+
+inline VkDescriptorSetLayout descriptorSetLayout;
+
 inline VkCommandPool graphicsCommandPool;
 inline VkCommandPool transferCommandPool;
 inline std::vector<VkCommandBuffer> commandBuffers;
