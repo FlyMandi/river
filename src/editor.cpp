@@ -25,7 +25,8 @@ void loopEditor()
 {
     //TODO: draw & exist only in specified viewport area
     //be able to have multiple viewports that can be paused (frozen) and resumed at will
-    while(!glfwWindowShouldClose(window)){
+    while(!glfwWindowShouldClose(window))
+    {
         glfwPollEvents();
         drawFrame();
     }

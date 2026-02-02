@@ -8,8 +8,11 @@
 #include <algorithm>
 
 static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats){
-    for(const auto &availableFormat : availableFormats){
-        if(VK_FORMAT_B8G8R8_SRGB == availableFormat.format && VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace){
+    for(const auto &availableFormat : availableFormats)
+    {
+        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format && 
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace
+        ){
             return availableFormat;
         }
     }
@@ -18,8 +21,10 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 }
 
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
-    for(const auto &availablePresentMode : availablePresentModes){
-        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
+    for(const auto &availablePresentMode : availablePresentModes)
+    {
+        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
+        {
             #ifdef DEBUG
                 printDebugLog('\0', "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", '\n');
             #endif
@@ -27,8 +32,10 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
         }
     }
 
-    for(const auto &availablePresentMode : availablePresentModes){
-        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
+    for(const auto &availablePresentMode : availablePresentModes)
+    {
+        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
+        {
             #ifdef DEBUG
                 printDebugLog('\0', "present mode: VK_PRESENT_MODE_MAILBOX_KHR", '\n');
             #endif
@@ -44,7 +51,8 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
-    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
+    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
+    {
         #ifdef DEBUG
             printDebugLog('\0', "swap size: ");
             printDebugLog(capabilities.currentExtent.width);
@@ -53,7 +61,9 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         #endif
 
         return capabilities.currentExtent;
-    }else{
+    }
+    else
+    {
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
@@ -73,7 +83,8 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     }
 }
 
-void createSwapChain(){
+void createSwapChain()
+{
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -82,7 +93,9 @@ void createSwapChain(){
 
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
-    if(0 < swapChainSupport.capabilities.maxImageCount && imageCount > swapChainSupport.capabilities.maxImageCount){
+    if( 0 < swapChainSupport.capabilities.maxImageCount && 
+        imageCount > swapChainSupport.capabilities.maxImageCount
+    ){
         imageCount = swapChainSupport.capabilities.maxImageCount;
     }
 
@@ -101,11 +114,14 @@ void createSwapChain(){
         logicalQueueFamilies.presentIndex
     };
 
-    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.presentIndex){
+    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.presentIndex)
+    {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
         createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    }else{
+    }
+    else
+    {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
@@ -118,7 +134,8 @@ void createSwapChain(){
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain) != VK_SUCCESS){
+    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create swap chain!");
         #endif
@@ -133,10 +150,12 @@ void createSwapChain(){
     swapChainExtent = extent;
 }
 
-void createImageViews(){
+void createImageViews()
+{
     swapChainImageViews.resize(swapChainImages.size()); 
 
-    for(size_t i = 0; i < swapChainImages.size(); ++i){
+    for(size_t i = 0; i < swapChainImages.size(); ++i)
+    {
         VkImageViewCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         createInfo.image = swapChainImages[i];
@@ -154,7 +173,8 @@ void createImageViews(){
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
+        if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+        {
             #ifdef DEBUG
                 printDebugLog("failed to create image views!");
             #endif
@@ -163,7 +183,8 @@ void createImageViews(){
     }
 }
 
-void createRenderPass(){
+void createRenderPass()
+{
     VkAttachmentDescription colorAttachment{}; 
     colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -202,7 +223,8 @@ void createRenderPass(){
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
+    if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create render pass!");
         #endif
@@ -210,19 +232,23 @@ void createRenderPass(){
     }
 }
 
-void cleanupSwapChain(){
-    for(size_t i = 0; i < swapChainFramebuffers.size(); ++i){
+void cleanupSwapChain()
+{
+    for(size_t i = 0; i < swapChainFramebuffers.size(); ++i)
+    {
         vkDestroyFramebuffer(logicalDevice, swapChainFramebuffers[i], nullptr);
     }
 
-    for(size_t i = 0; i < swapChainImageViews.size(); ++i){
+    for(size_t i = 0; i < swapChainImageViews.size(); ++i)
+    {
         vkDestroyImageView(logicalDevice, swapChainImageViews[i], nullptr);
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
 }
 
-void recreateSwapChain(){
+void recreateSwapChain()
+{
     int width = 0;
     int height = 0;
 
