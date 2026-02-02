@@ -79,7 +79,7 @@ if("MSVC" -eq $compiler)
 }
 elseIf("clang" -eq $compiler)
 {
-    #FIXME: it don't want
+    #it don't want
     &clang $sourceFilePaths
 }
 elseIf("g++" -eq $compiler)
