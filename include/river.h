@@ -23,4 +23,5 @@ void drawFrame();
 void windowPollEvents();
 
 void getProjectRoot(const char* rootName);
+
 }

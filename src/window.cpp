@@ -17,6 +17,7 @@ void river::cleanupGLFW(){
 }
 
 void river::windowPollEvents(){
+//TODO: better use of GLFW event system, there has to be a better way to check for window exit
     glfwPollEvents();
     window_SHOULDCLOSE = glfwWindowShouldClose(engine::window);
 }
