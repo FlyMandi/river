@@ -42,6 +42,8 @@ extern void createBuffer
     std::set<uint32_t>      &uniqueQueueFamilies
 );
 
+extern uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags);
+
 extern void createVertexBuffer();
 extern void createUniformBuffers();
 
