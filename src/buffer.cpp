@@ -5,15 +5,22 @@
 #include "device.h"
 #include "buffer.h"
 
+#include <cstdint>
 #include <cstring>
 #include <set>
 
-//HACK: hardcoded vertices
+//HACK: hardcoded vertices & indices
 const std::vector<Vertex> vertices =
 {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint32_t> indices =
+{
+    0, 1, 2, 2, 3, 0
 };
 
 VkVertexInputBindingDescription getVertexBindingDescription()
@@ -196,6 +203,50 @@ void createVertexBuffer()
     );
     
     copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+}
+
+void createIndexBuffer()
+{
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+
+    static std::set<uint32_t> queueFamilies = 
+    {
+        logicalQueueFamilies.graphicsIndex,
+        logicalQueueFamilies.transferIndex
+    };
+
+    createBuffer
+    (
+        bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer,
+        stagingBufferMemory,
+        queueFamilies
+    );
+
+    void* stagingBufferBegin;
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &stagingBufferBegin);
+    std::memcpy(stagingBufferBegin, indices.data(), (size_t)bufferSize);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
+    
+    createBuffer
+    (
+        bufferSize, 
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+        indexBuffer,
+        indexBufferMemory,
+        queueFamilies
+    );
+    
+    copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
