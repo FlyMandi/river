@@ -213,9 +213,10 @@ void cleanupVulkan(){
     }
 
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+    vkDestroyDevice(logicalDevice, nullptr);
 
     if(BUILD_DEBUG){
-        DestroyDebugUtilsMessengerEXT( nullptr); 
+        DestroyDebugUtilsMessengerEXT(nullptr); 
     }
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
