@@ -60,8 +60,10 @@ void createVertexBuffer()
     vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if(vkCreateBuffer(logicalDevice, &vertexBufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
-        printDebugLog('\0', "failed to create vertex buffer!");
+        printDebugLog("failed to create vertex buffer!");
         throw std::runtime_error("failed to create vertex buffer!");
+    }else{
+        printDebugLog('\0', "created vertex buffer.", '\n');
     }
 
     VkMemoryRequirements vertexBufferMemoryRequirements;
@@ -77,6 +79,8 @@ void createVertexBuffer()
     if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS){
         printDebugLog("failed to allocate vertex buffer memory!");
         throw std::runtime_error("failed to allocate vertex buffer memory!");
+    }else{
+        printDebugLog('\0', "allocated vertex buffer memory.", '\n');
     }
 
     void* vertexBufferBegin;
