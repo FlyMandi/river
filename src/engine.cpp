@@ -1,7 +1,9 @@
 #include "h/engine.h"
 #include <algorithm>
 #include <cstdint>
+#include <fstream>
 #include <limits>
+#include <string_view>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -64,6 +66,7 @@ void initVulkan(){
     createLogicalDevice();
     createSwapChain();
     createImageViews();
+    createGraphicsPipeline();
 }
 
 void cleanupVulkan(){
@@ -73,14 +76,14 @@ void cleanupVulkan(){
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroyDevice(device, nullptr);
 
-    if(isDebugMode){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
+    if(config_DEBUG){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
 }
 
 void createInstance(){
-    if(isDebugMode && !checkValidationLayerSupport()){
+    if(config_DEBUG && !checkValidationLayerSupport()){
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
@@ -102,7 +105,7 @@ void createInstance(){
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
-    if(isDebugMode){ std::cout << "\nAll needed extensions are present.\n\n"; }
+    if(config_DEBUG){ std::cout << "\nAll needed extensions are present.\n\n"; }
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -112,7 +115,7 @@ void createInstance(){
     createInfo.enabledLayerCount = 0;
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if(isDebugMode){
+    if(config_DEBUG){
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
         createInfo.ppEnabledLayerNames = validationLayers.data();
         
@@ -129,7 +132,7 @@ void createInstance(){
 }
 
 void setupDebugMessenger(){
-    if(!isDebugMode){ return; }
+    if(!config_DEBUG){ return; }
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
@@ -204,7 +207,7 @@ std::vector<const char*> getRequiredExtensions(){
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    if(isDebugMode){
+    if(config_DEBUG){
         extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
 
@@ -212,26 +215,26 @@ std::vector<const char*> getRequiredExtensions(){
 }
 
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    if(isDebugMode){
+    if(config_DEBUG){
         std::cout << "\n\tPresent:\n";
         for(const auto &extension : *instanceExt){
             std::cout << "\t" << extension.extensionName << '\n';
         }
     }
 
-    if(isDebugMode) { std::cout << "\n\tRequired:\n"; }
+    if(config_DEBUG) { std::cout << "\n\tRequired:\n"; }
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    if(isDebugMode){ std::cout << "found:\t" << required << '\n'; }
+                    if(config_DEBUG){ std::cout << "found:\t" << required << '\n'; }
                     extFound = true;
                     break;
                 }
             }
         if(!extFound){ 
-            if(isDebugMode){ std::cout << "not found: \t" << required << '\n'; }
+            if(config_DEBUG){ std::cout << "not found: \t" << required << '\n'; }
             return false; 
         } 
     }
@@ -307,7 +310,7 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    if(isDebugMode){
+    if(config_DEBUG){
         std::cout << deviceProperties.deviceName << ": score " << score << '\n';
     }
 
@@ -382,25 +385,25 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
+            if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; }
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
+            if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_MAILBOX_KHR" << '\n';}
             return availablePresentMode;
         }
     }
 
-    if(isDebugMode){ std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';}
+    if(config_DEBUG){ std::cout << "present mode: VK_PRESENT_MODE_FIFO_KHR" << '\n';}
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        if(isDebugMode){
+        if(config_DEBUG){
             std::cout << "swap width: " << capabilities.currentExtent.width << '\n';
             std::cout << "swap height: " << capabilities.currentExtent.height << '\n';
         }
@@ -414,7 +417,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        if(isDebugMode){
+        if(config_DEBUG){
             std::cout << "swap width: " << actualExtent.width << '\n';
             std::cout << "swap height: " << actualExtent.height << '\n';
         }
@@ -449,7 +452,7 @@ void createLogicalDevice(){
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    if(isDebugMode){
+    if(config_DEBUG){
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
     }else{
@@ -550,4 +553,33 @@ void createImageViews(){
             throw std::runtime_error("failed to create image views!");
         }
     }
+}
+
+static std::vector<char> readFile(const std::string &filename){
+    if(config_DEBUG){ std::cout << "reading file: " << filename << '\n'; }
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if(!file.is_open()){
+        throw std::runtime_error("failed to open file");
+    }
+
+    size_t fileSize = (size_t)file.tellg();
+    std::vector<char> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+
+    file.close();
+
+    if(config_DEBUG){
+        std::cout << "buffer size: " << buffer.size() << '\n';
+        std::cout << "file size: " << fileSize << '\n';
+    }
+
+    return buffer;
+}
+
+void createGraphicsPipeline(){
+    auto vertShaderCode = readFile("shaders/vertTest.vert");
+    auto fragShaderCode = readFile("shaders/fragTest.frag");
 }
