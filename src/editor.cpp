@@ -1,43 +1,59 @@
 #include "editor.h"
 #include "river.h"
-#include "window.h"
 #include <filesystem>
 
-void initEditor()
-{
+void initEditor
+(
+    EngineData          &engine,
+    ProjectManifest     &manifest,
+    const UserSettings  &settings
+){
     //TODO:#40: main menu GUI. buttons:
     //load project
     //create new project
     //exit
 
     //HACK: currently no project manifest, so all hardcoded.
-    projectName = "riverTest";
-    projectVersion = "0.0.0";
+    //later acquire from files
 
-    riverWindowWidth = 1920;
-    riverWindowHeight = 1080;
+    manifest.projectName = "riverTest";
+    manifest.projectVersion = "0.0.0";
 
-    getProjectRoot("river");
+    logLevel = 0;
 
-    projectModelPath = std::filesystem::canonical(projectRoot / "assets/models/WB_Vase.obj");
-    projectTexturePath = std::filesystem::canonical(projectRoot / "assets/textures/WB_Vase_Mat_Base_color.jpg");
+    engine.windowName = manifest.projectName + " " + manifest.projectVersion;
 
-    riverSetupLog();
+    manifest.projectRoot = getProjectRoot("river");
+    manifest.projectLog = manifest.projectRoot / "log" / "river.log";
+
+    manifest.vertexShader = manifest.projectRoot / "bin" / "vertTest.vert.spv";
+    manifest.fragmentShader = manifest.projectRoot / "bin" / "fragTest.frag.spv";
+
+    std::filesystem::path models = manifest.projectRoot / "assets" / "models";
+    std::filesystem::path textures = manifest.projectRoot / "assets" / "textures";
+
+    manifest.projectModelPath = std::filesystem::canonical(models / "WB_Vase.obj");
+    manifest.projectTexturePath = std::filesystem::canonical(textures / "WB_Vase_Mat_Base_color.jpg");
+
+    riverSetupLog(manifest.projectLog);
 }
 
-void loopEditor()
-{
+void loopEditor
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+){
     //TODO:#39: draw & exist only in specified viewport area
     //be able to have multiple viewports that can be paused (frozen) and resumed at will
-    while(!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(engine.window))
     {
         glfwPollEvents();
-        drawFrame();
+        drawFrame(engine, settings);
     }
 }
 
-void cleanupEditor()
+void cleanupEditor(EngineData &engine)
 {
-    cleanupVulkan();
+    cleanupVulkan(engine);
     riverCloseLog();
 }

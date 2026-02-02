@@ -1,26 +1,34 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
-#include <vector>
+#include "river.h"
 
-constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+extern VkExtent2D chooseSwapExtent
+(
+    const VkSurfaceCapabilitiesKHR  &capabilities,
+    GLFWwindow                      *window
+);
 
-inline VkSwapchainKHR swapchain;
-inline VkFormat swapchainImageFormat;
-inline VkExtent2D swapchainExtent;
+extern void createSwapchain
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+);
 
-inline std::vector<VkImage> swapchainImages{};
-inline std::vector<VkImageView> swapchainImageViews{};
-inline std::vector<VkFramebuffer> swapchainFramebuffers{};
+extern void recreateSwapchain
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+);
 
-inline uint32_t swapchainImageCount;
+extern void createRenderPass
+(
+    EngineData &engine
+);
 
-extern void createSwapchain();
-extern void createSwapImageViews();
-extern void createRenderPass();
-
-extern void cleanupSwapchain();
-extern void recreateSwapchain();
-
-extern VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+extern void cleanupSwapchain
+(
+    const EngineData &engine
+);

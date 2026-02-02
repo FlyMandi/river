@@ -105,7 +105,7 @@ const char* riverTranslateVkResult(VkResult code)
 
 #ifdef DEBUG
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
+internal VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
     VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT             messageType,
@@ -121,7 +121,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     return VK_FALSE;
 }
 
-static VkResult CreateDebugUtilsMessengerEXT
+internal VkResult CreateDebugUtilsMessengerEXT
 (
     VkInstance                                  instance,
     const VkDebugUtilsMessengerCreateInfoEXT    *createInfo,
@@ -139,7 +139,7 @@ static VkResult CreateDebugUtilsMessengerEXT
     }
 }
 
-static VkBool32 checkValidationLayerSupport()
+internal VkBool32 checkValidationLayerSupport()
 {
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -176,8 +176,10 @@ static VkBool32 checkValidationLayerSupport()
     return VK_TRUE;
 }
 
-static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
-{
+internal void populateDebugMessengerCreateInfo
+(
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo
+){
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -189,8 +191,10 @@ static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT 
     createInfo.pfnUserCallback = debugCallback;
 }
 
-static void setupDebugMessenger()
-{
+internal void setupDebugMessenger
+(
+    const VkInstance &instance
+){
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
@@ -202,8 +206,11 @@ static void setupDebugMessenger()
     );
 }
 
-static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator)
-{
+internal void DestroyDebugUtilsMessengerEXT
+(
+    const VkInstance            &instance,
+    const VkAllocationCallbacks *allocator
+){
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func)
     {
@@ -212,7 +219,7 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 }
 #endif
 
-static std::vector<const char*> getRequiredExtensions()
+internal std::vector<const char*> getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -227,8 +234,11 @@ static std::vector<const char*> getRequiredExtensions()
     return extensions;
 }
 
-static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
-{
+internal VkBool32 checkInstanceExtensions
+(
+    std::vector<const char*>            *requiredExt,
+    std::vector<VkExtensionProperties>  *instanceExt
+){
     for(const auto &required : *requiredExt)
     {
         VkBool32 extFound = VK_FALSE;
@@ -254,15 +264,18 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
     return VK_TRUE;
 }
 
-static void createInstance()
-{
+internal void createInstance
+(
+    EngineData              &engine,
+    const ProjectManifest   &manifest
+){
     #ifdef DEBUG
         riverAssert(checkValidationLayerSupport(), "validation layers requested, but not available!");
     #endif
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = projectName;
+    appInfo.pApplicationName = manifest.projectName.c_str();
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
@@ -302,111 +315,118 @@ static void createInstance()
 
     riverAssertVkSuccess
     (
-        vkCreateInstance(&createInfo, nullptr, &instance),
+        vkCreateInstance(&createInfo, nullptr, &engine.instance),
         "failed to create instance."
     );
 }
 
-void initVulkan()
-{
-    createInstance();
+void initVulkan
+(
+    EngineData              &engine,
+    const ProjectManifest   &manifest,
+    const UserSettings      &settings
+){
+    createInstance(engine, manifest);
 
     #ifdef DEBUG
-        setupDebugMessenger();
+        setupDebugMessenger(engine.instance);
     #endif
 
-    createSurface();
-    pickPhysicalDevice();
-    createLogicalDevice();
+    createSurface(engine);
+    pickPhysicalDevice(engine);
+    createLogicalDevice(engine);
 
-    createSwapchain();
-    createSwapImageViews();
+    createSwapchain(engine, settings);
 
-    createRenderPass();
-    createDescriptorSetLayout();
-    createGraphicsPipeline();
+    createRenderPass(engine);
+    createDescriptorSetLayout(engine);
+    createGraphicsPipeline(engine, manifest);
 
-    createCommandPools();
-    createDepthResources();
-    createFramebuffers();
+    createCommandPools(engine);
+    createDepthResources(engine);
+    createFramebuffers(engine);
 
-    createTextureImage();
-    createTextureImageView();
-    createTextureSampler();
+    createTextureImage(engine, manifest);
+    createTextureSampler(engine);
 
-    loadModel();
-    createVertexBuffer();
-    createUniformBuffers();
+    loadModel(engine, manifest.projectModelPath);
+    createVertexBuffer(engine);
+    createUniformBuffers(engine);
 
-    createDescriptorPool();
-    createDescriptorSets();
+    createDescriptorPool(engine);
+    createDescriptorSets(engine);
 
-    createCommandBuffers();
-    createSyncObjects();
+    createCommandBuffers(engine);
+    createSyncObjects(engine);
 }
 
-void cleanupVulkan()
-{
-    vkDeviceWaitIdle(logicalDevice);
+void cleanupVulkan
+(
+    EngineData &engine
+){
+    vkDeviceWaitIdle(engine.logicalDevice);
 
-    cleanupSyncObjects();
-    cleanupSwapchain();
+    cleanupSyncObjects(engine);
+    cleanupSwapchain(engine);
 
-    vkDestroySampler(logicalDevice, textureSampler, nullptr);
+    vkDestroySampler(engine.logicalDevice, engine.textureSampler, nullptr);
 
-    vkDestroyImage(logicalDevice, textureImage, nullptr);
-    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
-    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, engine.textureImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.textureImageMemory, nullptr);
+    vkDestroyImageView(engine.logicalDevice, engine.textureImageView, nullptr);
 
-    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
-    vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+    vkDestroyBuffer(engine.logicalDevice, engine.vertexBuffer, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.vertexBufferMemory, nullptr);
 
-    vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(engine.logicalDevice, engine.descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(engine.logicalDevice, engine.descriptorSetLayout, nullptr);
 
-    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(logicalDevice, graphicsPipelineLayout, nullptr);
+    vkDestroyPipeline(engine.logicalDevice, engine.graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(engine.logicalDevice, engine.graphicsPipelineLayout, nullptr);
 
-    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+    vkDestroyRenderPass(engine.logicalDevice, engine.renderPass, nullptr);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
-        vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(engine.logicalDevice, engine.uniformBuffers[i], nullptr);
+        vkFreeMemory(engine.logicalDevice, engine.uniformBuffersMemory[i], nullptr);
     }
 
-    vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
-    vkDestroyCommandPool(logicalDevice, transferCommandPool, nullptr);
-    vkDestroyDevice(logicalDevice, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, engine.graphicsCommandPool, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, engine.transferCommandPool, nullptr);
+    vkDestroyDevice(engine.logicalDevice, nullptr);
 
     #ifdef DEBUG
-        DestroyDebugUtilsMessengerEXT(nullptr);
+        DestroyDebugUtilsMessengerEXT(engine.instance, nullptr);
     #endif
 
-    vkDestroySurfaceKHR(instance, surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    vkDestroySurfaceKHR(engine.instance, engine.surface, nullptr);
+    vkDestroyInstance(engine.instance, nullptr);
 }
 
-void drawFrame()
-{
-    vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+void drawFrame
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+){
+    vkWaitForFences(engine.logicalDevice, 1, &engine.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
 
     VkResult result =
         vkAcquireNextImageKHR
         (
-            logicalDevice,
-            swapchain,
+            engine.logicalDevice,
+            engine.swapchain,
             UINT64_MAX,
-            acquireSemaphore,
+            engine.acquireSemaphore,
             VK_NULL_HANDLE,
             &imageIndex
         );
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        recreateSwapchain();
+        recreateSwapchain(engine, settings);
         return;
     }
     else if(result != VK_SUBOPTIMAL_KHR)
@@ -414,21 +434,21 @@ void drawFrame()
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
-    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+    vkResetFences(engine.logicalDevice, 1, &engine.inFlightFences[currentFrame]);
 
-    updateUniformBuffer(currentFrame);
+    updateUniformBuffer(engine, currentFrame);
 
-    vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+    vkResetCommandBuffer(engine.commandBuffers[currentFrame], 0);
+    recordCommandBuffer(engine, engine.commandBuffers[currentFrame], imageIndex);
 
     std::array<VkSemaphore, 1> waitSemaphores =
     {
-        acquireSemaphore
+        engine.acquireSemaphore
     };
 
     std::array<VkSemaphore, 1> signalSemaphores =
     {
-        imageReadyForPresentSemaphores[imageIndex]
+        engine.imageReadyForPresentSemaphores[imageIndex]
     };
 
     VkPipelineStageFlags waitStages[] =
@@ -447,37 +467,37 @@ void drawFrame()
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
     drawSubmitInfo.commandBufferCount = 1;
-    drawSubmitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+    drawSubmitInfo.pCommandBuffers = &engine.commandBuffers[currentFrame];
 
     riverAssertVkSuccess
     (
-        vkQueueSubmit(graphicsQueue, 1, &drawSubmitInfo, inFlightFences[currentFrame]),
+        vkQueueSubmit(engine.graphicsQueue, 1, &drawSubmitInfo, engine.inFlightFences[currentFrame]),
         "failed to submit draw command buffer!"
     );
 
     VkSwapchainKHR swapchains[] =
     {
-        swapchain
+        engine.swapchain
     };
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &imageReadyForPresentSemaphores[imageIndex];
+    presentInfo.pWaitSemaphores = &engine.imageReadyForPresentSemaphores[imageIndex];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    std::swap(imageReadyForWriteSemaphores[imageIndex], acquireSemaphore);
+    std::swap(engine.imageReadyForWriteSemaphores[imageIndex], engine.acquireSemaphore);
 
-    result = vkQueuePresentKHR(presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(engine.presentQueue, &presentInfo);
 
-    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || engine.framebufferResized)
     {
-        framebufferResized = VK_FALSE;
-        recreateSwapchain();
+        engine.framebufferResized = VK_FALSE;
+        recreateSwapchain(engine, settings);
     }
     else
     {
@@ -487,7 +507,7 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void getProjectRoot(const char *rootName)
+std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
@@ -495,20 +515,20 @@ void getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            projectRoot = current;
-            projectLog  = current / "log" / "river.log";
             riverLog(std::format("set project root to {}", current.string()), RIV_LOG_LEVEL_TRACE);
+            return current;
         }
         current = current.parent_path();
     }
+    return "RIV_PATH_UNDETERMINED";
 }
 
-void riverSetupLog()
+void riverSetupLog(const std::filesystem::path &path)
 {
 #ifdef DEBUG
     return;
 #endif
-    logFile.open(projectLog, std::ios::trunc);
+    logFile.open(path, std::ios::trunc);
     riverAssert(logFile.is_open(), "failed to open log file!");
 }
 

@@ -24,8 +24,8 @@ foreach($platform in $Platforms)
 {
     foreach($config in $Configurations)
     {
-        $objPath = ".\obj\$platform" + "_$config"
-        $binPath = ".\bin\$platform" + "_$config"
+        $objPath = "./obj/$platform" + "_$config"
+        $binPath = "./bin/$platform" + "_$config"
 
         if(-Not(Test-Path $objPath))
         {
@@ -39,26 +39,26 @@ foreach($platform in $Platforms)
     }
 }
 
-if(-Not(Test-Path ".\build\"))
+if(-Not(Test-Path "./build/"))
 {
-    &mkdir ".\build\"
+    &mkdir "./build/"
 }
 
-if($build -eq "release" -and (-Not(Test-Path ".\log\")))
+if($build -eq "release" -and (-Not(Test-Path "./log/")))
 {
-    &mkdir ".\log\"
+    &mkdir "./log/"
 }
 
 &premake5 ecc
 
-$target = ".\bin\$OS" + "_$build\River.exe"
+$target = "./bin/$OS" + "_$build/River.exe"
 
-$sourceFiles = Get-ChildItem ".\src\" -File
-$sourceFiles += Get-ChildItem ".\include\" -File
+$sourceFiles = Get-ChildItem "./src/" -File
+$sourceFiles += Get-ChildItem "./include/" -File
 
-$includes = "$env:VULKAN_SDK\1.4.313.2\Include"
-$includes += ".\vendor\glfw-3.4-win64\include\"
-$includes += ".\vendor\stb\"
+$includes = "$env:VULKAN_SDK/1.4.313.2/Include"
+$includes += "./vendor/glfw-3.4-win64/include/"
+$includes += "./vendor/stb/"
 
 foreach($file in $sourceFiles)
 {
@@ -72,18 +72,18 @@ if("MSVC" -eq $compiler)
 {
     &premake5 vs2022
 
-    $VS = Join-Path $env:PROGRAMFILES "\Microsoft Visual Studio\2022\Community\"
+    $VS = Join-Path $env:PROGRAMFILES "/Microsoft Visual Studio/2022/Community/"
 
     if($nAMD)
     {
-        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\"
+        $MSBuild = Join-Path $VS "/MSBuild/Current/bin/"
     }
     else
     {
-        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\"
+        $MSBuild = Join-Path $VS "/MSBuild/Current/bin/amd64/"
     }
 
-    &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
+    &"$MSBuild/MSBuild.exe" ./build/River.sln -p:Configuration=$build
 }
 elseIf("clang" -eq $compiler)
 {
@@ -92,7 +92,7 @@ elseIf("clang" -eq $compiler)
         $arguments += "-I$include"
     }
 
-    $arguments += "-o .\build\"
+    $arguments += "-o ./build/"
 
     Invoke-Expression "clang $sourceFilePaths $arguments"
 }
@@ -100,7 +100,7 @@ elseIf("g++" -eq $compiler)
 {
     &premake5 gmake
 
-    Push-Location ".\build\"
+    Push-Location "./build/"
     &make
     Pop-Location
 }
@@ -109,7 +109,7 @@ if(0 -eq $LASTEXITCODE)
 {
     Write-Host "`ncompiled successfully!" -ForegroundColor Green
     Write-Host "compiling shaders...`n"
-    &.\shader_comp.ps1
+    &./shader_comp.ps1
 }
 
 if(0 -eq $LASTEXITCODE -and $build -eq "debug")

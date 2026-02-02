@@ -1,16 +1,14 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
+#include "river.h"
 
-inline GLFWwindow *window;
+extern void initGLFW
+(
+    EngineData              &engine,
+    const UserSettings      &settings
+);
 
-inline uint32_t riverWindowWidth;
-inline uint32_t riverWindowHeight;
+extern void cleanupGLFW(GLFWwindow *window);
 
-inline VkSurfaceKHR surface;
-
-extern void initGLFW();
-extern void cleanupGLFW();
-
-extern void createSurface();
+extern void createSurface(EngineData &engine);

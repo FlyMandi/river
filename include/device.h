@@ -1,35 +1,24 @@
 #pragma once
 
-#include "vulkan/vulkan_core.h"
+#include "river.h"
 
-#include <cstdint>
-#include <vector>
+extern SwapchainSupportDetails querySwapchainSupport
+(
+    const VkPhysicalDevice  &physicalDevice,
+    const VkSurfaceKHR      &surface
+);
 
-struct SwapchainSupportDetails
-{
-    VkSurfaceCapabilitiesKHR capabilities{};
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-};
+extern QueueFamilyIndices findQueueFamilies
+(
+    const EngineData &engine
+);
 
-struct QueueFamilyIndices
-{
-    uint32_t graphicsIndex = UINT32_MAX;
-    uint32_t transferIndex = UINT32_MAX;
-    uint32_t presentIndex  = UINT32_MAX;
-};
+extern void pickPhysicalDevice
+(
+    EngineData &engine
+);
 
-inline QueueFamilyIndices logicalQueueFamilies;
-
-inline VkPhysicalDevice physicalDevice;
-inline VkPhysicalDeviceProperties deviceProperties;
-inline VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
-inline VkPhysicalDeviceFeatures deviceFeatures;
-
-inline VkDevice logicalDevice;
-
-extern SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
-extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-extern void pickPhysicalDevice();
-extern void createLogicalDevice();
+extern void createLogicalDevice
+(
+    EngineData &engine
+);

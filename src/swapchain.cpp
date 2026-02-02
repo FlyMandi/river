@@ -1,7 +1,6 @@
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
-#include "window.h"
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
@@ -11,8 +10,11 @@
 #include <algorithm>
 #include <cstdint>
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
-{
+internal VkExtent2D chooseSwapExtent
+(
+    const VkSurfaceCapabilitiesKHR  &capabilities,
+    GLFWwindow                      *window
+){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
         return capabilities.currentExtent;
@@ -31,9 +33,12 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     }
 }
 
-void createSwapchain()
-{
-    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice);
+void createSwapchain
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+){
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(engine.physicalDevice, engine.surface);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
     for(const auto &availableFormat : swapchainSupport.formats)
@@ -45,32 +50,30 @@ void createSwapchain()
         }
     }
 
-    //TODO: extract this into user defined variable in per-project settings manifest
-    VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR; //fallback
 
     for(const auto &availablePresentMode : swapchainSupport.presentModes)
     {
-        if(availablePresentMode == chosenPresentMode)
+        if(availablePresentMode == settings.presentMode)
         {
             presentMode = availablePresentMode;
         }
     }
 
-    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities);
+    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities, engine.window);
 
-    swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
+    engine.swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
 
     if( 0 < swapchainSupport.capabilities.maxImageCount &&
-        swapchainImageCount > swapchainSupport.capabilities.maxImageCount
+        engine.swapchainImageCount > swapchainSupport.capabilities.maxImageCount
     ){
-        swapchainImageCount = swapchainSupport.capabilities.maxImageCount;
+        engine.swapchainImageCount = swapchainSupport.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface;
-    createInfo.minImageCount = swapchainImageCount;
+    createInfo.surface = engine.surface;
+    createInfo.minImageCount = engine.swapchainImageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
@@ -78,11 +81,11 @@ void createSwapchain()
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     uint32_t queueFamilyIndices[] = {
-        logicalQueueFamilies.graphicsIndex,
-        logicalQueueFamilies.presentIndex
+        engine.logicalQueueFamilies.graphicsIndex,
+        engine.logicalQueueFamilies.presentIndex
     };
 
-    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.presentIndex)
+    if(engine.logicalQueueFamilies.graphicsIndex != engine.logicalQueueFamilies.presentIndex)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
@@ -104,37 +107,43 @@ void createSwapchain()
 
     riverAssertVkSuccess
     (
-        vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain),
+        vkCreateSwapchainKHR(engine.logicalDevice, &createInfo, nullptr, &engine.swapchain),
         "failed to create swap chain!"
     );
 
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
-    swapchainImages.resize(swapchainImageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, swapchainImages.data());
+    vkGetSwapchainImagesKHR(engine.logicalDevice, engine.swapchain, &engine.swapchainImageCount, nullptr);
+    engine.swapchainImages.resize(engine.swapchainImageCount);
+    vkGetSwapchainImagesKHR
+    (
+        engine.logicalDevice,
+        engine.swapchain,
+        &engine.swapchainImageCount,
+        engine.swapchainImages.data()
+    );
 
-    swapchainImageFormat = surfaceFormat.format;
-    swapchainExtent = extent;
-}
+    engine.swapchainImageFormat = surfaceFormat.format;
+    engine.swapchainExtent = extent;
 
-void createSwapImageViews()
-{
-    swapchainImageViews.resize(swapchainImages.size());
+    engine.swapchainImageViews.resize(engine.swapchainImages.size());
 
-    for(uint32_t i = 0; i < swapchainImages.size(); ++i)
+    for(uint32_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        swapchainImageViews[i] =    createImageView
-                                    (
-                                        swapchainImages[i],
-                                        swapchainImageFormat,
-                                        VK_IMAGE_ASPECT_COLOR_BIT
-                                    );
+        engine.swapchainImageViews[i] = createImageView
+                                        (
+                                            engine,
+                                            engine.swapchainImages[i],
+                                            engine.swapchainImageFormat,
+                                            VK_IMAGE_ASPECT_COLOR_BIT
+                                        );
     }
 }
 
-void createRenderPass()
-{
+void createRenderPass
+(
+    EngineData &engine
+){
     VkAttachmentDescription colorAttachmentDescription{};
-    colorAttachmentDescription.format = swapchainImageFormat;
+    colorAttachmentDescription.format = engine.swapchainImageFormat;
     colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 
     colorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -159,6 +168,7 @@ void createRenderPass()
     VkAttachmentDescription depthAttachmentDescription{};
     depthAttachmentDescription.format = findSupportedFormat
                                         (
+                                            engine,
                                             candidates,
                                             VK_IMAGE_TILING_OPTIMAL,
                                             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
@@ -209,49 +219,53 @@ void createRenderPass()
 
     riverAssertVkSuccess
     (
-        vkCreateRenderPass(logicalDevice, &renderPassCreateInfo, nullptr, &renderPass),
+        vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &engine.renderPass),
         "failed to create render pass!"
     );
 }
 
-void cleanupSwapchain()
-{
-    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
-    vkDestroyImage(logicalDevice, depthImage, nullptr);
-    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+void cleanupSwapchain
+(
+    const EngineData &engine
+){
+    vkDestroyImageView(engine.logicalDevice, engine.depthImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, engine.depthImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.depthImageMemory, nullptr);
 
-    for(size_t i = 0; i < swapchainFramebuffers.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainFramebuffers.size(); ++i)
     {
-        vkDestroyFramebuffer(logicalDevice, swapchainFramebuffers[i], nullptr);
+        vkDestroyFramebuffer(engine.logicalDevice, engine.swapchainFramebuffers[i], nullptr);
     }
 
-    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainImageViews.size(); ++i)
     {
-        vkDestroyImageView(logicalDevice, swapchainImageViews[i], nullptr);
+        vkDestroyImageView(engine.logicalDevice, engine.swapchainImageViews[i], nullptr);
     }
 
-    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
+    vkDestroySwapchainKHR(engine.logicalDevice, engine.swapchain, nullptr);
 }
 
-void recreateSwapchain()
-{
+void recreateSwapchain
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+){
     int width = 0;
     int height = 0;
 
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(engine.window, &width, &height);
     while(width == 0 || height == 0)
     {
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(engine.window, &width, &height);
         glfwWaitEvents();
     }
-    vkDeviceWaitIdle(logicalDevice);
+    vkDeviceWaitIdle(engine.logicalDevice);
 
-    cleanupSwapchain();
+    cleanupSwapchain(engine);
 
-    createSwapchain();
-    createSwapImageViews();
-    createDepthResources();
-    createFramebuffers();
+    createSwapchain(engine, settings);
+    createDepthResources(engine);
+    createFramebuffers(engine);
 
     riverLog(std::format("recreated swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 }
