@@ -1,7 +1,28 @@
 ## Introduction
 
 This is a cross-platform 3D Game Engine that utilizes the Vulkan Graphics API.
-I guess you could say I wrote this "from scratch", but that's a relative term, I obviously did not create Vulkan.
-GLFW is used to manage windows.
+Using this project to learn as I go about everything related to graphics & low-level engine programming.
 
-Progress tracking available here: [Project Overview](https://github.com/users/FlyMandi/projects/1)
+I've used lots of resources to learn Vulkan with C++ but left out a lot of the (frankly unnecessary) OOP-ness of common implementations.
+
+I want this to be my engine, not to reinvent the wheel, but to write it for the sake of learning and write a simple game or two with it. It'll not only teach me about engine programming, but force me to use my own product, so to say.
+
+### Concepts this project has taught me so far:
+- building a graphical application ""from scratch""
+- synchronization primitives
+- the Vulkan graphics pipeline
+- swapchain & present modes
+- shader basics
+- vertex buffers
+
+### State:
+- there's a window...
+- ...you can resize it!
+- the window shows a hardcoded triangle...
+- ...the triangle took 1000+ lines of code!
+
+### Plans:
+- building an editor that's able to save & load models/projects
+- learn and implement material shaders, compute shaders, etc
+- create an API to write games with <- possibly? I'll see about what approach sticks.
+- ray tracing....... in due time.
