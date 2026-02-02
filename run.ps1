@@ -109,6 +109,13 @@ if(0 -eq $LASTEXITCODE)
 
 if(0 -eq $LASTEXITCODE)
 {
+    Write-Host "`ngenerating rdi debug info..."
+
+    Invoke-Expression "radbin --rdi $target"
+}
+
+if(0 -eq $LASTEXITCODE)
+{
     Write-Host "`nrunning $target..."
     &$target
 }
