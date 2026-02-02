@@ -8,7 +8,6 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include <map>
 
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
