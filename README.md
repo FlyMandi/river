@@ -37,4 +37,5 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - add a wireframe view via hotkey
 - anything else I'm motivated enough to implement, like for example:
     - replacing GLFW with my own cross-platform windowing implementation (Win32, macOS, X11, Wayland)
+    - implementing OpenGL / DirectX / Metal rendering... maybe for the far future
     - replacing stb with my own image parser
