@@ -1,5 +1,6 @@
 #include "river.h"
 
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 
@@ -22,16 +23,21 @@ std::filesystem::path getProjectRoot(const char *rootName){
 }
 
 //TODO: flush every time the application is started, prob use a boolean
-void printDebugLog(const std::string &text, std::filesystem::path &logFile){
+void printDebugLog(const std::string &text, std::filesystem::path &logFile, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
         std::ofstream file(logFile, std::ios::app);
 
         if(!file.is_open()){
             throw std::runtime_error("failed to open file");
         }else{
-            file << text << '\n';
+            for(;tabs > 0; --tabs){
+                file << '\t'; 
+            }
+                file << text;
+            for(;newlines > 0; --newlines){
+                file << '\n';
+            }
         }
-
         file.close();
     }
 }
