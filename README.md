@@ -23,8 +23,9 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
+- replacing GLFW with my own cross-platform windowing implementation (Win32, macOS, X11, Wayland)
 - camera control
-- a GUI (maybe ImGui to start with)
+- a GUI (imgui / clay)
 - a default project.
 - project management, custom filetype
 
