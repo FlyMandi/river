@@ -142,7 +142,7 @@ void transitionImageLayout
     flushCommandBuffer(commandBuffer, graphicsCommandPool, graphicsQueue);
 }
 
-void createTextureImage()
+void createTextureImage(const std::filesystem::path &texturePath)
 {
     int texWidth;
     int texHeight;
@@ -150,7 +150,7 @@ void createTextureImage()
 
     stbi_uc *pixels =   stbi_load
                         (
-                            projectTexturePath.string().c_str(),
+                            texturePath.string().c_str(),
                             &texWidth,
                             &texHeight,
                             &texChannels,
@@ -166,7 +166,7 @@ void createTextureImage()
             std::format
             (
                 "failed to load texture image from {}: {}",
-                projectTexturePath.string(),
+                texturePath.string(),
                 stbi_failure_reason()
             )
         );

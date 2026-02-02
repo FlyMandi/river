@@ -254,7 +254,7 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
     return VK_TRUE;
 }
 
-static void createInstance()
+static void createInstance(const ProjectManifest &manifest)
 {
     #ifdef DEBUG
         riverAssert(checkValidationLayerSupport(), "validation layers requested, but not available!");
@@ -262,7 +262,7 @@ static void createInstance()
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = projectName;
+    appInfo.pApplicationName = manifest.projectName;
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
@@ -309,7 +309,7 @@ static void createInstance()
 
 void initVulkan(const ProjectManifest &manifest)
 {
-    createInstance();
+    createInstance(manifest);
 
     #ifdef DEBUG
         setupDebugMessenger();
@@ -330,7 +330,7 @@ void initVulkan(const ProjectManifest &manifest)
     createDepthResources();
     createFramebuffers();
 
-    createTextureImage();
+    createTextureImage(manifest.projectTexturePath);
     createTextureImageView();
     createTextureSampler();
 
@@ -345,7 +345,7 @@ void initVulkan(const ProjectManifest &manifest)
     createSyncObjects();
 }
 
-void cleanupVulkan()
+void cleanupVulkan(EngineData &engine)
 {
     vkDeviceWaitIdle(logicalDevice);
 
@@ -383,7 +383,7 @@ void cleanupVulkan()
         DestroyDebugUtilsMessengerEXT(nullptr);
     #endif
 
-    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroySurfaceKHR(instance, engine.surface, nullptr);
     vkDestroyInstance(instance, nullptr);
 }
 
@@ -500,6 +500,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
         }
         current = current.parent_path();
     }
+    return "RIV_PATH_UNDETERMINED";
 }
 
 void riverSetupLog(const std::filesystem::path &path)

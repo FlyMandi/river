@@ -2,6 +2,8 @@
 
 #include "vulkan/vulkan_core.h"
 
+#include <filesystem>
+
 extern void createImage
 (
     uint32_t                width,
@@ -21,7 +23,7 @@ VkImageView createImageView
     VkImageAspectFlags  aspectFlags
 );
 
-extern void createTextureImage();
+extern void createTextureImage(const std::filesystem::path &texturePath);
 extern void createTextureImageView();
 extern void createTextureSampler();
 
