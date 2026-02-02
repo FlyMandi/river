@@ -24,7 +24,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
-- replacing GLFW with my own cross-platform windowing implementation (Win32, macOS, X11, Wayland)
 - camera control
 - a GUI (imgui / clay)
 - a default project.
@@ -36,4 +35,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - create an API to write games with (no scripting, pure C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
 - add a wireframe view via hotkey
-- anything else I'm motivated enough to implement
+- anything else I'm motivated enough to implement, like for example:
+    - replacing GLFW with my own cross-platform windowing implementation (Win32, macOS, X11, Wayland)
+    - replacing stb with my own image parser
