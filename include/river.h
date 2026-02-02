@@ -19,6 +19,9 @@ inline std::filesystem::path projectRoot;
 inline std::filesystem::path projectLog;
 #define projectLogFolder = projectRoot / "log";
 
+inline std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_MODEL_PATH";
+inline std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
+
 inline VkInstance instance;
 
 extern void initVulkan();

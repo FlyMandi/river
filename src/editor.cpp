@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "river.h"
 #include "window.h"
+#include <filesystem>
 
 void initEditor()
 {
@@ -16,10 +17,11 @@ void initEditor()
     riverWindowWidth = 1920;
     riverWindowHeight = 1080;
 
-    riverModelPath = "assets/models/WB_Vase.obj";
-    riverTexturePath = "assets/textures/WB_Vase_Mat_Base_color.jpg";
-
     getProjectRoot("river");
+
+    projectModelPath = std::filesystem::canonical(projectRoot / "assets/models/WB_Vase.obj");
+    projectTexturePath = std::filesystem::canonical(projectRoot / "assets/textures/WB_Vase_Mat_Base_color.jpg");
+
     riverSetupLog();
 }
 
