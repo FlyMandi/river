@@ -28,8 +28,12 @@ inline VkBool32 framebufferResized = VK_FALSE;
 
 extern void createGraphicsPipeline();
 extern void createFramebuffers();
+
 extern void createCommandPools();
 extern void createCommandBuffers();
+
+extern VkCommandBuffer beginSingleTimeCommands();
+extern void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 extern void createDescriptorSetLayout();
 extern void createDescriptorPool();

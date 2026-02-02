@@ -6,6 +6,7 @@
 #include "buffer.h"
 #include "pipeline.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -301,6 +302,48 @@ void createCommandPools()
         vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool),
         "failed to create transfer command pool!"
     );
+}
+
+VkCommandBuffer beginSingleTimeCommands()
+{
+    VkCommandBufferAllocateInfo commandbufAllocInfo{};
+    commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    commandbufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    commandbufAllocInfo.commandPool = graphicsCommandPool;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(logicalDevice, &commandbufAllocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo commandbufBeginInfo{};
+    commandbufBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    commandbufBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &commandbufBeginInfo);
+
+    return commandBuffer;
+}
+
+void endSingleTimeCommands(VkCommandBuffer commandBuffer)
+{
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo singleTimeSubmitInfo{};
+    singleTimeSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    singleTimeSubmitInfo.commandBufferCount = 1;
+    singleTimeSubmitInfo.pCommandBuffers = &commandBuffer;
+
+    VkFence oneTimeFence;
+    VkFenceCreateInfo oneTimeFenceCreateInfo{};
+    oneTimeFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    vkCreateFence(logicalDevice, &oneTimeFenceCreateInfo, nullptr, &oneTimeFence);
+
+    vkQueueSubmit(graphicsQueue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
+
+    //FIXME: fence!
+    //vkQueueWaitIdle(graphicsQueue);
+    vkWaitForFences(logicalDevice, 1, &oneTimeFence, VK_FALSE, UINT64_MAX);
+
+    vkFreeCommandBuffers(logicalDevice, graphicsCommandPool, 1, &commandBuffer);
 }
 
 void createCommandBuffers()
