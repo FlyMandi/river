@@ -7,15 +7,16 @@ function Out-Shader{
     param(
         $fileName
     )
-    $source = Join-Path -Path $shaders -ChildPath $fileName
-    $target = Join-Path $bin "$fileName.spv"
-    $param = $source, '-o', $target 
+    $baseName = $fileName.baseName
+    $target = Join-Path $bin "$baseName.spv"
+    $param = $fileName, '-o', $target 
     
     &$glslc $param
     Write-Host "Compiled " -NoNewline
-    Write-Host $fileName -BackgroundColor DarkCyan -NoNewline
+    Write-Host $fileName -ForegroundColor DarkCyan -NoNewline
     Write-Host " successfully to: $target"
 }
 
-Out-Shader simple_shader.vert
-Out-Shader simple_shader.frag
+foreach($shader in (Get-ChildItem -File $shaders)){
+    Out-Shader $shader
+}
