@@ -8,7 +8,6 @@ workspace("River")
     location("build")
 
     project("River")
-        links{ "glfw3", "vulkan-1" }
         language("C++")
         cppdialect("C++23")
         targetdir("bin/%{cfg.platform}_%{cfg.buildcfg}")
@@ -33,10 +32,12 @@ filter("configurations:Release")
     optimize("Speed")
 
 filter("platforms:Win64")
+    links{ "glfw3", "vulkan-1" }
     system("Windows")
     architecture("x86_64")
 
 -- filter("platforms:Unix")
+    -- links{ "glfw3", "vulkan" }
 --     system("linux")
 --     architecture("x86_64")
 
