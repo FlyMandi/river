@@ -16,7 +16,8 @@ workspace("River")
             "./include/",
             "./vendor/glfw-3.4-win64/include/",
             "./vendor/stb/",
-            "%{VULKAN_SDK}/Include/"
+            "./vendor/tinyobjloader/",
+            "%{VULKAN_SDK}/Include/",
         })
         syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/glfw-3.4-win64/lib-vc2022/" })
         files({ "./src/*", "./include/*" })
