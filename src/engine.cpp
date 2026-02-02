@@ -71,6 +71,7 @@ void initVulkan(){
     createLogicalDevice();
     createSwapChain();
     createImageViews();
+    createRenderPass();
     createGraphicsPipeline();
 }
 
@@ -617,6 +618,10 @@ VkShaderModule createShaderModule(const std::vector<char> &code){
     }
 
     return shaderModule;
+}
+
+void createRenderPass(){
+    
 }
 
 void createGraphicsPipeline(){
