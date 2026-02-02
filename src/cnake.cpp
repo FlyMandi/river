@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
+#include <map>
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
@@ -173,9 +174,53 @@ void CnakeApp::createInstance(){
     }
 }
 
+uint32_t CnakeApp::rateDeviceSuitability(VkPhysicalDevice device){
+    uint32_t score = 0;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
+        score += 1000;
+    }
+
+    score += deviceProperties.limits.maxImageDimension2D;
+    score += deviceProperties.limits.maxImageDimension3D;
+
+    if(!deviceFeatures.geometryShader){ return 0; }
+
+    return score;
+}
+
+void CnakeApp::pickPhysicalDevice(){
+    uint32_t deviceCount = 0;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    if(0 == deviceCount){
+        throw std::runtime_error("failed to find any GPU with vulkan support!");
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    std::multimap<uint32_t, VkPhysicalDevice> suitabilityCandidates;
+
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    for(const auto& device : devices){
+        uint32_t score = rateDeviceSuitability(device);
+        suitabilityCandidates.insert(std::make_pair(score, device));
+    }
+
+    if(suitabilityCandidates.rbegin()->first > 0){
+        physicalDevice = suitabilityCandidates.rbegin()->second; 
+    }else{
+        throw std::runtime_error("failed to find a suitable GPU!");
+    }
+}
+
 void CnakeApp::initVulkan(){
     createInstance();
     setupDebugMessenger();
+    pickPhysicalDevice();
 }
 
 void CnakeApp::gameLoop(){

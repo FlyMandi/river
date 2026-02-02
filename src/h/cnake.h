@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "vulkan/vulkan_core.h"
@@ -25,7 +26,11 @@ class CnakeApp{
 
     GLFWwindow *window;
     VkInstance instance;
+
     VkDebugUtilsMessengerEXT debugMessenger;
+
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
 
     std::vector<const char*> getRequiredExtensions();
     
@@ -34,6 +39,9 @@ class CnakeApp{
 
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
     void setupDebugMessenger();
+
+    void pickPhysicalDevice();      
+    uint32_t rateDeviceSuitability(VkPhysicalDevice device);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
