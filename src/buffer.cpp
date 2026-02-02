@@ -11,7 +11,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/trigonometric.hpp"
-#include "glm/gtx/hash.hpp" // IWYU pragma: keep
+#include "glm/gtx/hash.hpp" // IWYU pragma: keep (for some reason clang doesn't recognize I need it below)
 #include "vulkan/vulkan_core.h"
 
 #include "pipeline.h"
