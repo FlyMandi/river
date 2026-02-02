@@ -80,8 +80,8 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
 {
     static uint32_t score = 0;
-
     static QueueFamilyIndices indices = findQueueFamilies(device);
+
     if( indices.graphicsIndex == UINT32_MAX ||
         indices.transferIndex == UINT32_MAX ||
         indices.presentIndex == UINT32_MAX
@@ -89,10 +89,13 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
         return 0;
     }
 
-    vkGetPhysicalDeviceProperties(device, &deviceProperties);
-    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+    VkPhysicalDeviceProperties toRateDeviceProperties{};
+    vkGetPhysicalDeviceProperties(device, &toRateDeviceProperties);
 
-    if(!deviceFeatures.geometryShader)
+    VkPhysicalDeviceFeatures toRateDeviceFeatures{};
+    vkGetPhysicalDeviceFeatures(device, &toRateDeviceFeatures);
+
+    if(!toRateDeviceFeatures.samplerAnisotropy || !toRateDeviceFeatures.geometryShader)
     {
         return 0;
     }
@@ -111,13 +114,13 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
         }
     }
 
-    if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+    if(toRateDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
     {
         score += 1000;
     }
-    score += deviceProperties.limits.maxImageDimension1D;
-    score += deviceProperties.limits.maxImageDimension2D/10;
-    score += deviceProperties.limits.maxImageDimension3D/100;
+    score += toRateDeviceProperties.limits.maxImageDimension1D;
+    score += toRateDeviceProperties.limits.maxImageDimension2D/10;
+    score += toRateDeviceProperties.limits.maxImageDimension3D/100;
 
     if(indices.presentIndex == indices.graphicsIndex)
     {
@@ -215,6 +218,7 @@ void createLogicalDevice()
     }
 
     VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -241,5 +245,7 @@ void createLogicalDevice()
     vkGetDeviceQueue(logicalDevice, logicalQueueFamilies.transferIndex, 0, &transferQueue);
     vkGetDeviceQueue(logicalDevice, logicalQueueFamilies.presentIndex, 0, &presentQueue);
 
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 }
