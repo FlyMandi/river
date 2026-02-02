@@ -22,6 +22,8 @@ int main()
     settings.windowWidth = 1920;
     settings.windowHeight = 1080;
 
+    settings.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+
     initEditor(engine, manifest, settings);
     initGLFW(engine, settings);
     initVulkan(engine, manifest, settings);
