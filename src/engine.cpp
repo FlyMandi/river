@@ -1,11 +1,18 @@
 #include "h/engine.h"
-#include <stdexcept>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "vulkan/vulkan_core.h"
 
 #include <map>
+#include <stdexcept>
+
+const char *version = "Cnake 0.0.0";
+
+const uint32_t WIDTH = 1920;
+const uint32_t HEIGHT = 1080;
+
+GLFWwindow *window;
 
 VkInstance instance;
 VkDebugUtilsMessengerEXT debugMessenger;
@@ -17,6 +24,8 @@ VkPhysicalDeviceFeatures deviceFeatures;
 VkDevice device;
 
 VkQueue graphicsQueue;
+
+VkSurfaceKHR surface;
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
@@ -33,6 +42,27 @@ VkResult CreateDebugUtilsMessengerEXT(
     }
 }
 
+bool appShouldClose(){
+    return glfwWindowShouldClose(window);
+}
+
+void initVulkan(){
+    createInstance();
+    setupDebugMessenger();
+    createSurface();
+    pickPhysicalDevice();
+    createLogicalDevice();
+}
+
+void initGLFW(){
+    glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
+}
+
 void DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,
         VkDebugUtilsMessengerEXT    messenger, 
@@ -43,6 +73,20 @@ void DestroyDebugUtilsMessengerEXT(
     if(nullptr != func){
         func(instance, messenger, pAllocator);
     }
+}
+
+void cleanupVulkan(){
+    vkDestroyDevice(device, nullptr);
+
+    if(enableValidationLayers){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
+
+    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
+}
+
+void cleanupGLFW(){
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
@@ -227,11 +271,10 @@ void createLogicalDevice(){
     vkGetDeviceQueue(device, indices.graphicsFamily.has_value(), 0, &graphicsQueue);
 }
 
-void initVulkan(){
-    createInstance();
-    setupDebugMessenger();
-    pickPhysicalDevice();
-    createLogicalDevice();
+void createSurface(){
+    if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
+        throw std::runtime_error("failed to create window surface!");
+    }
 }
 
 void createInstance(){
@@ -281,12 +324,4 @@ void createInstance(){
     if(vkCreateInstance(&createInfo, nullptr, &instance)){
         throw std::runtime_error("failed to create instance.");
     }
-}
-
-void cleanupVulkan(){
-    vkDestroyDevice(device, nullptr);
-
-    if(enableValidationLayers){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
-
-    vkDestroyInstance(instance, nullptr);
 }

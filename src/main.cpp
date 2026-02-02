@@ -5,13 +5,6 @@
 #include <cstdlib>
 #include <cstring>
 
-const char *version = "Cnake 0.0.0";
-
-const uint32_t WIDTH = 1920;
-const uint32_t HEIGHT = 1080;
-
-GLFWwindow *window;
-
 void run(){
     initGLFW();
     initVulkan();
@@ -22,25 +15,12 @@ void run(){
     cleanupGLFW();
 }
 
-void cleanupGLFW(){
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
-
 void gameLoop(){
-    while(!glfwWindowShouldClose(window)){
+    while(!appShouldClose()){
        glfwPollEvents(); 
     }
 }
 
-void initGLFW(){
-    glfwInit();
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
-}
 
 int main(){
     try{
