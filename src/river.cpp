@@ -114,7 +114,10 @@ internal VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     void                                        *userData
 ){
     //can I know which layer is outputting the msg?
-    riverLog(std::format("VL says: {}", callbackData->pMessage),
+    riverLog(std::format("VL says: {} {} {}",
+                         callbackData->pMessage,
+                         messageType,
+                         userData),
              severityTranslation(messageSeverity));
 
     return VK_FALSE;
@@ -493,7 +496,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
-    for(int i = 0; current.string().length() < RIV_MAX_PATH; ++i)
+    for(; current.string().length() < RIV_MAX_PATH;)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
