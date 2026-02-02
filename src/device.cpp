@@ -41,9 +41,13 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 
     VkBool32 presentSupport = false;
 
-    for(int i = 0; const auto &queueFamily : queueFamilies){
+    for(int i = 0; const auto &queueFamily : queueFamilies)
+    {
         if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
             indices.graphicsFamily = i;
+
+        }else if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT){
+            indices.transferFamily = i; 
         }
         
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
@@ -55,6 +59,10 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
             break; 
         }
         ++i;
+    }
+
+    if(indices.transferFamily == -1){
+        indices.transferFamily = indices.graphicsFamily;
     }
 
     return indices;
@@ -167,7 +175,11 @@ void createLogicalDevice()
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    std::set<uint32_t> uniqueQueueFamilies = {
+        indices.graphicsFamily.value(), 
+        indices.presentFamily.value(),
+        indices.transferFamily.value()
+    };
 
     float queuePriority = 1.0f;
     for(uint32_t queueFamily : uniqueQueueFamilies){
@@ -205,6 +217,7 @@ void createLogicalDevice()
 
     vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(logicalDevice, indices.transferFamily.value(), 0, &transferQueue);
 
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 }

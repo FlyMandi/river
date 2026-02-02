@@ -271,20 +271,32 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     }
 }
 
-void createCommandPool()
+void createCommandPools()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    VkCommandPoolCreateInfo graphicsPoolInfo{};
+    graphicsPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    graphicsPoolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if((vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
+    if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS){
         #ifdef DEBUG
-            printDebugLog("failed to create command pool!");
+            printDebugLog("failed to create graphics command pool!");
         #endif
-        throw std::runtime_error("failed to create command pool!");
+        throw std::runtime_error("failed to create graphics command pool!");
+    }
+
+    VkCommandPoolCreateInfo transferPoolInfo{};
+    transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    transferPoolInfo.queueFamilyIndex = queueFamilyIndices.transferFamily.value();
+
+    if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS){
+        #ifdef DEBUG
+            printDebugLog("failed to create transfer command pool!");
+        #endif
+        throw std::runtime_error("failed to create transfer command pool!");
     }
 }
 
@@ -294,9 +306,8 @@ void createCommandBuffers()
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = graphicsCommandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
     if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS){

@@ -226,7 +226,7 @@ void initVulkan()
     createRenderPass();
     createGraphicsPipeline();
     createFramebuffers();
-    createCommandPool();
+    createCommandPools();
     createVertexBuffer();
     createCommandBuffers();
     createSyncObjects();
@@ -251,7 +251,8 @@ void cleanupVulkan()
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
     }
 
-    vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+    vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
+    vkDestroyCommandPool(logicalDevice, transferCommandPool, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
 
     #ifdef DEBUG
