@@ -26,8 +26,11 @@ foreach($platform in $Platforms){
 
 &premake5 ecc
 .\shader_comp.ps1
+
 $target = ".\bin\$OS" + "_$build\River.exe"
-Remove-Item $target
+if(Test-Path $target){
+    Remove-Item $target
+}
 
 if("MSVC" -eq $compiler){
     &premake5 vs2022
