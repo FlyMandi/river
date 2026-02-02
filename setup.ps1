@@ -1,7 +1,7 @@
 if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
 {
    if(Get-Command scoop -ErrorAction SilentlyContinue)
-   { 
+   {
         &scoop install premake
    }
    else
@@ -10,7 +10,7 @@ if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
         $namePattern = "*windows.zip"
         $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
         $zipFolderName = $(Split-Path -Path $sourceURI -Leaf)
-        $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName 
+        $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName
         Invoke-WebRequest -Uri $sourceURI -Out $tempZIP
 
         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
@@ -31,14 +31,14 @@ function Install-VulkanSDK
     if($IsWindows)
     {
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/windows/VulkanSDK-$installVersion-Installer.exe
-        Write-Host "`nExpect a UAC prompt." 
+        Write-Host "`nExpect a UAC prompt."
         &.\VulkanSDK-$installVersion-Installer.exe
     }
     elseif($isLinux)
     {
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/linux/vulkansdk-linux-x86_64-$installVersion.tar.xz
         Write-Host "`nVulkanSDK version $installVersion has been downloaded, but not installed."
-        Write-Host "Now install the SDK the rest of the way." 
+        Write-Host "Now install the SDK the rest of the way."
         Write-Host "`nIf you need help, read the article below:"
         Write-Host "https://www.amd.com/en/resources/support-articles/faqs/GPU-636.html"
 
@@ -72,4 +72,3 @@ else
 {
     throw "ERROR: $env:VULKAN_SDK does not point to a valid directory."
 }
-
