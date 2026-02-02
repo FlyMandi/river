@@ -9,9 +9,6 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
-#include <chrono>
-#include <iomanip>
-#include <iostream>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
@@ -395,75 +392,4 @@ void clearLogs(const std::filesystem::path &baseDir)
             std::filesystem::remove(log);
         }
     }
-}
-
-//TODO:#43: write logs & asserts to a file in release builds AND
-//show an actual useful runtime error message box, not just "abort has been called"
-void riverLog(const auto &text, const RiverLogLevel level)
-{
-    if(level < logLevel)
-    {
-        return;
-    }
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    switch(level)
-    {
-        case RIV_LOG_LEVEL_TRACE:
-            std::cout << std::put_time(&buf, "[%T]-") << "[RIV_TRACE]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_DEBUG:
-            std::cout << std::put_time(&buf, "[%T]-") << "[RIV_DEBUG]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_WARN:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_WARN]:  " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_ERROR:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ERROR]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_ASSERT:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ASSERT]: " << text << '\n';
-            abort();
-    }
-}
-
-//FIXME:#44: WIP
-void riverAssert(bool condition, const auto &assertFailureMsg)
-{
-    if(condition)
-    {
-        return;
-    }
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cerr << '\n' << std::put_time(&buf, "[%T]-") << "[RIV_ASSERT]: " << assertFailureMsg << '\n';
-    abort();
-}
-
-void riverAssertVkSuccess(VkResult result, const auto &assertFailureMsg)
-{
-    if(result == VK_SUCCESS)
-    {
-        return;
-    }
-
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cerr << '\n' << std::put_time(&buf, "[%T]-") << "[RIV_ASSERT]: " << result << ": " << assertFailureMsg << '\n';
-    abort();
 }
