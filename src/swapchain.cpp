@@ -1,4 +1,4 @@
-#include "engine.h"
+#include "river.h"
 #include "window.h"
 #include "device.h"
 #include "swapchain.h"
@@ -35,9 +35,7 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
-    using namespace engine;
-
+VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         printDebugLog("swap width: ", 0, 0);
         printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
@@ -47,7 +45,7 @@ static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         return capabilities.currentExtent; 
     }else{
         int width, height;
-        glfwGetFramebufferSize(window::pWindow, &width, &height);
+        glfwGetFramebufferSize(window.pWindow, &width, &height);
 
         VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
@@ -64,8 +62,6 @@ static VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 }
 
 void swap::createSwapChain(){
-    using namespace device;
-
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);

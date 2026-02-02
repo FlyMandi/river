@@ -1,14 +1,20 @@
-#include "engine.h"
-#include "device.h"
 #include "river.h"
+#include "device.h"
 #include "swapchain.h"
 
 #include <set>
 #include <map>
 
-static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
-    using namespace engine;
+void river::Device::createSurface(){
+    if(glfwCreateWindowSurface(instance, window::pWindow, nullptr, &swap::surface) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create window surface!", 2, 1);
+        throw std::runtime_error("failed to create window surface!");
+    }else{
+        printDebugLog("Successfully created window surface.", 0, 1);
+    }
+}
 
+static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     uint32_t extensionCount;
 
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -25,8 +31,6 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
 }
 
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
-    using namespace device;
-
     uint32_t score = 0;
 
     QueueFamilyIndices indices = findQueueFamilies(device);
@@ -58,7 +62,6 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    using namespace engine;
     printDebugLog(deviceProperties.deviceName, 0, 1);
     printDebugLog("score: ", 0, 0);
     printDebugLog(std::to_string(score), 0, 2);
@@ -67,8 +70,6 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
 }
 
 SwapChainSupportDetails device::querySwapChainSupport(VkPhysicalDevice device){
-    using namespace swap;
-
     SwapChainSupportDetails details;
     uint32_t formatCount;
     uint32_t presentModeCount;
@@ -91,8 +92,6 @@ SwapChainSupportDetails device::querySwapChainSupport(VkPhysicalDevice device){
 }
 
 void device::pickPhysicalDevice(){
-    using namespace engine;
-
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
     
@@ -154,8 +153,6 @@ QueueFamilyIndices device::findQueueFamilies(VkPhysicalDevice device){
 }
 
 void device::createLogicalDevice(){
-    using namespace engine;
-
     static QueueFamilyIndices indices = device::findQueueFamilies(device::physicalDevice);
 
     static std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;

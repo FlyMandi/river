@@ -1,4 +1,3 @@
-#include "engine.h"
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
@@ -8,8 +7,6 @@
 #include <vector>
 
 static VkShaderModule createShaderModule(const std::vector<char> &code){
-    using namespace engine;
-
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
@@ -25,8 +22,6 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
 }
 
 static std::vector<char> readFile(const std::string &filename){
-    using namespace engine;
-
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if(!file.is_open()){
         printDebugLog("\nERROR: failed to open file: " + filename, 2, 1);

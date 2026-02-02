@@ -1,16 +1,12 @@
 #include "river.h"
-#include "engine.h"
 
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 
-
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
-void river::getProjectRoot(const char *rootName){
-    using namespace engine;
-
+void getProjectRoot(const char *rootName){
     std::filesystem::path current = std::filesystem::current_path();
 
     for(int i = 0; i < 3; ++i){
@@ -28,8 +24,7 @@ void river::getProjectRoot(const char *rootName){
 
 bool firstOpen = true;
 
-//TODO: look into the cost of this function, maybe there's no need to open/close it on every function call
-void engine::printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
+void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
         if(firstOpen){
             remove(debugLog);

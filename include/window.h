@@ -3,17 +3,28 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
-namespace window{
+//TODO: remove copy constructors, etc
+//TODO: add useful constructor w/ width, height, etc
+typedef struct Window{
 
-inline bool SHOULDCLOSE = false;
+Window();
+Window(const Window&) = delete;
+Window operator=(const Window&) = delete;
+~Window();
 
-inline uint32_t WIDTH;
-inline uint32_t HEIGHT;
+bool SHOULDCLOSE = false;
 
-inline GLFWwindow *pWindow;
+uint32_t WIDTH;
+uint32_t HEIGHT;
 
-extern void initGLFW();
-extern void cleanupGLFW();
-extern void pollEvents();
+GLFWwindow *pWindow;
 
-};
+VkSurfaceKHR surface;
+
+void initGLFW();
+void cleanupGLFW();
+void pollEvents();
+
+void createSurface();
+
+}Window;
