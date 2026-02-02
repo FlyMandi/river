@@ -181,19 +181,19 @@ static void createInstance(){
 }
 
 void initVulkan(){
-  createInstance();
-  setupDebugMessenger();
-  createSurface();
-  pickPhysicalDevice();
-  createLogicalDevice();
-  createSwapChain();
-  createImageViews();
-  createRenderPass();
-  createGraphicsPipeline();
-  createFramebuffers();
-  createCommandPool();
-  createCommandBuffer();
-  createSyncObjects();
+    createInstance();
+    setupDebugMessenger();
+    createSurface();
+    pickPhysicalDevice();
+    createLogicalDevice();
+    createSwapChain();
+    createImageViews();
+    createRenderPass();
+    createGraphicsPipeline();
+    createFramebuffers();
+    createCommandPool();
+    createCommandBuffer();
+    createSyncObjects();
 }
 
 void cleanupVulkan(){
