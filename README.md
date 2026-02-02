@@ -17,15 +17,15 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - uniform buffer objects and model view projection
 - loading & sampling textures, texels
 - depth buffering
+- loading 3D models
 
 ### State (DEMO):
 - there's a fully resizeable window with correct and proper vulkan instantiation
-- it shows two rotating, textured and coloured squares, one on top of the other.
+- it shows a rotating, textured 3D model, loaded from a .obj file
 
-![Screenshot of the river test project](assets/1.jpg)
+![Screenshot of the river test project](assets/preview.png)
 
 ### Next up:
-- loading 3D models (tinyobjloader)
 - mipmaps
 - multisampling
 - camera control
