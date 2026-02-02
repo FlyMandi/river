@@ -103,7 +103,7 @@ void createSwapChain(){
 
     if(graphicsFamilyIndex != presentFamilyIndex){
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
+        createInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
         createInfo.pQueueFamilyIndices = queueFamilyIndices;
     }else{
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
