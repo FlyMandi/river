@@ -10,13 +10,17 @@ void initEditor()
     //exit
 
     //HACK: currently no project manifest, so all hardcoded.
+    projectName = "riverTest";
+    projectVersion = "0.0.0";
+
     riverWindowWidth = 1920;
     riverWindowHeight = 1080;
 
-    projectName = "riverTest";
-    projectVersion = "0.0.0";
+    riverModelPath = "assets/models/WB_Vase.obj";
+    riverTexturePath = "assets/textures/WB_Vase_Mat_Base_color.jpg";
+
     getProjectRoot("river");
-    setupLog();
+    riverSetupLog();
 }
 
 void loopEditor()
@@ -33,5 +37,5 @@ void loopEditor()
 void cleanupEditor()
 {
     cleanupVulkan();
-    closeLog();
+    riverCloseLog();
 }

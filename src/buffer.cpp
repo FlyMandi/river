@@ -1,7 +1,10 @@
-#include "image.h"
+#include "window.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -14,32 +17,39 @@
 #include "device.h"
 #include "swapchain.h"
 #include "buffer.h"
+#include "image.h"
 
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <set>
 
-//HACK: hardcoded vertices & indices
-//TODO: cube
-const std::vector<Vertex> vertices =
+void loadModel()
 {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{ 0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f,  0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+    tinyobj::attrib_t attributes;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn;
+    std::string error;
 
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-};
+    riverAssert
+    (
+        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, riverModelPath),
+        (warn + error)
+    );
 
-const std::vector<uint32_t> indices =
-{
-    0, 1, 2, 2, 3, 0,
-    4, 5, 6, 6, 7, 4
-};
+    for(const tinyobj::shape_t &shape : shapes)
+    {
+        for(const tinyobj::index_t &index : shape.mesh.indices)
+        {
+            Vertex vertex{};
+
+            vertices.emplace_back(vertex);
+            //HACK: assuming every vertex is unique
+            indices.emplace_back(indices.size());
+        }
+    }
+}
 
 VkVertexInputBindingDescription getVertexBindingDescription()
 {
