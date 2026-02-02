@@ -282,7 +282,6 @@ void cleanupVulkan()
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 
-    //OPTIM: do we need to wait for fences here?
     vkWaitForFences(logicalDevice, 1, inFlightFences.data(), VK_TRUE, UINT64_MAX);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
