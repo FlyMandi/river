@@ -210,7 +210,7 @@ void EngineDevice::populateDebugMessengerCreateInfo(
 void EngineDevice::setupDebugMessenger(){
     if(!enableValidationLayers) return;
 
-    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
     if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS){
