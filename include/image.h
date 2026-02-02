@@ -31,14 +31,9 @@ extern void createTextureImage
     const ProjectManifest   &manifest
 );
 
-extern void createTextureImageView
-(
-    const EngineData &engine
-);
-
 extern void createTextureSampler
 (
-    const EngineData &engine
+    EngineData &engine
 );
 
 extern void transitionImageLayout
@@ -49,10 +44,3 @@ extern void transitionImageLayout
     const VkImageLayout &oldLayout,
     const VkImageLayout &newLayout
 );
-
-//TODO:#57: rid of inline global scope vars
-inline VkImage textureImage;
-inline VkImageView textureImageView;
-inline VkDeviceMemory textureImageMemory;
-
-inline VkSampler textureSampler;

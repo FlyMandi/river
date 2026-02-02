@@ -1,4 +1,3 @@
-#include "image.h"
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
@@ -356,7 +355,7 @@ void createCommandPools
 VkCommandBuffer setupCommandBuffer
 (
     const EngineData    &engine,
-    VkCommandPool       &commandPool //TODO:#57 redundant by the end
+    VkCommandPool       &commandPool
 ){
     VkCommandBufferAllocateInfo commandbufAllocInfo{};
     commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -609,8 +608,8 @@ void createDescriptorSets
 
         VkDescriptorImageInfo descriptorImageInfo{};
         descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        descriptorImageInfo.imageView = textureImageView;
-        descriptorImageInfo.sampler = textureSampler;
+        descriptorImageInfo.imageView = engine.textureImageView;
+        descriptorImageInfo.sampler = engine.textureSampler;
 
         VkWriteDescriptorSet uniformWriteDescriptorSet{};
         uniformWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

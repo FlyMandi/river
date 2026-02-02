@@ -27,7 +27,7 @@ extern void createCommandBuffers
 extern VkCommandBuffer setupCommandBuffer
 (
     const EngineData    &engine,
-    VkCommandPool       &commandPool //TODO:#57 redundant by the end
+    VkCommandPool       &commandPool
 );
 
 extern void flushCommandBuffer

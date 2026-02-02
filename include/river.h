@@ -145,6 +145,12 @@ struct EngineData
     std::vector<VkBuffer>               uniformBuffers{};
     std::vector<VkDeviceMemory>         uniformBuffersMemory{};
     std::vector<void*>                  uniformBuffersMapped{};
+
+    VkImage                             textureImage;
+    VkImageView                         textureImageView;
+    VkDeviceMemory                      textureImageMemory;
+
+    VkSampler                           textureSampler;
 };
 
 enum RiverLogLevel
