@@ -129,11 +129,6 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
         score += 250;
     }
 
-    riverLog("found GPU:", RIV_LOG_LEVEL_DEBUG);
-    riverLog(deviceProperties.deviceName, RIV_LOG_LEVEL_DEBUG);
-    riverLog("score:", RIV_LOG_LEVEL_DEBUG);
-    riverLog(score, RIV_LOG_LEVEL_DEBUG);
-
     return score;
 }
 
@@ -191,8 +186,6 @@ void pickPhysicalDevice()
         logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
         logicalQueueFamilies.transferIndex = indices.transferIndex;
         logicalQueueFamilies.presentIndex = indices.presentIndex;
-
-        riverLog("found suitable GPU.", RIV_LOG_LEVEL_DEBUG);
     }
     else
     {

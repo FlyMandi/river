@@ -64,7 +64,6 @@ static VkBool32 checkValidationLayerSupport()
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
-    riverLog("Using VLs:", RIV_LOG_LEVEL_DEBUG);
     for(const char *layer : validationLayers)
     {
         VkBool32 layerFound = VK_FALSE;
@@ -73,7 +72,6 @@ static VkBool32 checkValidationLayerSupport()
         {
             if(0 == strcmp(layerPresent.layerName, layer))
             {
-                riverLog(layerPresent.layerName, RIV_LOG_LEVEL_DEBUG);
                 layerFound = VK_TRUE;
                 break;
             }
@@ -139,13 +137,6 @@ static std::vector<const char*> getRequiredExtensions()
 
 static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
 {
-    riverLog("Present:", RIV_LOG_LEVEL_DEBUG);
-    for(const auto &extension : *instanceExt)
-    {
-        riverLog(extension.extensionName, RIV_LOG_LEVEL_DEBUG);
-    }
-    riverLog("Required:", RIV_LOG_LEVEL_DEBUG);
-
     for(const auto &required : *requiredExt)
     {
         VkBool32 extFound = VK_FALSE;
@@ -154,7 +145,6 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
             {
                 if(0 == strcmp(required, present.extensionName))
                 {
-                    riverLog(required, RIV_LOG_LEVEL_DEBUG);
                     extFound = VK_TRUE;
                     break;
                 }
@@ -404,8 +394,6 @@ std::filesystem::path getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            riverLog("project root: ", RIV_LOG_LEVEL_DEBUG);
-            riverLog(current, RIV_LOG_LEVEL_DEBUG);
             return current;
         }
         current = current.parent_path();

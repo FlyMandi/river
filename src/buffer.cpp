@@ -117,8 +117,8 @@ void createBuffer
         "failed to allocate buffer!"
     );
 
-    riverLog("created buffer with usage flags: " , RIV_LOG_LEVEL_DEBUG);
-    riverLog(usageFlags, RIV_LOG_LEVEL_DEBUG);
+    riverLog("created buffer with usage flags: " , RIV_LOG_LEVEL_TRACE);
+    riverLog(usageFlags, RIV_LOG_LEVEL_TRACE, false);
 
     vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
