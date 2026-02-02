@@ -23,14 +23,11 @@ void initGLFW
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    engine.window = glfwCreateWindow
-                    (
-                        settings.windowWidth,
-                        settings.windowHeight,
-                        engine.windowName.c_str(),
-                        nullptr,
-                        nullptr
-                    );
+    engine.window = glfwCreateWindow(settings.windowWidth,
+                                     settings.windowHeight,
+                                     engine.windowName.c_str(),
+                                     nullptr,
+                                     nullptr);
 
     RIV_ASSERT(nullptr != engine.window, "failed to create GLFW window!");
 

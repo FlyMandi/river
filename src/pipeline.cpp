@@ -161,13 +161,11 @@ void createGraphicsPipeline
     pipelineLayoutCreateInfo.setLayoutCount = 1;
     pipelineLayoutCreateInfo.pSetLayouts = &engine.descriptorSetLayout;
 
-    VkResult result =   vkCreatePipelineLayout
-                        (
-                            engine.logicalDevice,
-                            &pipelineLayoutCreateInfo,
-                            nullptr,
-                            &engine.graphicsPipelineLayout
-                        );
+    VkResult result = vkCreatePipelineLayout(engine.logicalDevice,
+                                             &pipelineLayoutCreateInfo,
+                                             nullptr,
+                                             &engine.graphicsPipelineLayout);
+
     RIV_ASSERT_VK_SUCCESS(result, "failed to create pipeline layout!");
 
     VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
@@ -188,15 +186,13 @@ void createGraphicsPipeline
     graphicsPipelineCreateInfo.renderPass = engine.renderPass;
     graphicsPipelineCreateInfo.subpass = 0;
 
-    result =    vkCreateGraphicsPipelines
-                (
-                    engine.logicalDevice,
-                    VK_NULL_HANDLE,
-                    1,
-                    &graphicsPipelineCreateInfo,
-                    nullptr,
-                    &engine.graphicsPipeline
-                );
+    result = vkCreateGraphicsPipelines(engine.logicalDevice,
+                                       VK_NULL_HANDLE,
+                                       1,
+                                       &graphicsPipelineCreateInfo,
+                                       nullptr,
+                                       &engine.graphicsPipeline);
+
     RIV_ASSERT_VK_SUCCESS(result, "failed to create graphics pipeline!");
 
     vkDestroyShaderModule(engine.logicalDevice, vertShaderModule, nullptr);
@@ -226,13 +222,11 @@ void createFramebuffers
         framebufferCreateInfo.height = engine.swapchainExtent.height;
         framebufferCreateInfo.layers = 1;
 
-        VkResult result =   vkCreateFramebuffer
-                            (
-                                engine.logicalDevice,
-                                &framebufferCreateInfo,
-                                nullptr,
-                                &engine.swapchainFramebuffers[i]
-                            );
+        VkResult result = vkCreateFramebuffer(engine.logicalDevice,
+                                              &framebufferCreateInfo,
+                                              nullptr,
+                                              &engine.swapchainFramebuffers[i]);
+
         RIV_ASSERT_VK_SUCCESS(result, "failed to create framebuffer!");
     }
 }
@@ -291,17 +285,14 @@ void recordCommandBuffer
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdBindDescriptorSets
-    (
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        engine.graphicsPipelineLayout,
-        0,
-        1,
-        &engine.descriptorSets[currentFrame],
-        0,
-        nullptr
-    );
+    vkCmdBindDescriptorSets(commandBuffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            engine.graphicsPipelineLayout,
+                            0,
+                            1,
+                            &engine.descriptorSets[currentFrame],
+                            0,
+                            nullptr);
 
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(engine.vertexIndices.size()), 1, 0, 0, 0);
 
@@ -444,24 +435,20 @@ void createSyncObjects
 
     for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        VkResult result =   vkCreateSemaphore
-                            (
-                                engine.logicalDevice,
-                                &semaphoreInfo,
-                                nullptr,
-                                &engine.imageReadyForPresentSemaphores[i]
-                            );
+        VkResult result = vkCreateSemaphore(engine.logicalDevice,
+                                            &semaphoreInfo,
+                                            nullptr,
+                                            &engine.imageReadyForPresentSemaphores[i]);
+
         RIV_ASSERT_VK_SUCCESS(result, std::format("failed to create imageReadyForPresentSemaphore No. {}", i));
 
         if(engine.imageReadyForWriteSemaphores[i] == VK_NULL_HANDLE)
         {
-            VkResult result =   vkCreateSemaphore
-                                (
-                                    engine.logicalDevice,
-                                    &semaphoreInfo,
-                                    nullptr,
-                                    &engine.imageReadyForWriteSemaphores[i]
-                                );
+            VkResult result = vkCreateSemaphore(engine.logicalDevice,
+                                                &semaphoreInfo,
+                                                nullptr,
+                                                &engine.imageReadyForWriteSemaphores[i]);
+
             RIV_ASSERT_VK_SUCCESS(result, std::format("failed to create imageReadyForWriteSemaphore No. {}", i));
         }
 
@@ -502,13 +489,11 @@ void createDescriptorSetLayout
     descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     descriptorSetLayoutCreateInfo.pBindings = bindings.data();
 
-    VkResult result =   vkCreateDescriptorSetLayout
-                        (
-                            engine.logicalDevice,
-                            &descriptorSetLayoutCreateInfo,
-                            nullptr,
-                            &engine.descriptorSetLayout
-                        );
+    VkResult result = vkCreateDescriptorSetLayout(engine.logicalDevice,
+                                                  &descriptorSetLayoutCreateInfo,
+                                                  nullptr,
+                                                  &engine.descriptorSetLayout);
+
     RIV_ASSERT_VK_SUCCESS(result, "failed to create descriptor set layout!");
 }
 
@@ -589,13 +574,10 @@ void createDescriptorSets
             samplerWriteDescriptorSet
         };
 
-        vkUpdateDescriptorSets
-        (
-            engine.logicalDevice,
-            static_cast<uint32_t>(descriptorSetWrites.size()),
-            descriptorSetWrites.data(),
-            0,
-            nullptr
-        );
+        vkUpdateDescriptorSets(engine.logicalDevice,
+                               static_cast<uint32_t>(descriptorSetWrites.size()),
+                               descriptorSetWrites.data(),
+                               0,
+                               nullptr);
     }
 }

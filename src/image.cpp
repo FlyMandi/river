@@ -39,14 +39,11 @@ internal void copyBufferToImage
         1
     };
 
-    vkCmdCopyBufferToImage
-    (
-        commandBuffer,
-        buffer, image,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1,
-        &region
-    );
+    vkCmdCopyBufferToImage(commandBuffer,
+                           buffer, image,
+                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                           1,
+                           &region);
 
     flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
@@ -75,8 +72,8 @@ void transitionImageLayout
     {
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-        if( format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
-            format == VK_FORMAT_D24_UNORM_S8_UINT)
+        if(format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+           format == VK_FORMAT_D24_UNORM_S8_UINT)
         {
             barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
         }
@@ -93,8 +90,8 @@ void transitionImageLayout
     VkPipelineStageFlags sourceStage;
     VkPipelineStageFlags destinationStage;
 
-    if( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-        newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+    if(oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+       newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
     {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -126,19 +123,16 @@ void transitionImageLayout
         riverThrow("unsupported layout transition!");
     }
 
-    vkCmdPipelineBarrier
-    (
-        commandBuffer,
-        sourceStage,
-        destinationStage,
-        0,
-        0,
-        nullptr,
-        0,
-        nullptr,
-        1,
-        &barrier
-    );
+    vkCmdPipelineBarrier(commandBuffer,
+                         sourceStage,
+                         destinationStage,
+                         0,
+                         0,
+                         nullptr,
+                         0,
+                         nullptr,
+                         1,
+                         &barrier);
 
     flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
@@ -174,14 +168,11 @@ internal void generateMipmaps
         imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-        vkCmdPipelineBarrier
-        (
-            commandBuffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0, 0, nullptr, 0, nullptr,
-            1, &imageMemoryBarrier
-        );
+        vkCmdPipelineBarrier(commandBuffer,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             0, 0, nullptr, 0, nullptr,
+                             1, &imageMemoryBarrier);
 
         VkImageBlit imageBlit{};
         imageBlit.srcOffsets[0] = {0, 0, 0};
@@ -207,28 +198,22 @@ internal void generateMipmaps
         imageBlit.dstSubresource.baseArrayLayer = 0;
         imageBlit.dstSubresource.layerCount = 1;
 
-        vkCmdBlitImage
-        (
-            commandBuffer,
-            image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            1, &imageBlit,
-            VK_FILTER_LINEAR
-        );
+        vkCmdBlitImage(commandBuffer,
+                       image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                       image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                       1, &imageBlit,
+                       VK_FILTER_LINEAR);
 
         imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
         imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-        vkCmdPipelineBarrier
-        (
-            commandBuffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            0, 0, nullptr, 0, nullptr,
-            1, &imageMemoryBarrier
-        );
+        vkCmdPipelineBarrier(commandBuffer,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                             0, 0, nullptr, 0, nullptr,
+                             1, &imageMemoryBarrier);
 
         if(mipWidth > 1)
         {
@@ -247,14 +232,11 @@ internal void generateMipmaps
     imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-    vkCmdPipelineBarrier
-    (
-        commandBuffer,
-        VK_PIPELINE_STAGE_TRANSFER_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0, 0, nullptr, 0, nullptr,
-        1, &imageMemoryBarrier
-    );
+    vkCmdPipelineBarrier(commandBuffer,
+                         VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         0, 0, nullptr, 0, nullptr,
+                         1, &imageMemoryBarrier);
 
     flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
@@ -268,14 +250,11 @@ void createTextureImage
     int texHeight;
     int texChannels;
 
-    stbi_uc *pixels =   stbi_load
-                        (
-                            manifest.projectTexturePath.string().c_str(),
-                            &texWidth,
-                            &texHeight,
-                            &texChannels,
-                            STBI_rgb_alpha
-                        );
+    stbi_uc *pixels =   stbi_load(manifest.projectTexturePath.string().c_str(),
+                                  &texWidth,
+                                  &texHeight,
+                                  &texChannels,
+                                  STBI_rgb_alpha);
 
     engine.mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
@@ -283,14 +262,8 @@ void createTextureImage
 
     if(!pixels)
     {
-        riverThrow
-        (
-            std::format
-            (
-                "failed to load texture image from {}: {}",
-                manifest.projectTexturePath.string(), stbi_failure_reason()
-            )
-        );
+        riverThrow(std::format("failed to load texture image from {}: {}",
+                               manifest.projectTexturePath.string(), stbi_failure_reason()));
     }
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
@@ -304,16 +277,13 @@ void createTextureImage
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    createBuffer
-    (
-        engine,
-        imageSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer,
-        stagingBufferMemory,
-        uniqueFamilyIndices
-    );
+    createBuffer(engine,
+                 imageSize,
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 stagingBuffer,
+                 stagingBufferMemory,
+                 uniqueFamilyIndices);
 
     void* data;
     vkMapMemory(engine.logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
@@ -322,59 +292,44 @@ void createTextureImage
 
     stbi_image_free(pixels);
 
-    createImage
-    (
-        engine,
-        texWidth,
-        texHeight,
-        engine.mipLevels,
-        VK_FORMAT_R8G8B8A8_SRGB,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        engine.textureImage,
-        engine.textureImageMemory
-    );
+    createImage(engine,
+                texWidth,
+                texHeight,
+                engine.mipLevels,
+                VK_FORMAT_R8G8B8A8_SRGB,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                engine.textureImage,
+                engine.textureImageMemory);
 
-    transitionImageLayout
-    (
-        engine,
-        engine.textureImage,
-        engine.mipLevels,
-        VK_FORMAT_R8G8B8A8_SRGB,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-    );
+    transitionImageLayout(engine,
+                          engine.textureImage,
+                          engine.mipLevels,
+                          VK_FORMAT_R8G8B8A8_SRGB,
+                          VK_IMAGE_LAYOUT_UNDEFINED,
+                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    copyBufferToImage
-    (
-        engine,
-        stagingBuffer,
-        engine.textureImage,
-        static_cast<uint32_t>(texWidth),
-        static_cast<uint32_t>(texHeight)
-    );
+    copyBufferToImage(engine,
+                      stagingBuffer,
+                      engine.textureImage,
+                      static_cast<uint32_t>(texWidth),
+                      static_cast<uint32_t>(texHeight));
 
-    generateMipmaps
-    (
-        engine,
-        engine.textureImage,
-        engine.mipLevels,
-        static_cast<int32_t>(texWidth),
-        static_cast<int32_t>(texHeight)
-    );
+    generateMipmaps(engine,
+                    engine.textureImage,
+                    engine.mipLevels,
+                    static_cast<int32_t>(texWidth),
+                    static_cast<int32_t>(texHeight));
 
     vkDestroyBuffer(engine.logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(engine.logicalDevice, stagingBufferMemory, nullptr);
 
-    engine.textureImageView =   createImageView
-                                (
-                                    engine,
-                                    engine.textureImage,
-                                    engine.mipLevels,
-                                    VK_FORMAT_R8G8B8A8_SRGB,
-                                    VK_IMAGE_ASPECT_COLOR_BIT
-                                );
+    engine.textureImageView =   createImageView(engine,
+                                                engine.textureImage,
+                                                engine.mipLevels,
+                                                VK_FORMAT_R8G8B8A8_SRGB,
+                                                VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void createImage

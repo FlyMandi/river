@@ -28,8 +28,7 @@ template<> struct std::hash<Vertex>
 {
     size_t operator()(Vertex const& vertex) const
     {
-        return  ((hash<glm::vec3>()(vertex.position) ^
-                    (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
+        return  ((hash<glm::vec3>()(vertex.position) ^ (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
                 (hash<glm::vec2>()(vertex.textureCoordinate) << 1);
     }
 };
@@ -122,8 +121,8 @@ uint32_t findSuitableMemoryType
 ){
     for(uint32_t i = 0; i < engine.deviceMemoryProperties.memoryTypeCount; ++i)
     {
-        if( typeFilter & (1 << i) &&
-            ((engine.deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags))
+        if(typeFilter & (1 << i) &&
+          ((engine.deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags))
         {
             return i;
         }
@@ -151,7 +150,9 @@ void createBuffer
     if(uniqueQueueFamilies.size() > 1)
     {
         bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-    }else{
+    }
+    else
+    {
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
@@ -214,16 +215,13 @@ void createVertexBuffer
         engine.logicalQueueFamilies.transferIndex
     };
 
-    createBuffer
-    (
-        engine,
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer,
-        stagingBufferMemory,
-        queueFamilies
-    );
+    createBuffer(engine,
+                 bufferSize,
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 stagingBuffer,
+                 stagingBufferMemory,
+                 queueFamilies);
 
     void* pData;
 
@@ -235,16 +233,13 @@ void createVertexBuffer
     ::memcpy(pData, engine.vertexIndices.data(), static_cast<size_t>(indexSize));
     vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
-    createBuffer
-    (
-        engine,
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        engine.vertexBuffer,
-        engine.vertexBufferMemory,
-        queueFamilies
-    );
+    createBuffer(engine,
+                 bufferSize,
+                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                 engine.vertexBuffer,
+                 engine.vertexBufferMemory,
+                 queueFamilies);
 
     copyBuffer(engine, stagingBuffer, engine.vertexBuffer, bufferSize);
 
@@ -270,26 +265,20 @@ void createUniformBuffers
             engine.logicalQueueFamilies.presentIndex
         };
 
-        createBuffer
-        (
-            engine,
-            uniformBufferSize,
-            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            engine.uniformBuffers[i],
-            engine.uniformBuffersMemory[i],
-            uniqueFamilyIndices
-        );
+        createBuffer(engine,
+                     uniformBufferSize,
+                     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                     engine.uniformBuffers[i],
+                     engine.uniformBuffersMemory[i],
+                     uniqueFamilyIndices);
 
-        vkMapMemory
-        (
-            engine.logicalDevice,
-            engine.uniformBuffersMemory[i],
-            0,
-            uniformBufferSize,
-            0,
-            &engine.uniformBuffersMapped[i]
-        );
+        vkMapMemory(engine.logicalDevice,
+                    engine.uniformBuffersMemory[i],
+                    0,
+                    uniformBufferSize,
+                    0,
+                    &engine.uniformBuffersMapped[i]);
     };
 }
 
@@ -306,14 +295,11 @@ void updateUniformBuffer
     UniformBufferObject uniformBuffer{};
     uniformBuffer.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     uniformBuffer.view = glm::lookAt(glm::vec3(1.0f, 0.0f, 0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    uniformBuffer.projection =  glm::perspective
-                                (
-                                    glm::radians(35.0f),
-                                    engine.swapchainExtent.width /
-                                        static_cast<float>(engine.swapchainExtent.height),
-                                    0.1f,
-                                    256.0f
-                                );
+    uniformBuffer.projection =  glm::perspective(glm::radians(35.0f),
+                                                 engine.swapchainExtent.width /
+                                                    static_cast<float>(engine.swapchainExtent.height),
+                                                 0.1f,
+                                                 256.0f);
 
     uniformBuffer.projection[1][1] *= -1;
 
@@ -332,13 +318,13 @@ VkFormat findSupportedFormat
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(engine.physicalDevice, format, &props);
 
-        if( tiling == VK_IMAGE_TILING_LINEAR &&
-            ((props.linearTilingFeatures & features) == features))
+        if(tiling == VK_IMAGE_TILING_LINEAR &&
+          ((props.linearTilingFeatures & features) == features))
         {
             return format;
         }
         else if(tiling == VK_IMAGE_TILING_OPTIMAL &&
-                ((props.optimalTilingFeatures & features) == features))
+               ((props.optimalTilingFeatures & features) == features))
         {
             return format;
         }
@@ -358,43 +344,31 @@ void createDepthResources
         VK_FORMAT_D24_UNORM_S8_UINT
     };
 
-    const VkFormat depthFormat =    findSupportedFormat
-                                    (
-                                        engine,
-                                        candidates,
-                                        VK_IMAGE_TILING_OPTIMAL,
-                                        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-                                    );
-    createImage
-    (
-        engine,
-        engine.swapchainExtent.width,
-        engine.swapchainExtent.height,
-        1,
-        depthFormat,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        engine.depthImage,
-        engine.depthImageMemory
-    );
+    const VkFormat depthFormat = findSupportedFormat(engine,
+                                                     candidates,
+                                                     VK_IMAGE_TILING_OPTIMAL,
+                                                     VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    createImage(engine,
+                engine.swapchainExtent.width,
+                engine.swapchainExtent.height,
+                1,
+                depthFormat,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                engine.depthImage,
+                engine.depthImageMemory);
 
-    engine.depthImageView = createImageView
-                            (
-                                engine,
-                                engine.depthImage,
-                                1,
-                                depthFormat,
-                                VK_IMAGE_ASPECT_DEPTH_BIT
-                            );
+    engine.depthImageView = createImageView(engine,
+                                            engine.depthImage,
+                                            1,
+                                            depthFormat,
+                                            VK_IMAGE_ASPECT_DEPTH_BIT);
 
-    transitionImageLayout
-    (
-        engine,
-        engine.depthImage,
-        1,
-        depthFormat,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    );
+    transitionImageLayout(engine,
+                          engine.depthImage,
+                          1,
+                          depthFormat,
+                          VK_IMAGE_LAYOUT_UNDEFINED,
+                          VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }

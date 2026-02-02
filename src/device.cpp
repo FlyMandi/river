@@ -96,8 +96,8 @@ internal uint32_t rateDeviceSuitability
     VkPhysicalDeviceFeatures toRateDeviceFeatures{};
     vkGetPhysicalDeviceFeatures(device, &toRateDeviceFeatures);
 
-    if( !toRateDeviceFeatures.samplerAnisotropy ||
-        !toRateDeviceFeatures.geometryShader)
+    if(!toRateDeviceFeatures.samplerAnisotropy ||
+       !toRateDeviceFeatures.geometryShader)
     {
         return 0;
     }
@@ -153,25 +153,19 @@ SwapchainSupportDetails querySwapchainSupport
     if(0 != formatCount)
     {
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR
-        (
-            physicalDevice,
-            surface,
-            &formatCount,
-            details.formats.data()
-        );
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice,
+                                             surface,
+                                             &formatCount,
+                                             details.formats.data());
     }
 
     if(0 != presentModeCount)
     {
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR
-        (
-            physicalDevice,
-            surface,
-            &presentModeCount,
-            details.presentModes.data()
-        );
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice,
+                                                  surface,
+                                                  &presentModeCount,
+                                                  details.presentModes.data());
     }
 
     return details;
@@ -184,7 +178,8 @@ void pickPhysicalDevice
     uint32_t deviceCount = 0;
 
     vkEnumeratePhysicalDevices(engine.instance, &deviceCount, nullptr);
-    if(0 == deviceCount){
+    if(0 == deviceCount)
+    {
         riverLog("failed to find any GPU with vulkan support!", RIV_LOG_LEVEL_ERROR);
     }
 

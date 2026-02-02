@@ -30,19 +30,13 @@ internal VkExtent2D chooseSwapExtent
             static_cast<uint32_t>(height)
         };
 
-        actualExtent.width =    std::clamp
-                                (
-                                    actualExtent.width,
-                                    capabilities.minImageExtent.width,
-                                    capabilities.maxImageExtent.width
-                                );
-        actualExtent.height =   std::clamp
-                                (
-                                    actualExtent.height,
-                                    capabilities.minImageExtent.height,
-                                    capabilities.maxImageExtent.height
-                                );
+        actualExtent.width =    std::clamp(actualExtent.width,
+                                           capabilities.minImageExtent.width,
+                                           capabilities.maxImageExtent.width);
 
+        actualExtent.height =   std::clamp(actualExtent.height,
+                                           capabilities.minImageExtent.height,
+                                           capabilities.maxImageExtent.height);
         return actualExtent;
     }
 }
@@ -123,15 +117,17 @@ void createSwapchain
     VkResult result = vkCreateSwapchainKHR(engine.logicalDevice, &createInfo, nullptr, &engine.swapchain);
     RIV_ASSERT_VK_SUCCESS(result, "failed to create swap chain!");
 
-    vkGetSwapchainImagesKHR(engine.logicalDevice, engine.swapchain, &engine.swapchainImageCount, nullptr);
+    vkGetSwapchainImagesKHR(engine.logicalDevice,
+                            engine.swapchain,
+                            &engine.swapchainImageCount,
+                            nullptr);
+
     engine.swapchainImages.resize(engine.swapchainImageCount);
-    vkGetSwapchainImagesKHR
-    (
-        engine.logicalDevice,
-        engine.swapchain,
-        &engine.swapchainImageCount,
-        engine.swapchainImages.data()
-    );
+
+    vkGetSwapchainImagesKHR(engine.logicalDevice,
+                            engine.swapchain,
+                            &engine.swapchainImageCount,
+                            engine.swapchainImages.data());
 
     engine.swapchainImageFormat = surfaceFormat.format;
     engine.swapchainExtent = extent;
@@ -140,14 +136,11 @@ void createSwapchain
 
     for(uint32_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        engine.swapchainImageViews[i] = createImageView
-                                        (
-                                            engine,
-                                            engine.swapchainImages[i],
-                                            1,
-                                            engine.swapchainImageFormat,
-                                            VK_IMAGE_ASPECT_COLOR_BIT
-                                        );
+        engine.swapchainImageViews[i] = createImageView(engine,
+                                                        engine.swapchainImages[i],
+                                                        1,
+                                                        engine.swapchainImageFormat,
+                                                        VK_IMAGE_ASPECT_COLOR_BIT);
     }
 }
 
@@ -179,13 +172,11 @@ void createRenderPass
     };
 
     VkAttachmentDescription depthAttachmentDescription{};
-    depthAttachmentDescription.format = findSupportedFormat
-                                        (
-                                            engine,
-                                            candidates,
-                                            VK_IMAGE_TILING_OPTIMAL,
-                                            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-                                        );
+    depthAttachmentDescription.format = findSupportedFormat(engine,
+                                                            candidates,
+                                                            VK_IMAGE_TILING_OPTIMAL,
+                                                            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
     depthAttachmentDescription.samples  = VK_SAMPLE_COUNT_1_BIT;
     depthAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -207,13 +198,13 @@ void createRenderPass
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask =   VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT   |
-                                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.srcAccessMask = 0;
-    dependency.dstStageMask =   VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT   |
-                                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask =  VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT            |
-                                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     std::array<VkAttachmentDescription, 2> attachments =
     {

@@ -114,11 +114,9 @@ internal VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     void                                        *userData
 ){
     //can I know which layer is outputting the msg?
-    riverLog
-    (
-        std::format("VL says: {}", callbackData->pMessage),
-        severityTranslation(messageSeverity)
-    );
+    riverLog(std::format("VL says: {}", callbackData->pMessage),
+             severityTranslation(messageSeverity));
+
     return VK_FALSE;
 }
 
@@ -165,11 +163,8 @@ internal VkBool32 checkValidationLayerSupport()
             std::string msg = "validation layer not found: ";
             msg += layer;
 
-            riverLog
-            (
-                msg,
-                RIV_LOG_LEVEL_WARN
-            );
+            riverLog(msg, RIV_LOG_LEVEL_WARN);
+
             return VK_FALSE;
         }
     }
@@ -183,12 +178,12 @@ internal void populateDebugMessengerCreateInfo
 ){
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    createInfo.messageType =    VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT     |
-                                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT  |
-                                VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT     |
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT  |
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
 }
 
@@ -209,11 +204,8 @@ internal void DestroyDebugUtilsMessengerEXT
     const EngineData            &engine,
     const VkAllocationCallbacks *allocator
 ){
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr
-                                                    (
-                                                        engine.instance,
-                                                        "vkDestroyDebugUtilsMessengerEXT"
-                                                    );
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(engine.instance,
+                                                                           "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func)
     {
         func(engine.instance, engine.debugMessenger, allocator);
@@ -410,15 +402,12 @@ void drawFrame
     uint32_t imageIndex;
 
     VkResult result =
-        vkAcquireNextImageKHR
-        (
-            engine.logicalDevice,
-            engine.swapchain,
-            UINT64_MAX,
-            engine.acquireSemaphore,
-            VK_NULL_HANDLE,
-            &imageIndex
-        );
+        vkAcquireNextImageKHR(engine.logicalDevice,
+                              engine.swapchain,
+                              UINT64_MAX,
+                              engine.acquireSemaphore,
+                              VK_NULL_HANDLE,
+                              &imageIndex);
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -508,15 +497,10 @@ std::filesystem::path getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            riverLog
-            (
-                std::format
-                (
-                    "set project root to {} with strlen {}",
-                    current.string(), current.string().length()
-                ),
-                RIV_LOG_LEVEL_TRACE
-            );
+            riverLog(std::format("set project root to {} with strlen {}",
+                                 current.string(), current.string().length()),
+                     RIV_LOG_LEVEL_TRACE);
+
             return current;
         }
         current = current.parent_path();
