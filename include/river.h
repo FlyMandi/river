@@ -27,6 +27,18 @@ inline GLFWwindow *window;
 inline std::filesystem::path appRoot;
 inline std::filesystem::path debugLog;
 
+void initVulkan();
+void cleanupVulkan();
+
+void initGLFW();
+void cleanupGLFW();
+
+void drawFrame();
+void windowPollEvents();
+
+void getProjectRoot(const char* rootName);
+void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
+
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
 inline VkInstance instance;
@@ -59,14 +71,3 @@ inline VkCommandBuffer commandBuffer;
 inline VkSemaphore imageAvailableSemaphore;
 inline VkSemaphore renderFinishedSemaphore;
 inline VkFence inFlightFence;
-
-void initVulkan();
-void cleanupVulkan();
-void drawFrame();
-
-void initGLFW();
-void cleanupGLFW();
-void windowPollEvents();
-
-void getProjectRoot(const char* rootName);
-void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
