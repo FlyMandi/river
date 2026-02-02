@@ -235,6 +235,7 @@ void initVulkan()
     createSwapchain();
     createImageViews();
     createRenderPass();
+    createDescriptorSetLayout();
     createGraphicsPipeline();
     createFramebuffers();
     createCommandPools();
@@ -264,7 +265,7 @@ void cleanupVulkan()
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 
     vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
+    vkDestroyPipelineLayout(logicalDevice, graphicsPipelineLayout, nullptr);
     vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
