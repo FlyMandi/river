@@ -1,14 +1,14 @@
 $glslc = (Join-Path -PATH $env:VULKAN_SDK -ChildPath "\Bin\glslc.exe")
-$shaders =  (Join-Path -PATH $PSScriptRoot -ChildPath "\shaders\")
-
-if(-Not(Test-Path $shaders)){ &mkdir $shaders }
+$src = Join-Path $PSScriptRoot "\src\"
+$shaders = Join-Path $src "\shaders\" 
+$bin = Join-Path $PSScriptRoot "\bin\" 
 
 function Out-Shader{
     param(
         $fileName
     )
     $source = Join-Path -Path $shaders -ChildPath $fileName
-    $target = "$source.spv"
+    $target = Join-Path $bin "$fileName.spv"
     $param = $source, '-o', $target 
     
     &$glslc $param
