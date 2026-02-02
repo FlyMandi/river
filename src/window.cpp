@@ -16,7 +16,10 @@ void initGLFW()
 {
     glfwInit();
 
+    //TODO:#49: choose monitor, refresh rate, videoMode, etc
+    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
     riverAssert(nullptr != window, "failed to create GLFW window!");
