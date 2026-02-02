@@ -12,8 +12,9 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
 - debugging said code (currently via logging, raddbg and renderdoc)
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
-- swapchain & present modes, when to choose which and why they exist
-- the Vulkan graphics pipeline & order of operations (it's a lot!)
+- queue families, the swapchain & present modes
+- vertex & index buffers, vertex & fragment shaders
+- loading textures, texels, mipmaps
 
 ### State:
 - there's a resizeable window
