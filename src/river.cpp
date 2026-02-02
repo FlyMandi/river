@@ -61,7 +61,8 @@ static VkResult CreateDebugUtilsMessengerEXT(
     }
 }
 
-static std::vector<const char*> getRequiredExtensions(){
+static std::vector<const char*> getRequiredExtensions()
+{
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
 
@@ -75,13 +76,14 @@ static std::vector<const char*> getRequiredExtensions(){
     return extensions;
 }
 
-static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
-    printDebugLog("\nPresent:", 1, 1);
+static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
+{
+    printDebugLog("Present:", 1, 1);
     for(const auto &extension : *instanceExt){
         printDebugLog(extension.extensionName, 2, 1);
     }
 
-    printDebugLog("\nRequired:", 1, 1);
+    printDebugLog("Required:", 1, 1);
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
@@ -102,7 +104,8 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
     return true;
 }
 
-static bool checkValidationLayerSupport(){
+static bool checkValidationLayerSupport()
+{
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
     
@@ -321,7 +324,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
     std::filesystem::path current = std::filesystem::current_path();
 
     for(int i = 0; i < 3; ++i){
-        if(strcmp(current.filename().string().c_str(), rootName) == 0) {
+        if(strcmp(current.filename().string().c_str(), rootName) == 0){
             printDebugLog("project root:", 0, 0);
             printDebugLog(current.string(), 1, 1);
             return current;
@@ -330,4 +333,12 @@ std::filesystem::path getProjectRoot(const char *rootName)
         }
     }
     return ".";
+}
+
+void clearLogs(const std::filesystem::path &baseDir){
+    for(const auto &log : std::filesystem::directory_iterator(baseDir)){
+        if(".log" == log.path().extension()){
+            std::filesystem::remove(log);
+        }
+    }
 }
