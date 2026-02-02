@@ -2,11 +2,14 @@
 require"vendor/premake-ecc/ecc"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
-workspace("Cnake")
+workspace("River")
     configurations({ "Debug", "Release" })
     platforms({ "Win64" })
     location("build")
 
+    --TODO: separate engine core (River) from editor GUI executable (Waterfall).
+    --Put Waterfall in its own repo, then add river as a submodule.
+    --Can't really use River without waterfall to build a game. 
     project("River")
         kind("StaticLib")
         links{ "glfw3", "vulkan-1" }
