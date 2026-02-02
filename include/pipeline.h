@@ -40,20 +40,44 @@ extern void createFramebuffers
     EngineData &engine
 );
 
-extern void createCommandPools();
-extern void createCommandBuffers();
-
-extern VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool);
-extern void flushCommandBuffer
+extern void createCommandPools
 (
-    VkCommandBuffer commandBuffer,
-    VkCommandPool   commandPool,
-    VkQueue         queue
+    const EngineData &engine
 );
 
-extern void createDescriptorSetLayout();
-extern void createDescriptorPool();
-extern void createDescriptorSets();
+extern void createCommandBuffers
+(
+    const EngineData &engine
+);
+
+extern VkCommandBuffer setupCommandBuffer
+(
+    const EngineData    &engine,
+    VkCommandPool       &commandPool //TODO:#57 redundant by the end
+);
+
+extern void flushCommandBuffer
+(
+    const EngineData        &engine,
+    const VkCommandBuffer   &commandBuffer,
+    const VkCommandPool     &commandPool,
+    const VkQueue           &queue
+);
+
+extern void createDescriptorSetLayout
+(
+    const EngineData &engine
+);
+
+extern void createDescriptorPool
+(
+    const EngineData &engine
+);
+
+extern void createDescriptorSets
+(
+    const EngineData &engine
+);
 
 extern void createSyncObjects
 (

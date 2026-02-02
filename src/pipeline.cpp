@@ -2,7 +2,6 @@
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
-#include "device.h"
 #include "swapchain.h"
 #include "buffer.h"
 #include "pipeline.h"
@@ -13,8 +12,11 @@
 #include <iostream>
 #include <vector>
 
-internal VkShaderModule createShaderModule(const std::vector<char> &code)
-{
+internal VkShaderModule createShaderModule
+(
+    const EngineData        &engine,
+    const std::vector<char> &code
+){
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
@@ -23,7 +25,7 @@ internal VkShaderModule createShaderModule(const std::vector<char> &code)
     VkShaderModule shaderModule;
     riverAssertVkSuccess
     (
-        vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule),
+        vkCreateShaderModule(engine.logicalDevice, &createInfo, nullptr, &shaderModule),
         "failed to create shader module!"
     );
 
@@ -56,8 +58,8 @@ void createGraphicsPipeline
     auto vertShaderCode = readFile(manifest.vertexShader);
     auto fragShaderCode = readFile(manifest.fragmentShader);
 
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+    VkShaderModule vertShaderModule = createShaderModule(engine, vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(engine, fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo{};
     vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -166,7 +168,7 @@ void createGraphicsPipeline
 
     riverAssertVkSuccess
     (
-        vkCreatePipelineLayout(logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout),
+        vkCreatePipelineLayout(engine.logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout),
         "failed to create pipeline layout!"
     );
 
@@ -190,12 +192,20 @@ void createGraphicsPipeline
 
     riverAssertVkSuccess
     (
-        vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &graphicsPipeline),
+        vkCreateGraphicsPipelines
+        (
+            engine.logicalDevice,
+            VK_NULL_HANDLE,
+            1,
+            &graphicsPipelineCreateInfo,
+            nullptr,
+            &graphicsPipeline
+        ),
         "failed to create graphics pipeline!"
     );
 
-    vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
-    vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
+    vkDestroyShaderModule(engine.logicalDevice, vertShaderModule, nullptr);
+    vkDestroyShaderModule(engine.logicalDevice, fragShaderModule, nullptr);
 }
 
 void createFramebuffers
@@ -225,7 +235,7 @@ void createFramebuffers
         (
             vkCreateFramebuffer
             (
-                logicalDevice,
+                engine.logicalDevice,
                 &framebufferCreateInfo,
                 nullptr,
                 &engine.swapchainFramebuffers[i]
@@ -308,33 +318,38 @@ void recordCommandBuffer
     riverAssertVkSuccess(vkEndCommandBuffer(commandBuffer), "failed to end recording command buffer!");
 }
 
-void createCommandPools()
-{
+void createCommandPools
+(
+    const EngineData &engine
+){
     VkCommandPoolCreateInfo graphicsPoolInfo{};
     graphicsPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    graphicsPoolInfo.queueFamilyIndex = logicalQueueFamilies.graphicsIndex;
+    graphicsPoolInfo.queueFamilyIndex = engine.logicalQueueFamilies.graphicsIndex;
 
     riverAssertVkSuccess
     (
-        vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
+        vkCreateCommandPool(engine.logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
         "failed to create graphics command pool!"
     );
 
     VkCommandPoolCreateInfo transferPoolInfo{};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    transferPoolInfo.queueFamilyIndex = logicalQueueFamilies.transferIndex;
+    transferPoolInfo.queueFamilyIndex = engine.logicalQueueFamilies.transferIndex;
 
     riverAssertVkSuccess
     (
-        vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool),
+        vkCreateCommandPool(engine.logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool),
         "failed to create transfer command pool!"
     );
 }
 
-VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool)
-{
+VkCommandBuffer setupCommandBuffer
+(
+    const EngineData    &engine,
+    VkCommandPool       &commandPool //TODO:#57 redundant by the end
+){
     VkCommandBufferAllocateInfo commandbufAllocInfo{};
     commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     commandbufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -344,7 +359,7 @@ VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool)
     VkCommandBuffer commandBuffer;
     riverAssertVkSuccess
     (
-        vkAllocateCommandBuffers(logicalDevice, &commandbufAllocInfo, &commandBuffer),
+        vkAllocateCommandBuffers(engine.logicalDevice, &commandbufAllocInfo, &commandBuffer),
         "failed to allocate single time command buffer!"
     );
 
@@ -359,9 +374,10 @@ VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool)
 
 void flushCommandBuffer
 (
-    VkCommandBuffer commandBuffer,
-    VkCommandPool   commandPool,
-    VkQueue         queue
+    const EngineData        &engine,
+    const VkCommandBuffer   &commandBuffer,
+    const VkCommandPool     &commandPool,
+    const VkQueue           &queue
 ){
     vkEndCommandBuffer(commandBuffer);
 
@@ -376,20 +392,22 @@ void flushCommandBuffer
 
     riverAssertVkSuccess
     (
-        vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &queueFence),
+        vkCreateFence(engine.logicalDevice, &fenceCreateInfo, nullptr, &queueFence),
         "failed to create queue fence!"
     );
 
     vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, queueFence);
 
-    vkWaitForFences(logicalDevice, 1, &queueFence, VK_TRUE, UINT64_MAX);
+    vkWaitForFences(engine.logicalDevice, 1, &queueFence, VK_TRUE, UINT64_MAX);
 
-    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
-    vkDestroyFence(logicalDevice, queueFence, nullptr);
+    vkFreeCommandBuffers(engine.logicalDevice, commandPool, 1, &commandBuffer);
+    vkDestroyFence(engine.logicalDevice, queueFence, nullptr);
 }
 
-void createCommandBuffers()
-{
+void createCommandBuffers
+(
+    const EngineData &engine
+){
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkCommandBufferAllocateInfo allocInfo{};
@@ -400,7 +418,7 @@ void createCommandBuffers()
 
     riverAssertVkSuccess
     (
-        vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()),
+        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, commandBuffers.data()),
         "failed to allocate command buffers!"
     );
 }
@@ -411,19 +429,19 @@ void cleanupSyncObjects
 ){
     for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        vkDestroySemaphore(logicalDevice, imageReadyForWriteSemaphores[i], nullptr);
+        vkDestroySemaphore(engine.logicalDevice, imageReadyForWriteSemaphores[i], nullptr);
         imageReadyForWriteSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed imageReadyForWriteSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
 
-        vkDestroySemaphore(logicalDevice, imageReadyForPresentSemaphores[i], nullptr);
+        vkDestroySemaphore(engine.logicalDevice, imageReadyForPresentSemaphores[i], nullptr);
         imageReadyForPresentSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed imageReadyForPresentSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
 
-        vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+        vkDestroyFence(engine.logicalDevice, inFlightFences[i], nullptr);
         inFlightFences[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed inFlightFence No. {}", i), RIV_LOG_LEVEL_TRACE);
     }
-    vkDestroySemaphore(logicalDevice, acquireSemaphore, nullptr);
+    vkDestroySemaphore(engine.logicalDevice, acquireSemaphore, nullptr);
     acquireSemaphore = VK_NULL_HANDLE;
     riverLog("destroyed acquireSemaphore.", RIV_LOG_LEVEL_TRACE);
 }
@@ -445,7 +463,7 @@ void createSyncObjects
 
     riverAssertVkSuccess
     (
-        vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &acquireSemaphore),
+        vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &acquireSemaphore),
         "failed to create acquireSemaphore."
     );
 
@@ -453,7 +471,7 @@ void createSyncObjects
     {
         riverAssertVkSuccess
         (
-            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageReadyForPresentSemaphores[i]),
+            vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &imageReadyForPresentSemaphores[i]),
             std::format("failed to create imageReadyForPresentSemaphore No. {}", i)
         );
 
@@ -461,7 +479,7 @@ void createSyncObjects
         {
             riverAssertVkSuccess
             (
-                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageReadyForWriteSemaphores[i]),
+                vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &imageReadyForWriteSemaphores[i]),
                 std::format("failed to create imageReadyForWriteSemaphore No. {}", i)
             );
         }
@@ -470,15 +488,17 @@ void createSyncObjects
         {
             riverAssertVkSuccess
             (
-                vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
+                vkCreateFence(engine.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
                 std::format("failed to create inFlightFence No. {}", i)
             );
         }
     }
 }
 
-void createDescriptorSetLayout()
-{
+void createDescriptorSetLayout
+(
+    const EngineData &engine
+){
     VkDescriptorSetLayoutBinding uniformBufferLayoutBinding{};
     uniformBufferLayoutBinding.binding = 0;
     uniformBufferLayoutBinding.descriptorCount = 1;
@@ -508,7 +528,7 @@ void createDescriptorSetLayout()
     (
         vkCreateDescriptorSetLayout
         (
-            logicalDevice,
+            engine.logicalDevice,
             &descriptorSetLayoutCreateInfo,
             nullptr,
             &descriptorSetLayout
@@ -517,8 +537,10 @@ void createDescriptorSetLayout()
     );
 }
 
-void createDescriptorPool()
-{
+void createDescriptorPool
+(
+    const EngineData &engine
+){
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -534,13 +556,15 @@ void createDescriptorPool()
 
     riverAssertVkSuccess
     (
-        vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool),
+        vkCreateDescriptorPool(engine.logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool),
         "failed to create descriptor pool."
     );
 }
 
-void createDescriptorSets()
-{
+void createDescriptorSets
+(
+    const EngineData &engine
+){
     std::vector<VkDescriptorSetLayout> setLayouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
 
     VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
@@ -552,7 +576,7 @@ void createDescriptorSets()
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     riverAssertVkSuccess
     (
-        vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()),
+        vkAllocateDescriptorSets(engine.logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()),
         "failed to allocate descriptor sets!"
     );
 
@@ -598,7 +622,7 @@ void createDescriptorSets()
 
         vkUpdateDescriptorSets
         (
-            logicalDevice,
+            engine.logicalDevice,
             static_cast<uint32_t>(descriptorSetWrites.size()),
             descriptorSetWrites.data(),
             0,

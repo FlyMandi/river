@@ -38,7 +38,7 @@ void createSwapchain
     EngineData          &engine,
     const UserSettings  &settings
 ){
-    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, engine.surface);
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(engine.physicalDevice, engine.surface);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
     for(const auto &availableFormat : swapchainSupport.formats)
@@ -62,18 +62,18 @@ void createSwapchain
 
     VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities, engine.window);
 
-    swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
+    engine.swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
 
     if( 0 < swapchainSupport.capabilities.maxImageCount &&
-        swapchainImageCount > swapchainSupport.capabilities.maxImageCount
+        engine.swapchainImageCount > swapchainSupport.capabilities.maxImageCount
     ){
-        swapchainImageCount = swapchainSupport.capabilities.maxImageCount;
+        engine.swapchainImageCount = swapchainSupport.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = engine.surface;
-    createInfo.minImageCount = swapchainImageCount;
+    createInfo.minImageCount = engine.swapchainImageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
@@ -81,11 +81,11 @@ void createSwapchain
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     uint32_t queueFamilyIndices[] = {
-        logicalQueueFamilies.graphicsIndex,
-        logicalQueueFamilies.presentIndex
+        engine.logicalQueueFamilies.graphicsIndex,
+        engine.logicalQueueFamilies.presentIndex
     };
 
-    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.presentIndex)
+    if(engine.logicalQueueFamilies.graphicsIndex != engine.logicalQueueFamilies.presentIndex)
     {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
@@ -107,17 +107,17 @@ void createSwapchain
 
     riverAssertVkSuccess
     (
-        vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &engine.swapchain),
+        vkCreateSwapchainKHR(engine.logicalDevice, &createInfo, nullptr, &engine.swapchain),
         "failed to create swap chain!"
     );
 
-    vkGetSwapchainImagesKHR(logicalDevice, engine.swapchain, &swapchainImageCount, nullptr);
-    engine.swapchainImages.resize(swapchainImageCount);
+    vkGetSwapchainImagesKHR(engine.logicalDevice, engine.swapchain, &engine.swapchainImageCount, nullptr);
+    engine.swapchainImages.resize(engine.swapchainImageCount);
     vkGetSwapchainImagesKHR
     (
-        logicalDevice,
+        engine.logicalDevice,
         engine.swapchain,
-        &swapchainImageCount,
+        &engine.swapchainImageCount,
         engine.swapchainImages.data()
     );
 
@@ -135,6 +135,7 @@ void createSwapImageViews
     {
         engine.swapchainImageViews[i] = createImageView
                                         (
+                                            engine,
                                             engine.swapchainImages[i],
                                             engine.swapchainImageFormat,
                                             VK_IMAGE_ASPECT_COLOR_BIT
@@ -172,6 +173,7 @@ void createRenderPass
     VkAttachmentDescription depthAttachmentDescription{};
     depthAttachmentDescription.format = findSupportedFormat
                                         (
+                                            engine,
                                             candidates,
                                             VK_IMAGE_TILING_OPTIMAL,
                                             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
@@ -222,7 +224,7 @@ void createRenderPass
 
     riverAssertVkSuccess
     (
-        vkCreateRenderPass(logicalDevice, &renderPassCreateInfo, nullptr, &renderPass),
+        vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &renderPass),
         "failed to create render pass!"
     );
 }
@@ -231,21 +233,21 @@ void cleanupSwapchain
 (
     const EngineData &engine
 ){
-    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
-    vkDestroyImage(logicalDevice, depthImage, nullptr);
-    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImageView(engine.logicalDevice, depthImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, depthImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, depthImageMemory, nullptr);
 
     for(size_t i = 0; i < engine.swapchainFramebuffers.size(); ++i)
     {
-        vkDestroyFramebuffer(logicalDevice, engine.swapchainFramebuffers[i], nullptr);
+        vkDestroyFramebuffer(engine.logicalDevice, engine.swapchainFramebuffers[i], nullptr);
     }
 
     for(size_t i = 0; i < engine.swapchainImageViews.size(); ++i)
     {
-        vkDestroyImageView(logicalDevice, engine.swapchainImageViews[i], nullptr);
+        vkDestroyImageView(engine.logicalDevice, engine.swapchainImageViews[i], nullptr);
     }
 
-    vkDestroySwapchainKHR(logicalDevice, engine.swapchain, nullptr);
+    vkDestroySwapchainKHR(engine.logicalDevice, engine.swapchain, nullptr);
 }
 
 void recreateSwapchain
@@ -262,7 +264,7 @@ void recreateSwapchain
         glfwGetFramebufferSize(engine.window, &width, &height);
         glfwWaitEvents();
     }
-    vkDeviceWaitIdle(logicalDevice);
+    vkDeviceWaitIdle(engine.logicalDevice);
 
     cleanupSwapchain(engine);
 

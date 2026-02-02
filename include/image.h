@@ -1,38 +1,53 @@
 #pragma once
 
-#include "vulkan/vulkan_core.h"
+#include <vulkan/vulkan_core.h>
 
-#include <filesystem>
+#include "river.h"
 
 extern void createImage
 (
-    uint32_t                width,
-    uint32_t                height,
-    VkFormat                format,
-    VkImageTiling           tiling,
-    VkImageUsageFlags       usage,
-    VkMemoryPropertyFlags   memPropFlags,
-    VkImage                 &image,
-    VkDeviceMemory          &imageMem
+    const EngineData            &engine,
+    const uint32_t              &width,
+    const uint32_t              &height,
+    const VkFormat              &format,
+    const VkImageTiling         &tiling,
+    const VkImageUsageFlags     &usage,
+    const VkMemoryPropertyFlags &memPropFlags,
+    VkImage                     &image,
+    VkDeviceMemory              &imageMem
 );
 
-VkImageView createImageView
+extern VkImageView createImageView
 (
+    const EngineData    &engine,
     VkImage             image,
     VkFormat            format,
     VkImageAspectFlags  aspectFlags
 );
 
-extern void createTextureImage(const std::filesystem::path &texturePath);
-extern void createTextureImageView();
-extern void createTextureSampler();
+extern void createTextureImage
+(
+    const EngineData        &engine,
+    const ProjectManifest   &manifest
+);
+
+extern void createTextureImageView
+(
+    const EngineData &engine
+);
+
+extern void createTextureSampler
+(
+    const EngineData &engine
+);
 
 extern void transitionImageLayout
 (
-    VkImage         image,
-    VkFormat        format,
-    VkImageLayout   oldLayout,
-    VkImageLayout   newLayout
+    const EngineData    &engine,
+    const VkImage       &image,
+    const VkFormat      &format,
+    const VkImageLayout &oldLayout,
+    const VkImageLayout &newLayout
 );
 
 //TODO:#57: rid of inline global scope vars

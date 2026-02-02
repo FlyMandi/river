@@ -333,68 +333,70 @@ void initVulkan
     #endif
 
     createSurface(engine);
-    pickPhysicalDevice(engine.instance, engine.surface);
-    createLogicalDevice();
+    pickPhysicalDevice(engine);
+    createLogicalDevice(engine);
 
     createSwapchain(engine, settings);
     createSwapImageViews(engine);
 
     createRenderPass(engine);
-    createDescriptorSetLayout();
+    createDescriptorSetLayout(engine);
     createGraphicsPipeline(engine, manifest);
 
-    createCommandPools();
+    createCommandPools(engine);
     createDepthResources(engine);
     createFramebuffers(engine);
 
-    createTextureImage(manifest.projectTexturePath);
-    createTextureImageView();
-    createTextureSampler();
+    createTextureImage(engine, manifest);
+    createTextureImageView(engine);
+    createTextureSampler(engine);
 
     loadModel(manifest.projectModelPath);
-    createVertexBuffer();
-    createUniformBuffers();
+    createVertexBuffer(engine);
+    createUniformBuffers(engine);
 
-    createDescriptorPool();
-    createDescriptorSets();
+    createDescriptorPool(engine);
+    createDescriptorSets(engine);
 
-    createCommandBuffers();
+    createCommandBuffers(engine);
     createSyncObjects(engine);
 }
 
-void cleanupVulkan(EngineData &engine)
-{
-    vkDeviceWaitIdle(logicalDevice);
+void cleanupVulkan
+(
+    EngineData &engine
+){
+    vkDeviceWaitIdle(engine.logicalDevice);
 
     cleanupSyncObjects(engine);
     cleanupSwapchain(engine);
 
-    vkDestroySampler(logicalDevice, textureSampler, nullptr);
+    vkDestroySampler(engine.logicalDevice, textureSampler, nullptr);
 
-    vkDestroyImage(logicalDevice, textureImage, nullptr);
-    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
-    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, textureImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, textureImageMemory, nullptr);
+    vkDestroyImageView(engine.logicalDevice, textureImageView, nullptr);
 
-    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
-    vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
+    vkDestroyBuffer(engine.logicalDevice, vertexBuffer, nullptr);
+    vkFreeMemory(engine.logicalDevice, vertexBufferMemory, nullptr);
 
-    vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(engine.logicalDevice, descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(engine.logicalDevice, descriptorSetLayout, nullptr);
 
-    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(logicalDevice, graphicsPipelineLayout, nullptr);
+    vkDestroyPipeline(engine.logicalDevice, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(engine.logicalDevice, graphicsPipelineLayout, nullptr);
 
-    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+    vkDestroyRenderPass(engine.logicalDevice, renderPass, nullptr);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
-        vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(engine.logicalDevice, uniformBuffers[i], nullptr);
+        vkFreeMemory(engine.logicalDevice, uniformBuffersMemory[i], nullptr);
     }
 
-    vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
-    vkDestroyCommandPool(logicalDevice, transferCommandPool, nullptr);
-    vkDestroyDevice(logicalDevice, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, graphicsCommandPool, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, transferCommandPool, nullptr);
+    vkDestroyDevice(engine.logicalDevice, nullptr);
 
     #ifdef DEBUG
         DestroyDebugUtilsMessengerEXT(engine.instance, nullptr);
@@ -409,14 +411,14 @@ void drawFrame
     EngineData          &engine,
     const UserSettings  &settings
 ){
-    vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(engine.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
 
     VkResult result =
         vkAcquireNextImageKHR
         (
-            logicalDevice,
+            engine.logicalDevice,
             engine.swapchain,
             UINT64_MAX,
             acquireSemaphore,
@@ -434,7 +436,7 @@ void drawFrame
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
-    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+    vkResetFences(engine.logicalDevice, 1, &inFlightFences[currentFrame]);
 
     updateUniformBuffer(engine, currentFrame);
 

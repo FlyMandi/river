@@ -4,19 +4,19 @@
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
-#include "device.h"
 #include "pipeline.h"
 #include "buffer.h"
 #include "image.h"
 
 internal void copyBufferToImage
 (
-    VkBuffer    buffer,
-    VkImage     image,
-    uint32_t    width,
-    uint32_t    height
+    const EngineData    &engine,
+    const VkBuffer      &buffer,
+    const VkImage       &image,
+    const uint32_t      &width,
+    const uint32_t      &height
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, graphicsCommandPool);
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -49,17 +49,18 @@ internal void copyBufferToImage
         &region
     );
 
-    flushCommandBuffer(commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(engine, commandBuffer, graphicsCommandPool, graphicsQueue);
 }
 
 void transitionImageLayout
 (
-    VkImage         image,
-    VkFormat        format,
-    VkImageLayout   oldLayout,
-    VkImageLayout   newLayout
+    const EngineData    &engine,
+    const VkImage       &image,
+    const VkFormat      &format,
+    const VkImageLayout &oldLayout,
+    const VkImageLayout &newLayout
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, graphicsCommandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -139,18 +140,21 @@ void transitionImageLayout
         &barrier
     );
 
-    flushCommandBuffer(commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(engine, commandBuffer, graphicsCommandPool, graphicsQueue);
 }
 
-void createTextureImage(const std::filesystem::path &texturePath)
-{
+void createTextureImage
+(
+    const EngineData        &engine,
+    const ProjectManifest   &manifest
+){
     int texWidth;
     int texHeight;
     int texChannels;
 
     stbi_uc *pixels =   stbi_load
                         (
-                            texturePath.string().c_str(),
+                            manifest.projectTexturePath.string().c_str(),
                             &texWidth,
                             &texHeight,
                             &texChannels,
@@ -166,7 +170,7 @@ void createTextureImage(const std::filesystem::path &texturePath)
             std::format
             (
                 "failed to load texture image from {}: {}",
-                texturePath.string(),
+                manifest.projectTexturePath.string(),
                 stbi_failure_reason()
             )
         );
@@ -176,8 +180,8 @@ void createTextureImage(const std::filesystem::path &texturePath)
 
     std::set<uint32_t> uniqueFamilyIndices =
     {
-        logicalQueueFamilies.graphicsIndex,
-        logicalQueueFamilies.transferIndex
+        engine.logicalQueueFamilies.graphicsIndex,
+        engine.logicalQueueFamilies.transferIndex
     };
 
     VkBuffer stagingBuffer;
@@ -185,6 +189,7 @@ void createTextureImage(const std::filesystem::path &texturePath)
 
     createBuffer
     (
+        engine,
         imageSize,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -194,14 +199,15 @@ void createTextureImage(const std::filesystem::path &texturePath)
     );
 
     void* data;
-    vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(engine.logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
     ::memcpy(data, pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(logicalDevice, stagingBufferMemory);
+    vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
     stbi_image_free(pixels);
 
     createImage
     (
+        engine,
         texWidth,
         texHeight,
         VK_FORMAT_R8G8B8A8_SRGB,
@@ -214,6 +220,7 @@ void createTextureImage(const std::filesystem::path &texturePath)
 
     transitionImageLayout
     (
+        engine,
         textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
@@ -222,6 +229,7 @@ void createTextureImage(const std::filesystem::path &texturePath)
 
     copyBufferToImage
     (
+        engine,
         stagingBuffer,
         textureImage,
         static_cast<uint32_t>(texWidth),
@@ -230,26 +238,28 @@ void createTextureImage(const std::filesystem::path &texturePath)
 
     transitionImageLayout
     (
+        engine,
         textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
 
-    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
-    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(engine.logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(engine.logicalDevice, stagingBufferMemory, nullptr);
 }
 
 void createImage
 (
-    uint32_t                width,
-    uint32_t                height,
-    VkFormat                format,
-    VkImageTiling           tiling,
-    VkImageUsageFlags       usage,
-    VkMemoryPropertyFlags   memPropFlags,
-    VkImage                 &image,
-    VkDeviceMemory          &imageMem
+    const EngineData            &engine,
+    const uint32_t              &width,
+    const uint32_t              &height,
+    const VkFormat              &format,
+    const VkImageTiling         &tiling,
+    const VkImageUsageFlags     &usage,
+    const VkMemoryPropertyFlags &memPropFlags,
+    VkImage                     &image,
+    VkDeviceMemory              &imageMem
 ){
     VkImageCreateInfo imageCreateInfo{};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -272,29 +282,30 @@ void createImage
 
     riverAssertVkSuccess
     (
-        vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &image),
+        vkCreateImage(engine.logicalDevice, &imageCreateInfo, nullptr, &image),
         "failed to create image!"
     );
 
     VkMemoryRequirements imageMemRequirements;
-    vkGetImageMemoryRequirements(logicalDevice, image, &imageMemRequirements);
+    vkGetImageMemoryRequirements(engine.logicalDevice, image, &imageMemRequirements);
 
     VkMemoryAllocateInfo mAllocInfo{};
     mAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     mAllocInfo.allocationSize = imageMemRequirements.size;
-    mAllocInfo.memoryTypeIndex = findSuitableMemoryType(imageMemRequirements.memoryTypeBits, memPropFlags);
+    mAllocInfo.memoryTypeIndex = findSuitableMemoryType(engine, imageMemRequirements.memoryTypeBits, memPropFlags);
 
     riverAssertVkSuccess
     (
-        vkAllocateMemory(logicalDevice, &mAllocInfo, nullptr, &imageMem),
+        vkAllocateMemory(engine.logicalDevice, &mAllocInfo, nullptr, &imageMem),
         "failed to allocate image memory!"
     );
 
-    vkBindImageMemory(logicalDevice, image, imageMem, 0);
+    vkBindImageMemory(engine.logicalDevice, image, imageMem, 0);
 }
 
 VkImageView createImageView
 (
+    const EngineData    &engine,
     VkImage             image,
     VkFormat            format,
     VkImageAspectFlags  aspectFlags
@@ -313,7 +324,7 @@ VkImageView createImageView
     VkImageView imageView;
     riverAssertVkSuccess
     (
-        vkCreateImageView(logicalDevice, &viewCreateInfo, nullptr, &imageView),
+        vkCreateImageView(engine.logicalDevice, &viewCreateInfo, nullptr, &imageView),
         "failed to create texture image view!"
     );
 
@@ -321,18 +332,23 @@ VkImageView createImageView
 }
 
 //TODO: expand functionality or remove unnecessary function definition for single function call
-void createTextureImageView()
-{
+void createTextureImageView
+(
+    const EngineData &engine
+){
     textureImageView =  createImageView
                         (
+                            engine,
                             textureImage,
                             VK_FORMAT_R8G8B8A8_SRGB,
                             VK_IMAGE_ASPECT_COLOR_BIT
                         );
 }
 
-void createTextureSampler()
-{
+void createTextureSampler
+(
+    const EngineData &engine
+){
     VkSamplerCreateInfo samplerCreateInfo{};
     samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
@@ -341,7 +357,7 @@ void createTextureSampler()
     samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerCreateInfo.anisotropyEnable = VK_TRUE;
-    samplerCreateInfo.maxAnisotropy = deviceProperties.limits.maxSamplerAnisotropy;
+    samplerCreateInfo.maxAnisotropy = engine.deviceProperties.limits.maxSamplerAnisotropy;
     samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
     samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
     samplerCreateInfo.compareEnable = VK_FALSE;
@@ -353,7 +369,7 @@ void createTextureSampler()
 
     riverAssertVkSuccess
     (
-        vkCreateSampler(logicalDevice, &samplerCreateInfo, nullptr, &textureSampler),
+        vkCreateSampler(engine.logicalDevice, &samplerCreateInfo, nullptr, &textureSampler),
         "failed to create texture sampler!"
     );
 }

@@ -51,12 +51,13 @@ extern void loadModel(const std::filesystem::path &modelPath);
 
 extern void createBuffer
 (
-    VkDeviceSize            bufferSize,
-    VkBufferUsageFlags      usageFlags,
-    VkMemoryPropertyFlags   memPropertyFlags,
-    VkBuffer                &buffer,
-    VkDeviceMemory          &bufferMemory,
-    std::set<uint32_t>      &uniqueQueueFamilies
+    const EngineData            &engine,
+    const VkDeviceSize          &bufferSize,
+    const VkBufferUsageFlags    &usageFlags,
+    const VkMemoryPropertyFlags &memPropFlags,
+    VkBuffer                    &buffer,
+    VkDeviceMemory              &bufferMemory,
+    const std::set<uint32_t>    &uniqueQueueFamilies
 );
 
 extern void createDepthResources
@@ -64,16 +65,29 @@ extern void createDepthResources
     const EngineData &engine
 );
 
-extern uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags);
-
-extern void createVertexBuffer();
-extern void createUniformBuffers();
-
-VkFormat findSupportedFormat
+extern uint32_t findSuitableMemoryType
 (
+    const EngineData            &engine,
+    const uint32_t              &typeFilter,
+    const VkMemoryPropertyFlags &flags
+);
+
+extern void createVertexBuffer
+(
+    const EngineData &engine
+);
+
+extern void createUniformBuffers
+(
+    const EngineData &engine
+);
+
+extern VkFormat findSupportedFormat
+(
+    const EngineData            &engine,
     const std::vector<VkFormat> &candidates,
-    VkImageTiling               tiling,
-    VkFormatFeatureFlags        features
+    const VkImageTiling         &tiling,
+    const VkFormatFeatureFlags  &features
 );
 
 extern void updateUniformBuffer

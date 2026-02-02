@@ -19,6 +19,20 @@ constexpr auto ENGINE_NAME = "River";
 global std::ofstream logFile;
 global uint8_t logLevel;
 
+struct SwapchainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities{};
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
+struct QueueFamilyIndices
+{
+    uint32_t graphicsIndex = UINT32_MAX;
+    uint32_t transferIndex = UINT32_MAX;
+    uint32_t presentIndex  = UINT32_MAX;
+};
+
 struct ProjectManifest
 {
     std::string             projectName         = "RIV_UNINITIALIZED_STRING";
@@ -43,19 +57,28 @@ struct UserSettings
 
 struct EngineData
 {
-    GLFWwindow                  *window;
-    std::string                 windowName;
+    GLFWwindow                          *window;
+    std::string                         windowName;
 
-    VkInstance                  instance;
-    VkSurfaceKHR                surface;
+    VkInstance                          instance;
+    VkSurfaceKHR                        surface;
 
-    VkSwapchainKHR              swapchain;
-    VkFormat                    swapchainImageFormat;
-    VkExtent2D                  swapchainExtent;
+    QueueFamilyIndices                  logicalQueueFamilies;
+    VkPhysicalDevice                    physicalDevice = VK_NULL_HANDLE;
+    VkPhysicalDeviceProperties          deviceProperties;
+    VkPhysicalDeviceMemoryProperties    deviceMemoryProperties;
+    VkPhysicalDeviceFeatures            deviceFeatures;
 
-    std::vector<VkImage>        swapchainImages{};
-    std::vector<VkImageView>    swapchainImageViews{};
-    std::vector<VkFramebuffer>  swapchainFramebuffers{};
+    VkDevice logicalDevice;
+
+    VkSwapchainKHR                      swapchain;
+    VkFormat                            swapchainImageFormat;
+    VkExtent2D                          swapchainExtent;
+
+    uint32_t                            swapchainImageCount;
+    std::vector<VkImage>                swapchainImages{};
+    std::vector<VkImageView>            swapchainImageViews{};
+    std::vector<VkFramebuffer>          swapchainFramebuffers{};
 };
 
 enum RiverLogLevel

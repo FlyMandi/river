@@ -8,8 +8,6 @@
 //maybe get rid of this in the future
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-inline uint32_t swapchainImageCount;
-
 extern VkExtent2D chooseSwapExtent
 (
     const VkSurfaceCapabilitiesKHR  &capabilities,
