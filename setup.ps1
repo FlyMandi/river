@@ -33,7 +33,6 @@ function Install-VulkanSDK{
         Write-Host "https://www.amd.com/en/resources/support-articles/faqs/GPU-636.html"
 
     }elseif($IsMacOS){
-        #TODO: add mac install steps... eh.
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/mac/vulkansdk-macos-$installVersion.zip
     }
 

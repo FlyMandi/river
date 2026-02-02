@@ -1,4 +1,3 @@
-#TODO: fix paths on linux
 $glslc = (Join-Path -PATH $env:VULKAN_SDK -ChildPath "\bin\glslc.exe")
 $src = Join-Path $PSScriptRoot "\src\"
 $shaders = Join-Path $src "\shaders\" 
@@ -19,7 +18,6 @@ function Out-Shader{
     $param = $fileName, '-o', $target 
     
     &$glslc $param
-    #TODO: check for syntax errors and throw the relevant info
     Write-Host "Compiled " -NoNewline
     Write-Host $fileName -ForegroundColor DarkCyan -NoNewline
     Write-Host " successfully to: $target"
