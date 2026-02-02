@@ -10,7 +10,7 @@ kind("WindowedApp")
 language("C++")
 cppdialect("C++20")
 targetdir("bin/%{cfg.buildcfg}")
-includedirs({ "vendor/GLM", "vendor/GLFW/include", "%{VULKAN_SDK}/Include/" })
+includedirs({ "../lib/", "../lib/GLFW/include", "%{VULKAN_SDK}/Include/" })
 
 files({ "**.h", "**.cpp" })
 
