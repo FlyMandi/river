@@ -105,7 +105,7 @@ const char* riverTranslateVkResult(VkResult code)
 
 #ifdef DEBUG
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
+internal VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
     VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT             messageType,
@@ -121,7 +121,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     return VK_FALSE;
 }
 
-static VkResult CreateDebugUtilsMessengerEXT
+internal VkResult CreateDebugUtilsMessengerEXT
 (
     VkInstance                                  instance,
     const VkDebugUtilsMessengerCreateInfoEXT    *createInfo,
@@ -139,7 +139,7 @@ static VkResult CreateDebugUtilsMessengerEXT
     }
 }
 
-static VkBool32 checkValidationLayerSupport()
+internal VkBool32 checkValidationLayerSupport()
 {
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -176,8 +176,10 @@ static VkBool32 checkValidationLayerSupport()
     return VK_TRUE;
 }
 
-static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
-{
+internal void populateDebugMessengerCreateInfo
+(
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo
+){
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -189,8 +191,10 @@ static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT 
     createInfo.pfnUserCallback = debugCallback;
 }
 
-static void setupDebugMessenger()
-{
+internal void setupDebugMessenger
+(
+    const VkInstance &instance
+){
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
@@ -202,8 +206,11 @@ static void setupDebugMessenger()
     );
 }
 
-static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator)
-{
+internal void DestroyDebugUtilsMessengerEXT
+(
+    const VkInstance            &instance,
+    const VkAllocationCallbacks *allocator
+){
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func)
     {
@@ -212,7 +219,7 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 }
 #endif
 
-static std::vector<const char*> getRequiredExtensions()
+internal std::vector<const char*> getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -227,8 +234,11 @@ static std::vector<const char*> getRequiredExtensions()
     return extensions;
 }
 
-static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
-{
+internal VkBool32 checkInstanceExtensions
+(
+    std::vector<const char*>            *requiredExt,
+    std::vector<VkExtensionProperties>  *instanceExt
+){
     for(const auto &required : *requiredExt)
     {
         VkBool32 extFound = VK_FALSE;
@@ -254,8 +264,11 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
     return VK_TRUE;
 }
 
-static void createInstance(const ProjectManifest &manifest)
-{
+internal void createInstance
+(
+    EngineData              &engine,
+    const ProjectManifest   &manifest
+){
     #ifdef DEBUG
         riverAssert(checkValidationLayerSupport(), "validation layers requested, but not available!");
     #endif
@@ -302,7 +315,7 @@ static void createInstance(const ProjectManifest &manifest)
 
     riverAssertVkSuccess
     (
-        vkCreateInstance(&createInfo, nullptr, &instance),
+        vkCreateInstance(&createInfo, nullptr, &engine.instance),
         "failed to create instance."
     );
 }
@@ -313,17 +326,17 @@ void initVulkan
     const ProjectManifest   &manifest,
     const UserSettings      &settings
 ){
-    createInstance(manifest);
+    createInstance(engine, manifest);
 
     #ifdef DEBUG
-        setupDebugMessenger();
+        setupDebugMessenger(engine.instance);
     #endif
 
-    createSurface(engine.window, engine.surface);
-    pickPhysicalDevice(engine.surface);
+    createSurface(engine);
+    pickPhysicalDevice(engine.instance, engine.surface);
     createLogicalDevice();
 
-    createSwapchain(engine.surface, engine.window, settings.presentMode);
+    createSwapchain(engine, settings);
     createSwapImageViews();
 
     createRenderPass();
@@ -384,18 +397,17 @@ void cleanupVulkan(EngineData &engine)
     vkDestroyDevice(logicalDevice, nullptr);
 
     #ifdef DEBUG
-        DestroyDebugUtilsMessengerEXT(nullptr);
+        DestroyDebugUtilsMessengerEXT(engine.instance, nullptr);
     #endif
 
-    vkDestroySurfaceKHR(instance, engine.surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    vkDestroySurfaceKHR(engine.instance, engine.surface, nullptr);
+    vkDestroyInstance(engine.instance, nullptr);
 }
 
 void drawFrame
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    EngineData          &engine,
+    const UserSettings  &settings
 ){
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -414,7 +426,7 @@ void drawFrame
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        recreateSwapchain(surface, window, preferredPresent);
+        recreateSwapchain(engine, settings);
         return;
     }
     else if(result != VK_SUBOPTIMAL_KHR)
@@ -485,7 +497,7 @@ void drawFrame
     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
     {
         framebufferResized = VK_FALSE;
-        recreateSwapchain(surface, window, preferredPresent);
+        recreateSwapchain(engine, settings);
     }
     else
     {

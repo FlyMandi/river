@@ -3,6 +3,8 @@
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
+#include "river.h"
+
 #include <vector>
 
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -26,16 +28,14 @@ extern VkExtent2D chooseSwapExtent
 
 extern void createSwapchain
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    const EngineData    &engine,
+    const UserSettings  &settings
 );
 
 extern void recreateSwapchain
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    const EngineData    &engine,
+    const UserSettings  &settings
 );
 
 extern void createSwapImageViews();

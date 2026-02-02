@@ -11,7 +11,7 @@ const std::vector<const char*> deviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-static VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
+internal VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
 
@@ -31,15 +31,15 @@ static VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
 
 QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
-    static QueueFamilyIndices indices{};
-    static uint32_t queueFamilyCount = 0;
+    QueueFamilyIndices indices{};
+    uint32_t queueFamilyCount = 0;
 
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
-    static std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
+    persistent std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, physicalQueueFamilies.data());
 
-    static VkBool32 presentSupport = false;
+    persistent VkBool32 presentSupport = false;
 
     for(int i = 0; const auto &queueFamily : physicalQueueFamilies)
     {
@@ -76,7 +76,7 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSur
     return indices;
 }
 
-internal_f uint32_t rateDeviceSuitability
+internal uint32_t rateDeviceSuitability
 (
     const VkPhysicalDevice  &device,
     const VkSurfaceKHR      &surface
@@ -166,8 +166,11 @@ SwapchainSupportDetails querySwapchainSupport
     return details;
 }
 
-void pickPhysicalDevice(const VkSurfaceKHR &surface)
-{
+void pickPhysicalDevice
+(
+    const VkInstance    &instance,
+    const VkSurfaceKHR  &surface
+){
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
 

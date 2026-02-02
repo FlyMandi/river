@@ -1,20 +1,14 @@
 #pragma once
 
 #include "GLFW/glfw3.h"
-#include "vulkan/vulkan_core.h"
+#include "river.h"
 
 extern void initGLFW
 (
-    GLFWwindow  *window,
-    const char* projectName,
-    int         width,
-    int         height
+    EngineData              &engine,
+    const UserSettings      &settings
 );
 
 extern void cleanupGLFW(GLFWwindow *window);
 
-extern void createSurface
-(
-    GLFWwindow      *window,
-    VkSurfaceKHR    &surface
-);
+extern void createSurface(EngineData &engine);

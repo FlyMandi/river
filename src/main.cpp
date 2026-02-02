@@ -17,7 +17,7 @@ int main()
     settings.windowHeight = 1080;
 
     initEditor(engine, manifest, settings);
-    initGLFW(engine.window, engine.windowName.c_str(), settings.windowWidth, settings.windowHeight);
+    initGLFW(engine, settings);
     initVulkan(engine, manifest, settings);
 
     loopEditor(engine, settings);

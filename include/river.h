@@ -8,17 +8,16 @@
 #include <vector>
 #include <fstream>
 
-#define persistent static
-#define global_var static
-#define internal_f static
+#define persistent  static
+#define global      static
+#define internal    static
 
 static uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
 
-global_var VkInstance instance;
-global_var std::ofstream logFile;
-global_var uint8_t logLevel;
+global std::ofstream logFile;
+global uint8_t logLevel;
 
 struct ProjectManifest
 {
@@ -47,7 +46,8 @@ struct EngineData
     GLFWwindow  *window;
     std::string windowName;
 
-    VkSurfaceKHR surface;
+    VkInstance      instance;
+    VkSurfaceKHR    surface;
 };
 
 enum RiverLogLevel
@@ -71,9 +71,8 @@ extern void cleanupVulkan(EngineData &engine);
 
 extern void drawFrame
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    EngineData          &engine,
+    const UserSettings  &settings
 );
 
 extern std::filesystem::path getProjectRoot(const char *rootName);
@@ -81,7 +80,7 @@ extern void riverSetupLog(const std::filesystem::path &path);
 extern void riverCloseLog();
 
 #ifdef DEBUG
-global_var VkDebugUtilsMessengerEXT debugMessenger;
+global VkDebugUtilsMessengerEXT debugMessenger;
 
 const std::vector<const char*> validationLayers =
 {

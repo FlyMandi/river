@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cstdint>
 
-VkExtent2D chooseSwapExtent
+internal VkExtent2D chooseSwapExtent
 (
     const VkSurfaceCapabilitiesKHR  &capabilities,
     GLFWwindow                      *window
@@ -35,11 +35,10 @@ VkExtent2D chooseSwapExtent
 
 void createSwapchain
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    const EngineData    &engine,
+    const UserSettings  &settings
 ){
-    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, surface);
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, engine.surface);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
     for(const auto &availableFormat : swapchainSupport.formats)
@@ -51,18 +50,17 @@ void createSwapchain
         }
     }
 
-    //TODO: extract this into user defined variable in per-project settings manifest
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR; //fallback
 
     for(const auto &availablePresentMode : swapchainSupport.presentModes)
     {
-        if(availablePresentMode == preferredPresent)
+        if(availablePresentMode == settings.presentMode)
         {
             presentMode = availablePresentMode;
         }
     }
 
-    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities, window);
+    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities, engine.window);
 
     swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
 
@@ -74,7 +72,7 @@ void createSwapchain
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface;
+    createInfo.surface = engine.surface;
     createInfo.minImageCount = swapchainImageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -240,24 +238,23 @@ void cleanupSwapchain()
 
 void recreateSwapchain
 (
-    const VkSurfaceKHR      &surface,
-    GLFWwindow              *window,
-    const VkPresentModeKHR  &preferredPresent
+    const EngineData    &engine,
+    const UserSettings  &settings
 ){
     int width = 0;
     int height = 0;
 
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(engine.window, &width, &height);
     while(width == 0 || height == 0)
     {
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(engine.window, &width, &height);
         glfwWaitEvents();
     }
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapchain();
 
-    createSwapchain(surface, window, preferredPresent);
+    createSwapchain(engine, settings);
     createSwapImageViews();
     createDepthResources();
     createFramebuffers();

@@ -48,7 +48,7 @@ void loopEditor
     while(!glfwWindowShouldClose(engine.window))
     {
         glfwPollEvents();
-        drawFrame(engine.surface, engine.window, settings.presentMode);
+        drawFrame(engine, settings);
     }
 }
 
