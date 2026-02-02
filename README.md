@@ -21,7 +21,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - there's a window...
 - ...you can resize it!
 - the window shows only a hardcoded rectangle...
-- ...the rectangle took 1200+ lines of code!
+- ...the rectangle took 1500+ lines of code!
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
