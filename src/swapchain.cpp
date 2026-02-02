@@ -24,10 +24,24 @@ internal VkExtent2D chooseSwapExtent
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
-        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+        VkExtent2D actualExtent =
+        {
+            static_cast<uint32_t>(width),
+            static_cast<uint32_t>(height)
+        };
 
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+        actualExtent.width =    std::clamp
+                                (
+                                    actualExtent.width,
+                                    capabilities.minImageExtent.width,
+                                    capabilities.maxImageExtent.width
+                                );
+        actualExtent.height =   std::clamp
+                                (
+                                    actualExtent.height,
+                                    capabilities.minImageExtent.height,
+                                    capabilities.maxImageExtent.height
+                                );
 
         return actualExtent;
     }
@@ -80,7 +94,8 @@ void createSwapchain
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    uint32_t queueFamilyIndices[] = {
+    uint32_t queueFamilyIndices[] =
+    {
         engine.logicalQueueFamilies.graphicsIndex,
         engine.logicalQueueFamilies.presentIndex
     };
@@ -254,11 +269,13 @@ void recreateSwapchain
     int height = 0;
 
     glfwGetFramebufferSize(engine.window, &width, &height);
+
     while(width == 0 || height == 0)
     {
         glfwGetFramebufferSize(engine.window, &width, &height);
         glfwWaitEvents();
     }
+
     vkDeviceWaitIdle(engine.logicalDevice);
 
     cleanupSwapchain(engine);

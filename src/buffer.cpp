@@ -1,4 +1,3 @@
-#include <unordered_map>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -19,6 +18,7 @@
 #include "buffer.h"
 #include "image.h"
 
+#include <unordered_map>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
