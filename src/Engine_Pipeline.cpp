@@ -9,11 +9,7 @@
 
 namespace engine{
 
-EnginePipeline::EnginePipeline(
-        class EngineDevice &device, 
-        const PipelineConfigInfo &configInfo, 
-        const std::string &vertFilepath, 
-        const std::string &fragFilepath) : EngineDevice{device} {
+EnginePipeline::EnginePipeline(class EngineDevice &device, const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath) : EngineDevice{device} {
     createGraphicsPipeline(configInfo, vertFilepath, fragFilepath);
 }
 
@@ -32,7 +28,7 @@ std::vector<char> EnginePipeline::readFile(const std::string &filepath){
     return buffer;
 }
 
-void EnginePipeline::createGraphicsPipeline(const PipelineConfigInfo &configInfo,const std::string &vertFilepath, const std::string &fragFilepath){
+void EnginePipeline::createGraphicsPipeline(const PipelineConfigInfo &configInfo, const std::string &vertFilepath, const std::string &fragFilepath){
     auto vertCode = readFile(vertFilepath);
     auto fragCode = readFile(fragFilepath);
 
