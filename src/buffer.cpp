@@ -93,10 +93,11 @@ void createBuffer(
     bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
     bufferInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 
-    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-    {
-        riverLog("failed to create buffer!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer),
+        "failed to create buffer!"
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
@@ -106,10 +107,12 @@ void createBuffer(
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findSuitableMemoryType(memRequirements.memoryTypeBits, memPropertyFlags);
 
-    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-    {
-        riverLog("failed to allocate buffer!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory),
+        "failed to allocate buffer!"
+    );
+
     riverLog("created buffer with usage flags: " , RIV_LOG_LEVEL_DEBUG);
     riverLog(usageFlags, RIV_LOG_LEVEL_DEBUG);
 
@@ -123,10 +126,11 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
     VkFenceCreateInfo transferFenceCreateInfo{};
     transferFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-    if(vkCreateFence(logicalDevice, &transferFenceCreateInfo, nullptr, &transferFence) != VK_SUCCESS)
-    {
-        riverLog("failed to create transfer fence!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateFence(logicalDevice, &transferFenceCreateInfo, nullptr, &transferFence),
+        "failed to create transfer fence!"
+    );
 
     VkCommandBufferAllocateInfo transferAllocInfo{}; 
     transferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

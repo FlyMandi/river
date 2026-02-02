@@ -262,10 +262,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     vkCmdEndRenderPass(commandBuffer);
 
-    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-    {
-        riverLog("failed to record command buffer!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess(vkEndCommandBuffer(commandBuffer), "failed to record command buffer!");
 }
 
 void createCommandPools()
@@ -275,20 +272,22 @@ void createCommandPools()
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     graphicsPoolInfo.queueFamilyIndex = logicalQueueFamilies.graphicsIndex;
 
-    if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS)
-    {
-        riverLog("failed to create graphics command pool!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+            vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
+            "failed to create graphics command pool!"
+    );
 
     VkCommandPoolCreateInfo transferPoolInfo{};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     transferPoolInfo.queueFamilyIndex = logicalQueueFamilies.transferIndex;
 
-    if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS)
-    {
-        riverLog("failed to create transfer command pool!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool),
+        "failed to create transfer command pool!"
+    );
 }
 
 void createCommandBuffers()
@@ -301,10 +300,11 @@ void createCommandBuffers()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-    if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
-    {
-        riverLog("failed to allocate command buffers!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()),
+        "failed to allocate command buffers!"
+    );
 }
 
 void createSyncObjects()
@@ -322,16 +322,23 @@ void createSyncObjects()
     
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        if( (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS ||
-            (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS
-        ){
-            riverLog("failed to create semaphore!", RIV_LOG_LEVEL_ERROR);
-        }
+        riverAssertVkSuccess
+        (
+            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
+            "failed to create imageAvailableSemaphore!"
+        );
 
-        if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS)
-        {
-            riverLog("failed to create fence!", RIV_LOG_LEVEL_ERROR);
-        }
+        riverAssertVkSuccess
+        (
+            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
+            "failed to create renderFinishedSemaphore!"
+        );
+
+        riverAssertVkSuccess
+        (
+            vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
+            "failed to create inFlightFence!"
+        );
     }
 }
 
@@ -349,10 +356,11 @@ void createDescriptorSetLayout()
     descriptorSetLayoutCreateInfo.bindingCount = 1;
     descriptorSetLayoutCreateInfo.pBindings = &uniformBufferLayoutBinding;
 
-    if(vkCreateDescriptorSetLayout(logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-    {
-        riverLog("failed to create descriptor set layout!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        vkCreateDescriptorSetLayout(logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout),
+        "failed to create descriptor set layout!"
+    );
 }
 
 void createDescriptorPool()
@@ -367,11 +375,12 @@ void createDescriptorPool()
     descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
     descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorPoolCreateInfo.flags = 0;
-    
-    if(vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-    {
-        riverLog("failed to create descriptor pool.", RIV_LOG_LEVEL_ERROR);
-    }
+
+    riverAssertVkSuccess    
+    (
+        vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool),
+        "failed to create descriptor pool."
+    );
 }
 
 void createDescriptorSets()

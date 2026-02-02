@@ -1,6 +1,6 @@
+#include "river.h"
 #include "window.h"
 #include "pipeline.h"
-#include "river.h"
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -19,10 +19,7 @@ void initGLFW()
 
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
-    if(nullptr == window)
-    {
-        riverLog("failed to create GLFW window!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssert(nullptr != window, "failed to create GLFW window!");
 
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 }
@@ -38,8 +35,9 @@ void createSurface()
 {
     //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
-    if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
-    {
-        riverLog("failed to create window surface!", RIV_LOG_LEVEL_ERROR);
-    }
+    riverAssertVkSuccess
+    (
+        glfwCreateWindowSurface(instance, window, nullptr, &surface),
+        "failed to create window surface!"
+    );
 }
