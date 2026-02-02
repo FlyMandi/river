@@ -160,37 +160,6 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
         func(instance, debugMessenger, allocator);
     }
 }
-
-static void setupDebugImageView()
-{
-    //TODO: create debug image (vkCreateImage())
-    //map memory (vkBindImageMemory(), vkMapMemory())
-    //memset to zero it maybe
-}
-
-void copyFramebufferToDebugImageView(VkCommandBuffer commandBuffer, VkImage srcFrame)
-{
-    //TODO: use VkImageMemoryBarrier barriers[] and specs
-    //srcImage to TRANSFER_SRC_OPTIMAL, then TRANSFER_DST_OPTIMAL
-    //vkCmdPipelineBarrier
-    //VkImageCopy copyRegion{};
-    //vkCmdCopyImage(
-    //commandBuffer,
-    //srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-    //debugImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    //1,
-    //&copyRegion);
-    //vkCmdPipelineBarrier(
-    //cmdBuffer,
-    //VK_PIPELINE_STAGE_TRANSFER_BIT,
-    //VK_PIPELINE_STAGE_HOST_BIT,
-    //0,
-    //0, nullptr,
-    //0, nullptr,
-    //1,
-    //&barrierDstTransferDstToGeneral
-    //);
-}
 #endif
 
 static void createInstance()
@@ -259,7 +228,6 @@ void initVulkan()
 
     #ifdef DEBUG
         setupDebugMessenger();
-        setupDebugImageView();
     #endif
 
     createSurface();
@@ -278,6 +246,7 @@ void initVulkan()
 
 void cleanupVulkan()
 {
+    //TODO:#38: fences.
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapChain();
@@ -389,7 +358,7 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-//TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
+//HACK: only checks up to 4 paths up. jank.
 std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::current_path();
