@@ -22,3 +22,8 @@ extern void createLogicalDevice
 (
     EngineData &engine
 );
+
+extern VkSampleCountFlagBits getMaxMSAASamples
+(
+    const EngineData &engine
+);

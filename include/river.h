@@ -171,6 +171,8 @@ struct EngineData
     VkDeviceMemory                      textureImageMemory;
 
     VkSampler                           textureSampler;
+
+    VkSampleCountFlagBits               msaaSamples;
 };
 
 enum RiverLogLevel

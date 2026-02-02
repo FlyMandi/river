@@ -202,11 +202,6 @@ void pickPhysicalDevice
     if(suitabilityCandidates.rbegin()->first > 0)
     {
         engine.physicalDevice = suitabilityCandidates.rbegin()->second;
-
-        QueueFamilyIndices indices = findQueueFamilies(engine.physicalDevice, engine.surface);
-        engine.logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
-        engine.logicalQueueFamilies.transferIndex = indices.transferIndex;
-        engine.logicalQueueFamilies.presentIndex = indices.presentIndex;
     }
     else
     {
@@ -218,6 +213,13 @@ void createLogicalDevice
 (
     EngineData &engine
 ){
+    QueueFamilyIndices indices = findQueueFamilies(engine.physicalDevice, engine.surface);
+    engine.logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
+    engine.logicalQueueFamilies.transferIndex = indices.transferIndex;
+    engine.logicalQueueFamilies.presentIndex = indices.presentIndex;
+
+    engine.msaaSamples = getMaxMSAASamples(engine);
+
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies =
     {
@@ -268,4 +270,21 @@ void createLogicalDevice
     vkGetPhysicalDeviceProperties(engine.physicalDevice, &engine.deviceProperties);
     vkGetPhysicalDeviceFeatures(engine.physicalDevice, &deviceFeatures);
     vkGetPhysicalDeviceMemoryProperties(engine.physicalDevice, &engine.deviceMemoryProperties);
+}
+
+VkSampleCountFlagBits getMaxMSAASamples
+(
+    const EngineData &engine
+){
+    VkSampleCountFlags counts = engine.deviceProperties.limits.framebufferColorSampleCounts &
+                                engine.deviceProperties.limits.framebufferDepthSampleCounts;
+
+    if(counts & VK_SAMPLE_COUNT_64_BIT){ return VK_SAMPLE_COUNT_64_BIT; }
+    if(counts & VK_SAMPLE_COUNT_32_BIT){ return VK_SAMPLE_COUNT_32_BIT; }
+    if(counts & VK_SAMPLE_COUNT_16_BIT){ return VK_SAMPLE_COUNT_16_BIT; }
+    if(counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+    if(counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+    if(counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+    return VK_SAMPLE_COUNT_1_BIT;
 }
