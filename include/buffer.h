@@ -16,12 +16,9 @@ extern const std::vector<uint32_t> indices;
 
 inline VkBuffer vertexBuffer;
 inline VkDeviceMemory vertexBufferMemory;
-
-inline VkBuffer indexBuffer;
-inline VkDeviceMemory indexBufferMemory;
+inline VkDeviceSize vertSize;
 
 extern void createVertexBuffer();
-extern void createIndexBuffer();
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
 extern std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions();

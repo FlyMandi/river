@@ -166,7 +166,10 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 
 void createVertexBuffer()
 {
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+    vertSize = sizeof(vertices[0]) * vertices.size();
+    VkDeviceSize indexSize = sizeof(indices[0]) * indices.size();
+
+    VkDeviceSize bufferSize = vertSize + indexSize;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -187,15 +190,20 @@ void createVertexBuffer()
         queueFamilies
     );
 
-    void* stagingBufferBegin;
-    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &stagingBufferBegin);
-    std::memcpy(stagingBufferBegin, vertices.data(), (size_t)bufferSize);
+    void* pData;
+
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, vertSize, 0, &pData);
+    std::memcpy(pData, vertices.data(), (size_t)vertSize);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
+
+    vkMapMemory(logicalDevice, stagingBufferMemory, vertSize, indexSize, 0, &pData);
+    std::memcpy(pData, indices.data(), (size_t)indexSize);
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
     
     createBuffer
     (
         bufferSize, 
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT   | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
         vertexBuffer,
         vertexBufferMemory,
@@ -203,50 +211,6 @@ void createVertexBuffer()
     );
     
     copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
-    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
-}
-
-void createIndexBuffer()
-{
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-
-    static std::set<uint32_t> queueFamilies = 
-    {
-        logicalQueueFamilies.graphicsIndex,
-        logicalQueueFamilies.transferIndex
-    };
-
-    createBuffer
-    (
-        bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        stagingBuffer,
-        stagingBufferMemory,
-        queueFamilies
-    );
-
-    void* stagingBufferBegin;
-    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &stagingBufferBegin);
-    std::memcpy(stagingBufferBegin, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(logicalDevice, stagingBufferMemory);
-    
-    createBuffer
-    (
-        bufferSize, 
-        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-        indexBuffer,
-        indexBufferMemory,
-        queueFamilies
-    );
-    
-    copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
