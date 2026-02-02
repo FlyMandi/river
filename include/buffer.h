@@ -9,9 +9,9 @@
 
 struct Vertex
 {
-    glm::vec3 pos;
+    glm::vec3 position;
     glm::vec3 colour;
-    glm::vec2 texCoord;
+    glm::vec2 textureCoordinate;
 };
 
 struct UniformBufferObject
@@ -21,8 +21,8 @@ struct UniformBufferObject
     glm::mat4 projection;
 };
 
-inline std::vector<Vertex> vertices{};
-inline std::vector<uint32_t> indices{};
+inline std::vector<Vertex> vertices;
+inline std::vector<uint32_t> vertexIndices;
 
 inline VkBuffer vertexBuffer;
 inline VkDeviceMemory vertexBufferMemory;

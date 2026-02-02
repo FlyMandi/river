@@ -1,4 +1,3 @@
-#include "window.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -34,7 +33,7 @@ void loadModel()
 
     riverAssert
     (
-        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, riverModelPath),
+        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, projectModelPath.string().c_str()),
         (warn + error)
     );
 
@@ -44,9 +43,24 @@ void loadModel()
         {
             Vertex vertex{};
 
+            vertex.position =
+            {
+                attributes.vertices[3 * index.vertex_index + 0],
+                attributes.vertices[3 * index.vertex_index + 1],
+                attributes.vertices[3 * index.vertex_index + 2] - 0.25
+            };
+
+            vertex.textureCoordinate =
+            {
+                attributes.texcoords[2 * index.texcoord_index + 0],
+                1.0f - attributes.texcoords[2 * index.texcoord_index + 1]
+            };
+
+            vertex.colour = { 1.0f, 1.0f, 1.0f };
+
             vertices.emplace_back(vertex);
             //HACK: assuming every vertex is unique
-            indices.emplace_back(indices.size());
+            vertexIndices.emplace_back(static_cast<uint32_t>(vertexIndices.size()));
         }
     }
 }
@@ -68,7 +82,7 @@ std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions(
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, pos);
+    attributeDescriptions[0].offset = offsetof(Vertex, position);
 
     attributeDescriptions[1].binding = 0;
     attributeDescriptions[1].location = 1;
@@ -78,7 +92,7 @@ std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions(
     attributeDescriptions[2].binding = 0;
     attributeDescriptions[2].location = 2;
     attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+    attributeDescriptions[2].offset = offsetof(Vertex, textureCoordinate);
 
     return attributeDescriptions;
 }
@@ -87,7 +101,8 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
 {
     for(uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; ++i)
     {
-        if(typeFilter & (1 << i) && ((deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags))
+        if( typeFilter & (1 << i) &&
+            ((deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags))
         {
             return i;
         }
@@ -163,7 +178,7 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 void createVertexBuffer()
 {
     vertSize = sizeof(vertices[0]) * vertices.size();
-    VkDeviceSize indexSize = sizeof(indices[0]) * indices.size();
+    VkDeviceSize indexSize = sizeof(vertexIndices[0]) * vertexIndices.size();
 
     VkDeviceSize bufferSize = vertSize + indexSize;
 
@@ -189,11 +204,11 @@ void createVertexBuffer()
     void* pData;
 
     vkMapMemory(logicalDevice, stagingBufferMemory, 0, vertSize, 0, &pData);
-    ::memcpy(pData, vertices.data(), (size_t)vertSize);
+    ::memcpy(pData, vertices.data(), static_cast<size_t>(vertSize));
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     vkMapMemory(logicalDevice, stagingBufferMemory, vertSize, indexSize, 0, &pData);
-    ::memcpy(pData, indices.data(), (size_t)indexSize);
+    ::memcpy(pData, vertexIndices.data(), static_cast<size_t>(indexSize));
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     createBuffer
@@ -251,8 +266,14 @@ void updateUniformBuffer(uint32_t currentImage)
 
     UniformBufferObject uniformBuffer{};
     uniformBuffer.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    uniformBuffer.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    uniformBuffer.projection = glm::perspective(glm::radians(35.0f), swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
+    uniformBuffer.view = glm::lookAt(glm::vec3(1.0f, 0.0f, 0.3f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    uniformBuffer.projection =  glm::perspective
+                                (
+                                    glm::radians(35.0f),
+                                    swapchainExtent.width / static_cast<float>(swapchainExtent.height),
+                                    0.1f,
+                                    256.0f
+                                );
 
     uniformBuffer.projection[1][1] *= -1;
 
