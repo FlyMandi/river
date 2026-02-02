@@ -12,8 +12,8 @@ int WinMain()
 
     loopEditor();
 
-    cleanupEditor();
     cleanupGLFW();
+    cleanupEditor();
 }
 
 #else
@@ -26,8 +26,8 @@ int main()
 
     loopEditor();
 
-    cleanupEditor();
     cleanupGLFW();
+    cleanupEditor();
 }
 
 #endif
