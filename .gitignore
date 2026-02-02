@@ -6,5 +6,5 @@ bin/
 obj/
 
 compile_commands*
-raddbg*
+*.raddbg
 *.log
