@@ -16,7 +16,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - queue families, the swapchain & present modes
 - vertex & index buffers, vertex & fragment shaders
 - uniform buffer objects and model view projection
-- loading & sampling textures, texels
+- loading & sampling textures, texels, mipmaps
 - depth buffering
 - loading 3D models
 
@@ -27,7 +27,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ![Screenshot of the river test project](assets/preview.png)
 
 ### Next up:
-- mipmaps
 - multisampling
 - normals
 - materials
