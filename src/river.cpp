@@ -2,6 +2,7 @@
 #include "engine.h"
 #include "device.h"
 #include "swapchain.h"
+#include "pipeline.h"
 
 void river::initVulkan(){
 
@@ -13,7 +14,7 @@ void river::initVulkan(){
     swap::createSwapChain();
     swap::createImageViews();
     swap::createRenderPass();
-    engine::createGraphicsPipeline();
+    pipeline::createGraphicsPipeline();
     engine::createFramebuffers();
     engine::createCommandPool();
     engine::createCommandBuffer();
@@ -21,41 +22,41 @@ void river::initVulkan(){
 }
 
 void river::cleanupVulkan(){
-    using namespace engine;
+    using namespace device;
 
-    vkDeviceWaitIdle(device::logicalDevice);
+    vkDeviceWaitIdle(logicalDevice);
 
-    vkDestroySemaphore(device::logicalDevice, imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(device::logicalDevice, renderFinishedSemaphore, nullptr);
-    vkDestroyFence(device::logicalDevice, inFlightFence, nullptr);
+    vkDestroySemaphore(logicalDevice, pipeline::imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(logicalDevice, pipeline::renderFinishedSemaphore, nullptr);
+    vkDestroyFence(logicalDevice, pipeline::inFlightFence, nullptr);
 
-    vkDestroyCommandPool(device::logicalDevice, commandPool, nullptr);
+    vkDestroyCommandPool(logicalDevice, pipeline::commandPool, nullptr);
 
     for(const auto &framebuffer : swap::swapChainFramebuffers){
-        vkDestroyFramebuffer(device::logicalDevice, framebuffer, nullptr);
+        vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
     }
 
-    vkDestroyPipeline(device::logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device::logicalDevice, pipelineLayout, nullptr);
-    vkDestroyRenderPass(device::logicalDevice, renderPass, nullptr);
+    vkDestroyPipeline(logicalDevice, pipeline::graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(logicalDevice, pipeline::pipelineLayout, nullptr);
+    vkDestroyRenderPass(logicalDevice, pipeline::renderPass, nullptr);
 
     for(const auto &imageView : swap::swapChainImageViews){
-        vkDestroyImageView(device::logicalDevice, imageView, nullptr);
+        vkDestroyImageView(logicalDevice, imageView, nullptr);
     }
 
-    vkDestroySwapchainKHR(device::logicalDevice, swap::swapChain, nullptr);
-    vkDestroyDevice(device::logicalDevice, nullptr);
+    vkDestroySwapchainKHR(logicalDevice, swap::swapChain, nullptr);
+    vkDestroyDevice(logicalDevice, nullptr);
 
     if(build_DEBUG){
-        device::DestroyDebugUtilsMessengerEXT(instance, device::debugMessenger, nullptr); 
+        DestroyDebugUtilsMessengerEXT(engine::instance, debugMessenger, nullptr); 
     }
 
-    vkDestroySurfaceKHR(instance, swap::surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    vkDestroySurfaceKHR(engine::instance, swap::surface, nullptr);
+    vkDestroyInstance(engine::instance, nullptr);
 }
 
 void river::drawFrame(){
-    using namespace engine;
+    using namespace pipeline;
 
     uint32_t imageIndex;
 
@@ -65,7 +66,7 @@ void river::drawFrame(){
     vkAcquireNextImageKHR(device::logicalDevice, swap::swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
     
     vkResetCommandBuffer(commandBuffer, 0);
-    recordCommandBuffer(commandBuffer, imageIndex);
+    engine::recordCommandBuffer(commandBuffer, imageIndex);
 
     VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
@@ -81,10 +82,10 @@ void river::drawFrame(){
 
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.pCommandBuffers = &pipeline::commandBuffer;
 
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
+    if(vkQueueSubmit(engine::graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
+        engine::printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -99,5 +100,5 @@ void river::drawFrame(){
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    vkQueuePresentKHR(presentQueue, &presentInfo);
+    vkQueuePresentKHR(engine::presentQueue, &presentInfo);
 }

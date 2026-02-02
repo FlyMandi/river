@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "device.h"
 #include "swapchain.h"
+#include "pipeline.h"
 
 #include <filesystem>
 #include <fstream>
@@ -54,13 +55,12 @@ static std::vector<char> readFile(const std::string &filename){
     return buffer;
 }
 
-//TODO: create pipeline.h and pipeline.cpp, move functions
-void engine::createGraphicsPipeline(){
-    printDebugLog("current directory: ", 0, 0);
-    printDebugLog(std::filesystem::current_path().string(), 0, 2);
+void pipeline::createGraphicsPipeline(){
+    engine::printDebugLog("current directory: ", 0, 0);
+    engine::printDebugLog(std::filesystem::current_path().string(), 0, 2);
     
-    const std::filesystem::path vertPath = appRoot / "river\\bin\\vertTest.vert.spv";
-    const std::filesystem::path fragPath = appRoot / "river\\bin\\fragTest.frag.spv";
+    const std::filesystem::path vertPath = engine::appRoot / "river\\bin\\vertTest.vert.spv";
+    const std::filesystem::path fragPath = engine::appRoot / "river\\bin\\fragTest.frag.spv";
 
     auto vertShaderCode = readFile(vertPath.string());
     auto fragShaderCode = readFile(fragPath.string());
@@ -154,7 +154,7 @@ void engine::createGraphicsPipeline(){
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
     if(vkCreatePipelineLayout(device::logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
+        engine::printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -177,7 +177,7 @@ void engine::createGraphicsPipeline(){
     pipelineInfo.subpass = 0;
 
     if((vkCreateGraphicsPipelines(device::logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
+        engine::printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
