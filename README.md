@@ -22,7 +22,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### State (DEMO):
 - there's a fully resizeable window with correct and proper vulkan instantiation
-- it shows a rotating, textured 3D model, loaded from a .obj/.jpg
+- it shows a rotating, textured 3D model, loaded from .obj/.jpg files
 
 ![Screenshot of the river test project](assets/preview.png)
 
