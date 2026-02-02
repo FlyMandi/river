@@ -127,7 +127,6 @@ void createGraphicsPipeline()
     rasterizerStateCreateInfo.depthBiasClamp = 0.0f;
     rasterizerStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 
-    //wip
     VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo{};
     multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;

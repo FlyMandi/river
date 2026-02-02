@@ -469,7 +469,6 @@ void drawFrame()
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    //wip
     std::swap(imageReadyForWriteSemaphores[imageIndex], acquireSemaphore);
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
