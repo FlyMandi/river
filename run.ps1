@@ -26,6 +26,8 @@ foreach($platform in $Platforms){
 
 &premake5 ecc
 .\shader_comp.ps1
+$target = ".\bin\$OS" + "_$build\River.exe"
+Remove-Item $target
 
 if("MSVC" -eq $compiler){
     &premake5 vs2022
@@ -48,5 +50,4 @@ if("MSVC" -eq $compiler){
     Pop-Location
 }
 
-$target = ".\bin\$OS" + "_$build\River.exe"
 &$target
