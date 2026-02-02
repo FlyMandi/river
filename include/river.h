@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <iostream>
 
-#define TIMESTAMP 
+#define TIMESTAMP
 
 inline uint8_t currentFrame = 0;
 
@@ -16,7 +16,7 @@ constexpr auto ENGINE_NAME = "River";
 
 //if specified logLevel is 4+, only asserts will be thrown
 constexpr uint8_t logLevel = 0;
- 
+
 inline const char *appName;
 inline const char *appVersion;
 
@@ -53,13 +53,25 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_ASSERT = 4
 };
 
+static const std::string logLevelStamps[] =
+{
+    "[RIV_TRACE]: ",
+    "[RIV_DEBUG]: ",
+    "[RIV_WARN]:  ",
+    "[RIV_ERROR]: ",
+};
+
 //ugly aah inline function definitions in header file, I know
 //this is because of the auto types, they need to be known BEFORE the link stage
 
 //TODO:#43: write logs & asserts to a file in release builds AND
 //show an actual useful runtime error message box, not just "abort has been called"
-inline void riverLog(const auto &text, const RiverLogLevel &level)
-{
+inline void riverLog
+(
+    const auto &text,
+    const RiverLogLevel &level,
+    const bool newLine = true
+){
     if(level < logLevel)
     {
         return;
@@ -70,28 +82,18 @@ inline void riverLog(const auto &text, const RiverLogLevel &level)
     tm buf;
     localtime_s(&buf, &now);
 
-    switch(level)
+    if(newLine)
     {
-        case RIV_LOG_LEVEL_TRACE:
-            std::cout << std::put_time(&buf, "[%T]-") << "[RIV_TRACE]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_DEBUG:
-            std::cout << std::put_time(&buf, "[%T]-") << "[RIV_DEBUG]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_WARN:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_WARN]:  " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_ERROR:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ERROR]: " << text << '\n';
-            return;
-
-        case RIV_LOG_LEVEL_ASSERT:
-            std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ASSERT]: " << text << '\n';
-            abort();
+        std::cout << '\n' << std::put_time(&buf, "[%T]-") << logLevelStamps[level];
     }
+
+    if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
+    {
+        std::cerr << text;
+        return;
+    }
+
+    std::cout << text;
 }
 
 inline void riverAssert(bool condition, const auto &assertFailureMsg)
