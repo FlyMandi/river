@@ -1,52 +1,157 @@
 #pragma once
 
-#include "vulkan/vulkan_core.h"
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
+#include <glm/glm.hpp>
 
 #include <filesystem>
 #include <vector>
 #include <fstream>
 
-inline uint32_t currentFrame = 0;
+#define persistent  static
+#define global      static
+#define internal    static
+
+global uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
+//maybe get rid of this in the future
+constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-constexpr uint8_t logLevel = 0;
+global std::ofstream logFile;
+global uint8_t logLevel;
 
-inline const char* projectName;
-inline std::string projectVersion;
-
-inline std::filesystem::path projectRoot;
-inline std::filesystem::path projectLog;
-#define projectLogFolder = projectRoot / "log";
-
-inline std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_MODEL_PATH";
-inline std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
-
-inline VkInstance instance;
-
-extern void initVulkan();
-extern void cleanupVulkan();
-
-extern void drawFrame();
-
-extern void getProjectRoot(const char *rootName);
-extern void riverSetupLog();
-extern void riverCloseLog();
-
-inline std::ofstream logFile;
-
-#ifdef DEBUG
-inline VkDebugUtilsMessengerEXT debugMessenger;
-
-const std::vector<const char*> validationLayers =
+struct SwapchainSupportDetails
 {
-    "VK_LAYER_KHRONOS_validation",
-    "VK_LAYER_KHRONOS_synchronization2",
-    // "VK_LAYER_LUNARG_crash_diagnostic",
-    "VK_LAYER_LUNARG_monitor",
-    "VK_LAYER_RTSS"
+    VkSurfaceCapabilitiesKHR capabilities{};
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
 };
-#endif
+
+struct QueueFamilyIndices
+{
+    uint32_t graphicsIndex = UINT32_MAX;
+    uint32_t transferIndex = UINT32_MAX;
+    uint32_t presentIndex  = UINT32_MAX;
+};
+
+struct Vertex
+{
+    glm::vec3 position;
+    glm::vec3 colour;
+    glm::vec2 textureCoordinate;
+
+    bool operator==(const Vertex& other) const
+    {
+        return  position            == other.position   &&
+                colour              == other.colour     &&
+                textureCoordinate   == other.textureCoordinate;
+    }
+};
+
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
+};
+
+struct ProjectManifest
+{
+    std::string             projectName         = "RIV_UNINITIALIZED_STRING";
+    std::string             projectVersion      = "RIV_UNINITIALIZED_STRING";
+    std::filesystem::path   projectRoot         = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   projectLog          = "RIV_UNINITIALIZED_PATH";
+
+    std::filesystem::path   projectModelPath    = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   projectTexturePath  = "RIV_UNINITIALIZED_PATH";
+
+    std::filesystem::path   vertexShader        = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   fragmentShader      = "RIV_UNINITIALIZED_PATH";
+};
+
+struct UserSettings
+{
+    uint32_t            windowHeight;
+    uint32_t            windowWidth;
+
+    VkPresentModeKHR    presentMode;
+};
+
+//maybe chop this up in swapchain / device / pipeline / buffer structs if it gets too big
+
+struct EngineData
+{
+    GLFWwindow                          *window;
+    std::string                         windowName;
+
+    VkInstance                          instance;
+    VkSurfaceKHR                        surface;
+
+    QueueFamilyIndices                  logicalQueueFamilies;
+    VkPhysicalDevice                    physicalDevice = VK_NULL_HANDLE;
+    VkPhysicalDeviceProperties          deviceProperties;
+    VkPhysicalDeviceMemoryProperties    deviceMemoryProperties;
+    VkPhysicalDeviceFeatures            deviceFeatures;
+
+    VkDevice                            logicalDevice;
+
+    VkSwapchainKHR                      swapchain;
+    VkFormat                            swapchainImageFormat;
+    VkExtent2D                          swapchainExtent;
+
+    uint32_t                            swapchainImageCount;
+    std::vector<VkImage>                swapchainImages{};
+    std::vector<VkImageView>            swapchainImageViews{};
+    std::vector<VkFramebuffer>          swapchainFramebuffers{};
+
+    VkRenderPass                        renderPass;
+    VkPipeline                          graphicsPipeline;
+    VkPipelineLayout                    graphicsPipelineLayout;
+
+    VkDescriptorSetLayout               descriptorSetLayout;
+    std::vector<VkDescriptorSet>        descriptorSets{};
+
+    VkCommandPool                       graphicsCommandPool;
+    VkCommandPool                       transferCommandPool;
+    VkDescriptorPool                    descriptorPool;
+
+    std::vector<VkCommandBuffer>        commandBuffers{};
+
+    VkQueue                             graphicsQueue;
+    VkQueue                             presentQueue;
+    VkQueue                             transferQueue;
+
+    std::vector<VkSemaphore>            imageReadyForWriteSemaphores{VK_NULL_HANDLE};
+    std::vector<VkSemaphore>            imageReadyForPresentSemaphores{VK_NULL_HANDLE};
+    VkSemaphore                         acquireSemaphore = VK_NULL_HANDLE;
+
+    std::vector<VkFence>                inFlightFences{VK_NULL_HANDLE};
+
+    VkBool32                            framebufferResized = VK_FALSE;
+
+    std::vector<Vertex>                 vertices;
+    std::vector<uint32_t>               vertexIndices;
+
+    VkBuffer                            vertexBuffer;
+    VkDeviceMemory                      vertexBufferMemory;
+    VkDeviceSize                        vertSize;
+
+    VkImage                             depthImage;
+    VkDeviceMemory                      depthImageMemory;
+    VkImageView                         depthImageView;
+
+    std::vector<VkBuffer>               uniformBuffers{};
+    std::vector<VkDeviceMemory>         uniformBuffersMemory{};
+    std::vector<void*>                  uniformBuffersMapped{};
+
+    VkImage                             textureImage;
+    VkImageView                         textureImageView;
+    VkDeviceMemory                      textureImageMemory;
+
+    VkSampler                           textureSampler;
+};
 
 enum RiverLogLevel
 {
@@ -58,9 +163,73 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_UNDEFINED = 5
 };
 
-const char* riverTranslateVkResult(VkResult code);
+extern void initVulkan
+(
+    EngineData              &engine,
+    const ProjectManifest   &manifest,
+    const UserSettings      &settings
+);
 
-extern void riverLog(const std::string_view text, const RiverLogLevel level);
-extern void riverAssert(bool condition, const std::string_view assertFailureMsg);
-extern void riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg);
-extern void riverThrow(const std::string_view throwMsg);
+extern void cleanupVulkan
+(
+    EngineData &engine
+);
+
+extern void drawFrame
+(
+    EngineData          &engine,
+    const UserSettings  &settings
+);
+
+extern std::filesystem::path getProjectRoot
+(
+    const char *rootName
+);
+
+extern void riverSetupLog
+(
+    const std::filesystem::path &path
+);
+
+extern void riverCloseLog();
+
+#ifdef DEBUG
+global VkDebugUtilsMessengerEXT debugMessenger;
+
+const std::vector<const char*> validationLayers =
+{
+    "VK_LAYER_KHRONOS_validation",
+    "VK_LAYER_KHRONOS_synchronization2",
+    // "VK_LAYER_LUNARG_crash_diagnostic",
+    "VK_LAYER_LUNARG_monitor",
+    "VK_LAYER_RTSS"
+};
+#endif
+
+const char* riverTranslateVkResult
+(
+    VkResult code
+);
+
+extern void riverLog
+(
+    const std::string_view text,
+    const RiverLogLevel level
+);
+
+extern void riverAssert
+(
+    bool condition,
+    const std::string_view assertFailureMsg
+);
+
+extern void riverAssertVkSuccess
+(
+    VkResult result,
+    const std::string_view assertFailureMsg
+);
+
+extern void riverThrow
+(
+    const std::string_view throwMsg
+);

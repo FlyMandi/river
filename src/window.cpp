@@ -1,47 +1,56 @@
 #include "river.h"
 #include "window.h"
-#include "pipeline.h"
 
-static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
-{
-    framebufferResized = VK_TRUE;
+internal void framebufferResizeCallback
+(
+    GLFWwindow  *window,
+    int         width,
+    int         height
+){
+    EngineData *engine = static_cast<EngineData*>(glfwGetWindowUserPointer(window));
+
+    engine->framebufferResized = VK_TRUE;
 }
 
-void initGLFW()
-{
+void initGLFW
+(
+    EngineData              &engine,
+    const UserSettings      &settings
+){
     glfwInit();
 
     //TODO:#49: choose monitor, refresh rate, videoMode, etc
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    window =    glfwCreateWindow
-                (
-                    riverWindowWidth,
-                    riverWindowHeight,
-                    projectName,
-                    nullptr,
-                    nullptr
-                );
+    engine.window = glfwCreateWindow
+                    (
+                        settings.windowWidth,
+                        settings.windowHeight,
+                        engine.windowName.c_str(),
+                        nullptr,
+                        nullptr
+                    );
 
-    riverAssert(nullptr != window, "failed to create GLFW window!");
+    riverAssert(nullptr != engine.window, "failed to create GLFW window!");
 
-    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    glfwSetWindowUserPointer(engine.window, &engine);
+    glfwSetFramebufferSizeCallback(engine.window, framebufferResizeCallback);
 }
 
-void cleanupGLFW()
+void cleanupGLFW(GLFWwindow *window)
 {
     glfwDestroyWindow(window);
     glfwTerminate();
 }
 
-void createSurface()
+void createSurface(EngineData &engine)
 {
     //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
     riverAssertVkSuccess
     (
-        glfwCreateWindowSurface(instance, window, nullptr, &surface),
+        glfwCreateWindowSurface(engine.instance, engine.window, nullptr, &engine.surface),
         "failed to create window surface!"
     );
 }
