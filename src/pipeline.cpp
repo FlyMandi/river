@@ -290,7 +290,7 @@ void createCommandPools()
     VkCommandPoolCreateInfo transferPoolInfo{};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    transferPoolInfo.queueFamilyIndex = queueFamilyIndices.transferFamily.value();
+    transferPoolInfo.queueFamilyIndex = transferFamilyIndex;
 
     if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS){
         #ifdef DEBUG

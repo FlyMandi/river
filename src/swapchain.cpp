@@ -98,8 +98,7 @@ void createSwapChain(){
 
     uint32_t queueFamilyIndices[] = {
         graphicsFamilyIndex, 
-        presentFamilyIndex,
-        transferFamilyIndex
+        presentFamilyIndex
     };
 
     if(graphicsFamilyIndex != presentFamilyIndex){
