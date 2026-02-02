@@ -235,27 +235,22 @@ const std::vector<const char*> validationLayers =
 };
 #endif
 
-const char* riverTranslateVkResult
-(
-    VkResult code
-);
-
 extern void riverLog
 (
-    const std::string_view text,
-    const RiverLogLevel level
+    const std::string_view  text,
+    const RiverLogLevel     &level
 );
 
 extern bool riverAssert
 (
-    bool condition,
-    const std::string_view assertFailureMsg
+    const bool              &condition,
+    const std::string_view  assertFailureMsg
 );
 
 extern bool riverAssertVkSuccess
 (
-    VkResult result,
-    const std::string_view assertFailureMsg
+    const VkResult          &result,
+    const std::string_view  assertFailureMsg
 );
 
 extern void riverThrow

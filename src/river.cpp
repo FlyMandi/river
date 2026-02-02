@@ -46,8 +46,11 @@ RiverLogLevel severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severit
     }
 }
 
-const char* riverTranslateVkResult(VkResult code)
-{
+#ifdef DEBUG
+internal const char* riverTranslateVkResult
+(
+    const VkResult &code
+){
     switch(code)
     {
         case VK_SUCCESS:                                            return "VK_SUCCESS";
@@ -102,8 +105,6 @@ const char* riverTranslateVkResult(VkResult code)
         default:                                                    return "RIV_ERROR_VK_ERROR_NOT_TRANSLATED";
     }
 }
-
-#ifdef DEBUG
 
 internal VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
@@ -557,8 +558,11 @@ std::string riverTimestamp()
     return std::format ("[{:02}:{:02}:{:02}] ", buf.tm_hour, buf.tm_min, buf.tm_sec);
 }
 
-void riverLog(const std::string_view text, const RiverLogLevel level)
-{
+void riverLog
+(
+    const std::string_view  text,
+    const RiverLogLevel     &level
+){
     if(level < logLevel)
     {
         return;
@@ -585,8 +589,12 @@ void riverLog(const std::string_view text, const RiverLogLevel level)
 #endif
 }
 
-bool riverAssert(bool condition, const std::string_view assertFailureMsg)
-{
+#ifdef DEBUG
+bool riverAssert
+(
+    const bool              &condition,
+    const std::string_view  assertFailureMsg
+){
     if(condition)
     {
         return true;
@@ -598,8 +606,11 @@ bool riverAssert(bool condition, const std::string_view assertFailureMsg)
     abort();
 }
 
-bool riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg)
-{
+bool riverAssertVkSuccess
+(
+    const VkResult          &result,
+    const std::string_view  assertFailureMsg
+){
     if(result == VK_SUCCESS)
     {
         return true;
@@ -609,9 +620,12 @@ bool riverAssertVkSuccess(VkResult result, const std::string_view assertFailureM
 
     abort();
 }
+#endif
 
-void riverThrow(const std::string_view throwMsg)
-{
+void riverThrow
+(
+    const std::string_view throwMsg
+){
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
         << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI << '\n';
 
