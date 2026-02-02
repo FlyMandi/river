@@ -212,7 +212,6 @@ void recreateSwapChain(){
     glfwGetFramebufferSize(window, &width, &height);
     while(width == 0 || height == 0){
         glfwGetFramebufferSize(window, &width, &height);
-        printDebugLog('\0', "window minimized.", '\n');
         glfwWaitEvents();
     }
 
