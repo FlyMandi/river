@@ -9,7 +9,7 @@ workspace("River")
 
     project("River")
         language("C++")
-        cppdialect("C++20")
+        cppdialect("C++23")
         targetdir("bin/%{cfg.platform}_%{cfg.buildcfg}")
         objdir("obj/%{cfg.platform}_%{cfg.buildcfg}")
         includedirs({
