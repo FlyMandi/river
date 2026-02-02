@@ -5,7 +5,7 @@
 
 inline VkRenderPass renderPass;
 inline VkPipeline graphicsPipeline;
-inline VkPipelineLayout pipelineLayout;
+inline VkPipelineLayout graphicsPipelineLayout;
 
 inline VkDescriptorSetLayout descriptorSetLayout;
 
