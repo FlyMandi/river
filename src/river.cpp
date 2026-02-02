@@ -382,29 +382,6 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void createDescriptorSetLayout()
-{
-    VkDescriptorSetLayoutBinding uniformBufferLayoutBinding{};
-    uniformBufferLayoutBinding.binding = 0;
-    uniformBufferLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uniformBufferLayoutBinding.descriptorCount = 1;
-    uniformBufferLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    uniformBufferLayoutBinding.pImmutableSamplers = nullptr;
-
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
-    descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorSetLayoutCreateInfo.bindingCount = 1;
-    descriptorSetLayoutCreateInfo.pBindings = &uniformBufferLayoutBinding;
-
-    if(vkCreateDescriptorSetLayout(logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-    {
-        #ifdef DEBUG
-            printDebugLog("failed to create descriptor set layout!");
-        #endif
-        throw std::runtime_error("failed to create descriptor set layout!");
-    }
-}
-
 //HACK: only checks up to 4 paths up. jank.
 std::filesystem::path getProjectRoot(const char *rootName)
 {

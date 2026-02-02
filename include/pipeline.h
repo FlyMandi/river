@@ -11,6 +11,8 @@ inline VkDescriptorSetLayout descriptorSetLayout;
 
 inline VkCommandPool graphicsCommandPool;
 inline VkCommandPool transferCommandPool;
+inline VkDescriptorPool descriptorPool;
+
 inline std::vector<VkCommandBuffer> commandBuffers;
 
 inline VkQueue graphicsQueue;
@@ -26,6 +28,10 @@ extern void createGraphicsPipeline();
 extern void createFramebuffers();
 extern void createCommandPools();
 extern void createCommandBuffers();
+
+extern void createDescriptorSetLayout();
+extern void createDescriptorPool();
+
 extern void createSyncObjects();
 
 extern void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
