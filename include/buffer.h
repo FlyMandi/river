@@ -25,8 +25,14 @@ inline VkBuffer vertexBuffer;
 inline VkDeviceMemory vertexBufferMemory;
 inline VkDeviceSize vertSize;
 
+inline std::vector<VkBuffer> uniformBuffers;
+inline std::vector<VkDeviceMemory> uniformBuffersMemory;
+inline std::vector<void*> uniformBuffersMapped;
+
 extern void createVertexBuffer();
 extern void createUniformBuffers();
+
+extern void updateUniformBuffer(uint32_t currentImage);
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
 extern std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions();
