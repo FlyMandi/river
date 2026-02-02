@@ -334,6 +334,7 @@ void initVulkan()
     createTextureImageView();
     createTextureSampler();
 
+    loadModel();
     createVertexBuffer();
     createUniformBuffers();
 
@@ -502,7 +503,7 @@ void getProjectRoot(const char *rootName)
     }
 }
 
-void setupLog()
+void riverSetupLog()
 {
 #ifdef DEBUG
     return;
@@ -511,7 +512,7 @@ void setupLog()
     riverAssert(logFile.is_open(), "failed to open log file!");
 }
 
-void closeLog()
+void riverCloseLog()
 {
 #ifdef DEBUG
     return;
