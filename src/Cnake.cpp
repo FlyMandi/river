@@ -4,6 +4,7 @@
 #include "vulkan/vulkan_core.h"
 
 #include <stdexcept>
+#include <array>
 #include <format>
 
 namespace engine{
@@ -21,7 +22,10 @@ Cnake::~Cnake(){
 void Cnake::run(){
     while(!engineWindow.shouldClose()){
         glfwPollEvents();
+        drawFrame();
     }
+
+    vkDeviceWaitIdle(engineDevice.device());
 }
 
 void Cnake::createPipelineLayout(){
@@ -64,8 +68,44 @@ void Cnake::createCommandBuffers(){
         if(vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS){
             throw std::runtime_error(std::format("CommandBuffer {} failed to begin recording.", i));
         }
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = engineSwapChain.getRenderPass();
+        renderPassInfo.framebuffer = engineSwapChain.getFrameBuffer(i);
+
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = engineSwapChain.getSwapChainExtent();
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {0.1f, 0.1f, 0.1f, 0.1f};
+        clearValues[1].depthStencil = {1.0f, 0};
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        enginePipeline->bind(commandBuffers[i]);
+        vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+
+        vkCmdEndRenderPass(commandBuffers[i]);
+        if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS){
+            throw std::runtime_error(std::format("failed to record commandBuffer ", i));
+        }
     }
 }
-void Cnake::drawFrame(){}
+void Cnake::drawFrame(){
+    uint32_t imageIndex;
+    auto result = engineSwapChain.acquireNextImage(&imageIndex);
+
+    if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR){
+        throw std::runtime_error("failed to acquire the next swapChain image.");
+    }
+
+    result = engineSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    if(result != VK_SUCCESS){
+        throw std::runtime_error("failed to present swapChain image.");
+    }
+}
 
 } //namespace engine

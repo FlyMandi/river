@@ -46,6 +46,8 @@ class EnginePipeline{
     EnginePipeline(const EnginePipeline&) = delete;
     EnginePipeline operator=(const EnginePipeline&) = delete;
 
+    void bind(VkCommandBuffer commandBuffer);
+
     static void defaultPipelineConfigInfo(PipelineConfigInfo &configInfo, uint32_t width, uint32_t height);
 };
 
