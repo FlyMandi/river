@@ -1,4 +1,3 @@
-#include "swapchain.h"
 #include "vulkan/vulkan_core.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -76,9 +75,6 @@ static void transitionImageLayout
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
-    //TODO: fixup transitionImageLayout:
-    barrier.srcAccessMask = 0;
-    barrier.dstAccessMask = 0;
 
     VkPipelineStageFlags sourceStage;
     VkPipelineStageFlags destinationStage;
