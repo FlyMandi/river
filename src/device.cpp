@@ -3,7 +3,9 @@
 #include <set>
 #include <map>
 
-bool engine::checkDeviceExtensionSupport(VkPhysicalDevice device){
+static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
+    using namespace engine;
+
     uint32_t extensionCount;
 
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -41,7 +43,9 @@ engine::SwapChainSupportDetails engine::querySwapChainSupport(VkPhysicalDevice d
     return details;
 }
 
-uint32_t engine::rateDeviceSuitability(VkPhysicalDevice device){
+static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
+    using namespace engine;
+
     uint32_t score = 0;
 
     QueueFamilyIndices indices = findQueueFamilies(device);
