@@ -12,22 +12,20 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
 - debugging said code (currently via logging, raddbg and renderdoc)
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
-- the Vulkan graphics pipeline & order of operations
-- command buffers, framebuffers
-- swapchain & present modes
-- indexed vertex buffers
+- swapchain & present modes, when to choose which and why they exist
+- the Vulkan graphics pipeline & order of operations (it's a lot!)
 
 ### State:
 - there's a resizeable window
 - it shows a rotating, coloured rectangle.
 
-![ScreenShot of the river test project](assets/1.jpg) 
+![ScreenShot of the river test project](assets/1.jpg)
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
 - camera control
-- a GUI
-- a default project
+- a GUI (maybe ImGui to start with)
+- a default project.
 - project management, custom filetype
 
 ### Plans:
