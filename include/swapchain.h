@@ -16,4 +16,7 @@ extern void createSwapChain();
 extern void createImageViews();
 extern void createRenderPass();
 
+extern void cleanupSwapChain();
+extern void recreateSwapChain();
+
 extern VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
