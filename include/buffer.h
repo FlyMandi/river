@@ -10,6 +10,13 @@ struct Vertex
     glm::vec3 color;
 };
 
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
+};
+
 //HACK: eventually these won't be const anymore
 extern const std::vector<Vertex> vertices;
 extern const std::vector<uint32_t> indices;
@@ -19,6 +26,7 @@ inline VkDeviceMemory vertexBufferMemory;
 inline VkDeviceSize vertSize;
 
 extern void createVertexBuffer();
+extern void createUniformBuffers();
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
 extern std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions();
