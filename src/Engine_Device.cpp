@@ -322,10 +322,7 @@ QueueFamilyIndices EngineDevice::findQueueFamilies(VkPhysicalDevice device){
             indices.presentFamily = i;
             indices.presentFamilyHasValue = true;
         }
-        if(indices.isComplete()){
-            break;
-        }
-
+        if(indices.isComplete()){ break; }
         i++;
     }
 
