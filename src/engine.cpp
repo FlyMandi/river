@@ -1,6 +1,6 @@
 #include "h/window.h"
 #include "h/engine.h"
-#include "river.h"
+#include "h/river.h"
 
 #include <stdexcept>
 #include <string_view>

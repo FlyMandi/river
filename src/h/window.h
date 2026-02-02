@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "utils.h"
+
 #include <filesystem>
 
 inline const char *appName = "Cnake";
