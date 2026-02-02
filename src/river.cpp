@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
+#include <filesystem>
 
 #ifdef DEBUG
 uint8_t severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
@@ -395,12 +396,11 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-//HACK: only checks up to 4 paths up. jank.
 std::filesystem::path getProjectRoot(const char *rootName)
 {
-    std::filesystem::path current = std::filesystem::current_path();
+    std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < 256; ++i)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
@@ -410,7 +410,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
         }
         current = current.parent_path();
     }
-    return ".";
+    return current;
 }
 
 void clearLogs(const std::filesystem::path &baseDir)
