@@ -383,7 +383,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::current_path();
 
-    for(int i = 0; i < 3; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
@@ -393,9 +393,7 @@ std::filesystem::path getProjectRoot(const char *rootName)
             #endif
             return current;
         }
-        else{
-            current = current.parent_path();
-        }
+        current = current.parent_path();
     }
     return ".";
 }
