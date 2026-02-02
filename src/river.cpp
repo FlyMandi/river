@@ -5,6 +5,7 @@
 #include "swapchain.h"
 #include "pipeline.h"
 
+#include <cstdint>
 #include <cstring>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -197,9 +198,11 @@ void initVulkan(){
 }
 
 void cleanupVulkan(){
+    vkDeviceWaitIdle(logicalDevice);
+
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
-        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
     }
 
