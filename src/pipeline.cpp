@@ -195,13 +195,13 @@ void createGraphicsPipeline()
 
 void createFramebuffers()
 {
-    swapChainFramebuffers.resize(swapChainImageViews.size());
+    swapchainFramebuffers.resize(swapchainImageViews.size());
 
-    for(size_t i = 0; i < swapChainImageViews.size(); ++i)
+    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
     {
         VkImageView attachments[] = 
         { 
-            swapChainImageViews[i] 
+            swapchainImageViews[i] 
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -213,7 +213,7 @@ void createFramebuffers()
         framebufferInfo.height = swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
+        if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
         {
             #ifdef DEBUG
                 printDebugLog("failed to create framebuffer!");
@@ -241,7 +241,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+    renderPassInfo.framebuffer = swapchainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChainExtent;
     renderPassInfo.clearValueCount = 1;
@@ -336,7 +336,7 @@ void createCommandBuffers()
 void createSyncObjects()
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    renderFinishedSemaphores.resize(swapChainImages.size());
+    renderFinishedSemaphores.resize(swapchainImages.size());
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkSemaphoreCreateInfo semaphoreInfo{};

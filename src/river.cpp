@@ -233,7 +233,7 @@ void initVulkan()
     createSurface();
     pickPhysicalDevice();
     createLogicalDevice();
-    createSwapChain();
+    createSwapchain();
     createImageViews();
     createRenderPass();
     createGraphicsPipeline();
@@ -247,7 +247,7 @@ void initVulkan()
 void cleanupVulkan()
 {
     //TODO:#38: fences.
-    cleanupSwapChain();
+    cleanupSwapchain();
 
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
@@ -292,14 +292,18 @@ void cleanupVulkan()
 
 void drawFrame()
 {
+    uint32_t imageIndex;
+
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-    uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    destroyDeferredResources(&frameResources[currentFrame]);
 
+    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+
+    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        recreateSwapChain();
+        recreateSwapchain();
         return;
     }
     else if(result != VK_SUCCESS)
@@ -309,8 +313,6 @@ void drawFrame()
         #endif
         throw std::runtime_error("failed to acquire swapChain image!");
     }
-
-    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -358,7 +360,7 @@ void drawFrame()
     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
     {
         framebufferResized = false;
-        recreateSwapChain();
+        recreateSwapchain();
     }
     else if(result != VK_SUCCESS)
     {

@@ -83,7 +83,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     }
 }
 
-void createSwapChain()
+void createSwapchain()
 {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -143,8 +143,8 @@ void createSwapChain()
     }
 
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, nullptr);
-    swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, swapChainImages.data());
+    swapchainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, swapchainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
@@ -152,13 +152,13 @@ void createSwapChain()
 
 void createImageViews()
 {
-    swapChainImageViews.resize(swapChainImages.size()); 
+    swapchainImageViews.resize(swapchainImages.size()); 
 
-    for(size_t i = 0; i < swapChainImages.size(); ++i)
+    for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
         VkImageViewCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = swapChainImages[i];
+        createInfo.image = swapchainImages[i];
         createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         createInfo.format = swapChainImageFormat;
 
@@ -173,7 +173,7 @@ void createImageViews()
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+        if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
         {
             #ifdef DEBUG
                 printDebugLog("failed to create image views!");
@@ -232,22 +232,22 @@ void createRenderPass()
     }
 }
 
-void cleanupSwapChain()
+void cleanupSwapchain()
 {
-    for(size_t i = 0; i < swapChainFramebuffers.size(); ++i)
+    for(size_t i = 0; i < swapchainFramebuffers.size(); ++i)
     {
-        vkDestroyFramebuffer(logicalDevice, swapChainFramebuffers[i], nullptr);
+        vkDestroyFramebuffer(logicalDevice, swapchainFramebuffers[i], nullptr);
     }
 
-    for(size_t i = 0; i < swapChainImageViews.size(); ++i)
+    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
     {
-        vkDestroyImageView(logicalDevice, swapChainImageViews[i], nullptr);
+        vkDestroyImageView(logicalDevice, swapchainImageViews[i], nullptr);
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
 }
 
-void recreateSwapChain()
+void recreateSwapchain()
 {
     int width = 0;
     int height = 0;
@@ -261,9 +261,9 @@ void recreateSwapChain()
     //TODO:#38: fence
     vkDeviceWaitIdle(logicalDevice);
 
-    cleanupSwapChain();
+    cleanupSwapchain();
 
-    createSwapChain();
+    createSwapchain();
     createImageViews();
     createFramebuffers();
 
