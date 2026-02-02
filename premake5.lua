@@ -9,7 +9,7 @@ workspace("River")
 
     project("River")
         language("C++")
-        cppdialect("C++23")
+        cppdialect("C++20")
         targetdir("bin/%{cfg.platform}_%{cfg.buildcfg}")
         objdir("obj/%{cfg.platform}_%{cfg.buildcfg}")
         includedirs({ "./include/", "./vendor/glfw-3.4-win64/include/", "%{VULKAN_SDK}/Include/" })
@@ -40,19 +40,3 @@ filter("platforms:Win64")
     -- links{ "glfw3", "vulkan" }
 --     system("linux")
 --     architecture("x86_64")
-
-newaction({
-    trigger = "clean",
-    description = "clean the software",
-    execute = function()
-        print("clean the build...")
-        os.rmdir("./build/")
-        os.rmdir("./bin/")
-        os.rmdir("./obj/")
-        os.rmdir("./.cache/")
-        os.remove("BuildRules.xml")
-        os.remove("BuildRules.props")
-        os.remove("BuildRules.targets")
-        print("done.")
-    end,
-})
