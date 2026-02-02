@@ -3,6 +3,7 @@
 #include "vulkan/vulkan_core.h"
 #include <glm/glm.hpp>
 
+#include <set>
 #include <vector>
 #include <array>
 
@@ -30,6 +31,16 @@ inline VkDeviceSize vertSize;
 inline std::vector<VkBuffer> uniformBuffers;
 inline std::vector<VkDeviceMemory> uniformBuffersMemory;
 inline std::vector<void*> uniformBuffersMapped;
+
+extern void createBuffer
+(
+    VkDeviceSize            bufferSize,
+    VkBufferUsageFlags      usageFlags,
+    VkMemoryPropertyFlags   memPropertyFlags,
+    VkBuffer                &buffer,
+    VkDeviceMemory          &bufferMemory,
+    std::set<uint32_t>      &uniqueQueueFamilies
+);
 
 extern void createVertexBuffer();
 extern void createUniformBuffers();
