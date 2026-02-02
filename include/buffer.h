@@ -29,6 +29,7 @@ struct UniformBufferObject
     glm::mat4 projection;
 };
 
+//TODO:#57: rid of inline global scope vars
 inline std::vector<Vertex> vertices;
 inline std::vector<uint32_t> vertexIndices;
 

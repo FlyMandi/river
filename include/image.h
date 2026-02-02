@@ -35,6 +35,7 @@ extern void transitionImageLayout
     VkImageLayout   newLayout
 );
 
+//TODO:#57: rid of inline global scope vars
 inline VkImage textureImage;
 inline VkImageView textureImageView;
 inline VkDeviceMemory textureImageMemory;

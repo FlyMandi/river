@@ -19,6 +19,7 @@ struct QueueFamilyIndices
     uint32_t presentIndex  = UINT32_MAX;
 };
 
+//TODO:#57: rid of inline global scope vars
 inline QueueFamilyIndices logicalQueueFamilies;
 
 inline VkPhysicalDevice physicalDevice;

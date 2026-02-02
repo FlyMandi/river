@@ -33,8 +33,12 @@ VkExtent2D chooseSwapExtent
     }
 }
 
-void createSwapchain(const VkSurfaceKHR &surface)
-{
+void createSwapchain
+(
+    const VkSurfaceKHR      &surface,
+    GLFWwindow              *window,
+    const VkPresentModeKHR  &preferredPresent
+){
     SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, surface);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
@@ -48,18 +52,17 @@ void createSwapchain(const VkSurfaceKHR &surface)
     }
 
     //TODO: extract this into user defined variable in per-project settings manifest
-    VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     for(const auto &availablePresentMode : swapchainSupport.presentModes)
     {
-        if(availablePresentMode == chosenPresentMode)
+        if(availablePresentMode == preferredPresent)
         {
             presentMode = availablePresentMode;
         }
     }
 
-    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities);
+    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities, window);
 
     swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
 
@@ -235,8 +238,12 @@ void cleanupSwapchain()
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
 }
 
-void recreateSwapchain()
-{
+void recreateSwapchain
+(
+    const VkSurfaceKHR      &surface,
+    GLFWwindow              *window,
+    const VkPresentModeKHR  &preferredPresent
+){
     int width = 0;
     int height = 0;
 
@@ -250,7 +257,7 @@ void recreateSwapchain()
 
     cleanupSwapchain();
 
-    createSwapchain();
+    createSwapchain(surface, window, preferredPresent);
     createSwapImageViews();
     createDepthResources();
     createFramebuffers();

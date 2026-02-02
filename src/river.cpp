@@ -307,8 +307,12 @@ static void createInstance(const ProjectManifest &manifest)
     );
 }
 
-void initVulkan(const ProjectManifest &manifest)
-{
+void initVulkan
+(
+    const ProjectManifest   &manifest,
+    const UserSettings      &settings,
+    const EngineData        &engine
+){
     createInstance(manifest);
 
     #ifdef DEBUG
@@ -319,7 +323,7 @@ void initVulkan(const ProjectManifest &manifest)
     pickPhysicalDevice();
     createLogicalDevice();
 
-    createSwapchain();
+    createSwapchain(engine.surface, engine.window, settings.presentMode);
     createSwapImageViews();
 
     createRenderPass();
