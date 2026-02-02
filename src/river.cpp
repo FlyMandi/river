@@ -315,7 +315,7 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
             std::string msg = "extension not found: ";
             msg += required;
 
-            riverLog(msg.c_str(), RIV_LOG_LEVEL_WARN);
+            riverLog(msg.c_str(), RIV_LOG_LEVEL_ERROR);
 
             return VK_FALSE;
         }

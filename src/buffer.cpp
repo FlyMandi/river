@@ -118,11 +118,6 @@ void createBuffer
         "failed to allocate buffer!"
     );
 
-    std::string msg = "created buffer with usage flags: ";
-    msg += std::to_string(usageFlags);
-
-    riverLog(msg.c_str(), RIV_LOG_LEVEL_TRACE);
-
     vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
 
