@@ -1,5 +1,5 @@
 #include "Cnake.h"
-#include "glfw/include/GLFW/glfw3.h"
+#include "GLFW/glfw3.h"
 
 namespace engine{
 
