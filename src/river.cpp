@@ -33,8 +33,6 @@ static const char* logLevelANSI[] =
 
 static const char* clearANSI = "\033[0m";
 
-#ifdef DEBUG
-
 RiverLogLevel severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
 {
     switch(severity)
@@ -103,6 +101,8 @@ const char* riverTranslateVkResult(VkResult code)
         default:                                                    return "RIV_ERROR_VK_ERROR_NOT_TRANSLATED";
     }
 }
+
+#ifdef DEBUG
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
