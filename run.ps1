@@ -48,10 +48,6 @@ if(-Not(Test-Path ".\build\"))
 .\shader_comp.ps1
 
 $target = ".\bin\$OS" + "_$build\River.exe"
-if(Test-Path $target)
-{
-    Remove-Item $target
-}
 
 if("MSVC" -eq $compiler)
 {
@@ -80,4 +76,7 @@ elseIf("g++" -eq $compiler)
     Pop-Location
 }
 
-&$target
+if(0 -eq $LASTEXITCODE)
+{
+    &$target
+}
