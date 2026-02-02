@@ -31,7 +31,10 @@ I'm using GFLW to draw and manage the window, since it makes my life easier and 
 
 GLM is what I've ran with for graphics arithmetics operations.
 
-
 #### Building with PreMake
 
-TODO
+Building cross-plaform and cross-IDE is a fairly simple task with PreMake and I like the fact you write in lua. Also I've heard many people prefer it over CMake, so I'll try it here. Also always good to know the ins and outs of a build system.
+
+#### Text Editor/IDE
+
+For editing text, I use neovim with [my custom configuration](https://github.com/FlyMandi/dotfiles/tree/main/nvim/), specifically for C++ I use `clang` as an LSP and write a simple `compile_flags.txt` with the include folders, which clang can pick up on. Then, when I want to debug or compile, I simply run `premake5 vs2022` and load up the `.vcxproj` in Visual Studio 2022.
