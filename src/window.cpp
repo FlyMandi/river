@@ -1,20 +1,21 @@
 #include "river.h"
+#include "h/engine.h"
 
-void initGLFW(){
+void river::initGLFW(){
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
+    engine::window = glfwCreateWindow(WIDTH, HEIGHT, ((std::string)appName + " " + (std::string)appVersion).c_str(), nullptr, nullptr);
 }
 
-void cleanupGLFW(){
-    glfwDestroyWindow(window);
+void river::cleanupGLFW(){
+    glfwDestroyWindow(engine::window);
     glfwTerminate();
 }
 
-void windowPollEvents(){
+void river::windowPollEvents(){
     glfwPollEvents();
-    window_SHOULDCLOSE = glfwWindowShouldClose(window);
+    window_SHOULDCLOSE = glfwWindowShouldClose(engine::window);
 }
