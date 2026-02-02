@@ -7,10 +7,10 @@
 #include <filesystem>
 #include <vector>
 
-#ifdef NDEBUG
-    const bool build_DEBUG = false;
-#else 
+#ifdef DEBUG
     const bool build_DEBUG = true;
+#else 
+    const bool build_DEBUG = false;
 #endif
 
 inline bool window_SHOULDCLOSE = false;
