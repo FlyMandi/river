@@ -4,7 +4,7 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 workspace("River")
     configurations({ "Debug", "Release" })
-    platforms({ "Win64", "Unix" })
+    platforms({ "Win64"}) --TODO: add Unix
     location("build")
 
     --TODO: separate engine core (River) from editor GUI executable (Waterfall).
@@ -38,9 +38,9 @@ filter("platforms:Win64")
     system("Windows")
     architecture("x86_64")
 
-filter("platforms:Unix")
-    system("linux")
-    architecture("x86_64")
+-- filter("platforms:Unix")
+--     system("linux")
+--     architecture("x86_64")
 
 newaction({
     trigger = "clean",
