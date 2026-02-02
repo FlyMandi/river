@@ -1,6 +1,9 @@
 #include "h/engine.h"
-#include "h/cnake.h"
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 #include "vulkan/vulkan_core.h"
+
 #include <map>
 
 VkInstance instance;
