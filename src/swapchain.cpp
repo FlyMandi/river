@@ -12,11 +12,6 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
-        riverLog("swap extent: ", RIV_LOG_LEVEL_TRACE);
-        riverLog(capabilities.currentExtent.width, RIV_LOG_LEVEL_TRACE, false);
-        riverLog("x", RIV_LOG_LEVEL_TRACE, false);
-        riverLog(capabilities.currentExtent.height, RIV_LOG_LEVEL_TRACE, false);
-
         return capabilities.currentExtent;
     }
     else
@@ -28,11 +23,6 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-        riverLog("swap extent (clamped): ", RIV_LOG_LEVEL_TRACE);
-        riverLog(actualExtent.width, RIV_LOG_LEVEL_TRACE, false);
-        riverLog("x", RIV_LOG_LEVEL_TRACE, false);
-        riverLog(actualExtent.height, RIV_LOG_LEVEL_TRACE, false);
 
         return actualExtent;
     }
@@ -64,6 +54,7 @@ void createSwapchain()
         }
     }
 
+    //TODO: move chooseswapextent inline here
     VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities);
 
     swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;

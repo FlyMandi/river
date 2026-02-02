@@ -4,11 +4,6 @@
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    riverLog("attempting resize: ", RIV_LOG_LEVEL_TRACE);
-    riverLog(height, RIV_LOG_LEVEL_TRACE, false);
-    riverLog("x", RIV_LOG_LEVEL_TRACE, false);
-    riverLog(width, RIV_LOG_LEVEL_TRACE, false);
-
     framebufferResized = VK_TRUE;
 }
 

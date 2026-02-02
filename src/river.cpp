@@ -11,17 +11,96 @@
 #include <cstring>
 #include <ctime>
 #include <filesystem>
+#include <iostream>
+
+static const char* logLevelStamps[] =
+{
+    "[RIV_TRACE]: ",
+    "[RIV_DEBUG]: ",
+    "[RIV_WARNI]: ",
+    "[RIV_ERROR]: ",
+    "[RIV_ASSER]: "
+};
+
+static const char* logLevelANSI[] =
+{
+    "\033[30;1;1m",
+    "\033[37;1;1m",
+    "\033[33;1;1m",
+    "\033[31;1;1m",
+    "\033[31;1;7m"
+};
+
+static const char* clearANSI = "\033[0m";
 
 #ifdef DEBUG
-uint8_t severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
+
+RiverLogLevel severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
 {
     switch(severity)
     {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:   return 0;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:      return 1;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:   return 2;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:     return 3;
-        default:                                                return 4;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:   return RIV_LOG_LEVEL_TRACE;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:      return RIV_LOG_LEVEL_DEBUG;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:   return RIV_LOG_LEVEL_WARN;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:     return RIV_LOG_LEVEL_ERROR;
+        default:                                                return RIV_LOG_LEVEL_UNDEFINED;
+    }
+}
+
+const char* riverTranslateVkResult(VkResult code)
+{
+    switch(code)
+    {
+        case VK_SUCCESS:                                            return "VK_SUCCESS";
+        case VK_NOT_READY:                                          return "VK_NOT_READY";
+        case VK_TIMEOUT:                                            return "VK_TIMEOUT";
+        case VK_EVENT_SET:                                          return "VK_EVENT_SET";
+        case VK_EVENT_RESET:                                        return "VK_EVENT_RESET";
+        case VK_INCOMPLETE:                                         return "VK_INCOMPLETE";
+        case VK_ERROR_OUT_OF_HOST_MEMORY:                           return "VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:                         return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:                        return "VK_ERROR_INITIALIZATION_FAILED";
+        case VK_ERROR_DEVICE_LOST:                                  return "VK_ERROR_DEVICE_LOST";
+        case VK_ERROR_MEMORY_MAP_FAILED:                            return "VK_ERROR_MEMORY_MAP_FAILED";
+        case VK_ERROR_LAYER_NOT_PRESENT:                            return "VK_ERROR_LAYER_NOT_PRESENT";
+        case VK_ERROR_EXTENSION_NOT_PRESENT:                        return "VK_ERROR_EXTENSION_NOT_PRESENT";
+        case VK_ERROR_FEATURE_NOT_PRESENT:                          return "VK_ERROR_FEATURE_NOT_PRESENT";
+        case VK_ERROR_INCOMPATIBLE_DRIVER:                          return "VK_ERROR_INCOMPATIBLE_DRIVER";
+        case VK_ERROR_TOO_MANY_OBJECTS:                             return "VK_ERROR_TOO_MANY_OBJECTS";
+        case VK_ERROR_FORMAT_NOT_SUPPORTED:                         return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+        case VK_ERROR_FRAGMENTED_POOL:                              return "VK_ERROR_FRAGMENTED_POOL";
+        case VK_ERROR_UNKNOWN:                                      return "VK_ERROR_UNKNOWN";
+        case VK_ERROR_OUT_OF_POOL_MEMORY:                           return "VK_ERROR_OUT_OF_POOL_MEMORY";
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:                      return "VK_ERROR_INVALID_EXTERNAL_HANDLE";
+        case VK_ERROR_FRAGMENTATION:                                return "VK_ERROR_FRAGMENTATION";
+        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:               return "VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS";
+        case VK_PIPELINE_COMPILE_REQUIRED:                          return "VK_PIPELINE_COMPILE_REQUIRED";
+        case VK_ERROR_NOT_PERMITTED:                                return "VK_ERROR_NOT_PERMITTED";
+        case VK_ERROR_SURFACE_LOST_KHR:                             return "VK_ERROR_SURFACE_LOST_KHR";
+        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:                     return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+        case VK_SUBOPTIMAL_KHR:                                     return "VK_SUBOPTIMAL_KHR";
+        case VK_ERROR_OUT_OF_DATE_KHR:                              return "VK_ERROR_OUT_OF_DATE_KHR";
+        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:                     return "VK_ERROR_INCOMPATIBLE_DISPLAY_KHR";
+        case VK_ERROR_VALIDATION_FAILED_EXT:                        return "VK_ERROR_VALIDATION_FAILED_EXT";
+        case VK_ERROR_INVALID_SHADER_NV:                            return "VK_ERROR_INVALID_SHADER_NV";
+        case VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR:                return "VK_ERROR_IMAGE_USAGE_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR:       return "VK_ERROR_VIDEO_PICTURE_LAYOUT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR:    return "VK_ERROR_VIDEO_PROFILE_OPERATION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR:       return "VK_ERROR_VIDEO_PROFILE_FORMAT_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR:        return "VK_ERROR_VIDEO_PROFILE_CODEC_NOT_SUPPORTED_KHR";
+        case VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR:          return "VK_ERROR_VIDEO_STD_VERSION_NOT_SUPPORTED_KHR";
+        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT: return "VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT";
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:          return "VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT";
+        case VK_THREAD_IDLE_KHR:                                    return "VK_THREAD_IDLE_KHR";
+        case VK_THREAD_DONE_KHR:                                    return "VK_THREAD_DONE_KHR";
+        case VK_OPERATION_DEFERRED_KHR:                             return "VK_OPERATION_DEFERRED_KHR";
+        case VK_OPERATION_NOT_DEFERRED_KHR:                         return "VK_OPERATION_NOT_DEFERRED_KHR";
+        case VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR:             return "VK_ERROR_INVALID_VIDEO_STD_PARAMETERS_KHR";
+        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT:                    return "VK_ERROR_COMPRESSION_EXHAUSTED_EXT";
+        case VK_INCOMPATIBLE_SHADER_BINARY_EXT:                     return "VK_INCOMPATIBLE_SHADER_BINARY_EXT";
+        case VK_PIPELINE_BINARY_MISSING_KHR:                        return "VK_PIPELINE_BINARY_MISSING_KHR";
+        case VK_ERROR_NOT_ENOUGH_SPACE_KHR:                         return "VK_ERROR_NOT_ENOUGH_SPACE_KHR";
+        default:                                                    return "RIV_ERROR_VK_ERROR_NOT_TRANSLATED";
     }
 }
 
@@ -33,8 +112,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     void                                        *userData
 ){
     //can I know which layer is outputting the msg?
-    riverLog("VL Says: ", severityTranslation(messageSeverity));
-    riverLog(callbackData->pMessage, severityTranslation(messageSeverity), false);
+    std::string msg = "VL says: ";
+    msg += callbackData->pMessage;
+
+    riverLog(msg.c_str(), severityTranslation(messageSeverity));
     return VK_FALSE;
 }
 
@@ -78,8 +159,14 @@ static VkBool32 checkValidationLayerSupport()
         }
         if(!layerFound)
         {
-            riverLog("validation layer not found: ", RIV_LOG_LEVEL_WARN);
-            riverLog(layer, RIV_LOG_LEVEL_WARN);
+            std::string msg = "validation layer not found: ";
+            msg += layer;
+
+            riverLog
+            (
+                msg.c_str(),
+                RIV_LOG_LEVEL_WARN
+            );
             return VK_FALSE;
         }
     }
@@ -120,6 +207,80 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 }
 #endif
 
+void riverLog(const char* text, const RiverLogLevel level)
+{
+    if(level < logLevel)
+    {
+        return;
+    }
+
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cout << logLevelANSI[level];
+
+    std::cout << '\n' << std::put_time(&buf, "[%T] ") << logLevelStamps[level];
+
+    if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
+    {
+        std::cerr << text << clearANSI;
+        return;
+    }
+
+    std::cout << text << clearANSI;
+}
+
+void riverAssert(bool condition, const char* assertFailureMsg)
+{
+    if(condition)
+    {
+        return;
+    }
+
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cerr << '\n' << std::put_time(&buf, "[%T] ") << logLevelANSI[RIV_LOG_LEVEL_ASSERT]
+        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << clearANSI;
+
+    abort();
+}
+
+void riverAssertVkSuccess(VkResult result, const char* assertFailureMsg)
+{
+    if(result == VK_SUCCESS)
+    {
+        return;
+    }
+
+    uint32_t logLevel = RIV_LOG_LEVEL_ASSERT;
+
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cerr << '\n' << logLevelANSI[logLevel] << std::put_time(&buf, "[%T] ") << logLevelStamps[logLevel]
+        << riverTranslateVkResult(result) << ": " << assertFailureMsg << clearANSI;
+
+    abort();
+}
+
+void riverThrow(const char *throwMsg)
+{
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    tm buf;
+    localtime_s(&buf, &now);
+
+    std::cerr << '\n' << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << std::put_time(&buf, "[%T] ")
+        << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI;
+}
+
 static std::vector<const char*> getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
@@ -151,8 +312,10 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
             }
         if(!extFound)
         {
-            riverLog("extension not found: ", RIV_LOG_LEVEL_WARN);
-            riverLog(required, RIV_LOG_LEVEL_WARN);
+            std::string msg = "extension not found: ";
+            msg += required;
+
+            riverLog(msg.c_str(), RIV_LOG_LEVEL_WARN);
 
             return VK_FALSE;
         }

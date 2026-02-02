@@ -1,3 +1,4 @@
+#include <string>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 
@@ -117,8 +118,10 @@ void createBuffer
         "failed to allocate buffer!"
     );
 
-    riverLog("created buffer with usage flags: " , RIV_LOG_LEVEL_TRACE);
-    riverLog(usageFlags, RIV_LOG_LEVEL_TRACE, false);
+    std::string msg = "created buffer with usage flags: ";
+    msg += std::to_string(usageFlags);
+
+    riverLog(msg.c_str(), RIV_LOG_LEVEL_TRACE);
 
     vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
