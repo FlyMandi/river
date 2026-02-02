@@ -4,10 +4,19 @@ param(
     [Parameter(position=1,Mandatory=$false)]
     $OS = "Win64",
     [Parameter(position=2,Mandatory=$false)]
-    $compiler = "g++",
+    $compiler = "",
     [Parameter(position=3,Mandatory=$false)]
     [switch]$nAMD = $false
 )
+if($IsWindows)
+{
+    $compiler = "MSVC"
+}
+elseIf($IsLinux)
+{
+    $compiler = "g++"
+}
+
 $Platforms = "Win64", "Unix"
 $Configurations = "Debug", "Release"
 
