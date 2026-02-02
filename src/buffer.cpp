@@ -1,6 +1,8 @@
+#include <unordered_map>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+#define GLM_ENABLE_EXPERIMENTAL
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -9,6 +11,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/trigonometric.hpp"
+#include "glm/gtx/hash.hpp"
 #include "vulkan/vulkan_core.h"
 
 #include "pipeline.h"
@@ -23,6 +26,16 @@
 #include <cstring>
 #include <set>
 
+template<> struct std::hash<Vertex>
+{
+    size_t operator()(Vertex const& vertex) const
+    {
+        return  ((hash<glm::vec3>()(vertex.position) ^
+                (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
+                (hash<glm::vec2>()(vertex.textureCoordinate) << 1);
+    }
+};
+
 void loadModel()
 {
     tinyobj::attrib_t attributes;
@@ -36,6 +49,8 @@ void loadModel()
         tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, projectModelPath.string().c_str()),
         (warn + error)
     );
+
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
     for(const tinyobj::shape_t &shape : shapes)
     {
@@ -58,9 +73,13 @@ void loadModel()
 
             vertex.colour = { 1.0f, 1.0f, 1.0f };
 
-            vertices.emplace_back(vertex);
-            //HACK: assuming every vertex is unique
-            vertexIndices.emplace_back(static_cast<uint32_t>(vertexIndices.size()));
+            if(!uniqueVertices.contains(vertex))
+            {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.emplace_back(vertex);
+            }
+
+            vertexIndices.emplace_back(uniqueVertices[vertex]);
         }
     }
 }
