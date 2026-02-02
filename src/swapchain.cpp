@@ -7,20 +7,22 @@
 
 #include <algorithm>
 
-static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats){
+static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
+{
     for(const auto &availableFormat : availableFormats)
     {
-        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format && 
+        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format &&
             VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace
         ){
             return availableFormat;
         }
     }
-    
+
     return availableFormats[0];
 }
 
-static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
+static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes)
+{
     for(const auto &availablePresentMode : availablePresentModes)
     {
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
@@ -72,7 +74,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         riverLog(actualExtent.width, RIV_LOG_LEVEL_TRACE);
         riverLog("swap height (clamped): ", RIV_LOG_LEVEL_TRACE);
         riverLog(actualExtent.height, RIV_LOG_LEVEL_TRACE);
-        
+
         return actualExtent;
     }
 }
@@ -87,7 +89,7 @@ void createSwapchain()
 
     swapchainImageCount = swapChainSupport.capabilities.minImageCount + 1;
 
-    if( 0 < swapChainSupport.capabilities.maxImageCount && 
+    if( 0 < swapChainSupport.capabilities.maxImageCount &&
         swapchainImageCount > swapChainSupport.capabilities.maxImageCount
     ){
         swapchainImageCount = swapChainSupport.capabilities.maxImageCount;
@@ -99,12 +101,12 @@ void createSwapchain()
     createInfo.minImageCount = swapchainImageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent; 
+    createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     uint32_t queueFamilyIndices[] = {
-        logicalQueueFamilies.graphicsIndex, 
+        logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.presentIndex
     };
 
@@ -144,7 +146,7 @@ void createSwapchain()
 
 void createImageViews()
 {
-    swapchainImageViews.resize(swapchainImages.size()); 
+    swapchainImageViews.resize(swapchainImages.size());
 
     for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
@@ -175,7 +177,7 @@ void createImageViews()
 
 void createRenderPass()
 {
-    VkAttachmentDescription colorAttachment{}; 
+    VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapchainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 

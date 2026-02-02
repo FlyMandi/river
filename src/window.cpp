@@ -4,10 +4,10 @@
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    riverLog("new swap height:", RIV_LOG_LEVEL_TRACE);
-    riverLog(height, RIV_LOG_LEVEL_TRACE);
-    riverLog("new swap width:", RIV_LOG_LEVEL_TRACE);
-    riverLog(width, RIV_LOG_LEVEL_TRACE);
+    riverLog("new swap size: ", RIV_LOG_LEVEL_TRACE);
+    riverLog(height, RIV_LOG_LEVEL_TRACE, false);
+    riverLog("x", RIV_LOG_LEVEL_TRACE, false);
+    riverLog(width, RIV_LOG_LEVEL_TRACE, false);
     framebufferResized = VK_TRUE;
 }
 
@@ -16,7 +16,6 @@ void initGLFW()
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
     riverAssert(nullptr != window, "failed to create GLFW window!");
@@ -30,7 +29,6 @@ void cleanupGLFW()
     glfwTerminate();
 }
 
-
 void createSurface()
 {
     //TODO:#39: find out if I can create a surface smaller than the window.
@@ -41,3 +39,5 @@ void createSurface()
         "failed to create window surface!"
     );
 }
+
+
