@@ -93,7 +93,7 @@ VkResult EngineSwapChain::submitCommandBuffers(const VkCommandBuffer *buffers, u
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = imageIndex;
 
-    auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
+    VkResult result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
     return result;
@@ -324,8 +324,7 @@ void EngineSwapChain::createSyncObjects(){
 VkSurfaceFormatKHR EngineSwapChain::chooseSwapSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &availableFormats){
     for(const auto &availableFormat : availableFormats){
-        if(availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
-            availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR){
+        if(availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR){
             return availableFormat;
         }
     }
@@ -344,6 +343,7 @@ VkPresentModeKHR EngineSwapChain::chooseSwapPresentMode(const std::vector<VkPres
     for(const auto &availablePresentMode : availablePresentModes){
         if(availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR){
             std::cout << "Present mode: Immediate" << std::endl; 
+            return availablePresentMode;
         }
     }
 
