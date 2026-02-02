@@ -279,7 +279,21 @@ VkImageView createImageView(VkImage image, VkFormat format)
     return imageView;
 }
 
+//TODO: expand functionality or remove unnecessary function definition for single function call
 void createTextureImageView()
 {
     textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+void createTextureSampler()
+{
+    VkSamplerCreateInfo samplerCreateInfo{};
+    samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+    samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+    samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+    //WIP
 }
