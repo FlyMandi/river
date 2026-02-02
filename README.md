@@ -8,7 +8,8 @@ This project is intended to be a simple Snake Clone in C++ (Hence the name Cnake
 | Project Structure          | Done          |
 | Snake Asset                | Done          |
 | Set up Building w/ PreMake | Done          |
-| Draw a Window with Vulkan  | In Progress   |
+| Draw a Window with GLFW    | Done          |
+| Basic Engine logic         | In Progress   |
 | Basic Movement & collision | Not Started   |
 | Scoring System             | Not Started   |
 | Gameplay Expansion         | Not Started   |
