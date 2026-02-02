@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
 #include <vector>
@@ -23,4 +24,8 @@ extern void createRenderPass();
 extern void cleanupSwapchain();
 extern void recreateSwapchain();
 
-extern VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+extern VkExtent2D chooseSwapExtent
+(
+    const VkSurfaceCapabilitiesKHR  &capabilities,
+    GLFWwindow                      *window
+);

@@ -28,8 +28,17 @@ inline VkPhysicalDeviceFeatures deviceFeatures;
 
 inline VkDevice logicalDevice;
 
-extern SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
-extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+extern SwapchainSupportDetails querySwapchainSupport
+(
+    const VkPhysicalDevice  &device,
+    const VkSurfaceKHR      &surface
+);
+
+extern QueueFamilyIndices findQueueFamilies
+(
+    const VkPhysicalDevice  &device,
+    const VkSurfaceKHR      &surface
+);
 
 extern void pickPhysicalDevice();
 extern void createLogicalDevice();

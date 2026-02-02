@@ -1,6 +1,5 @@
 #include "river.h"
 #include "vulkan/vulkan_core.h"
-#include "window.h"
 #include "device.h"
 #include "pipeline.h"
 
@@ -30,7 +29,7 @@ static VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     static QueueFamilyIndices indices{};
     static uint32_t queueFamilyCount = 0;
@@ -77,10 +76,13 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
     return indices;
 }
 
-static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
-{
+internal_f uint32_t rateDeviceSuitability
+(
+    const VkPhysicalDevice  &device,
+    const VkSurfaceKHR      &surface
+){
     static uint32_t score = 0;
-    static QueueFamilyIndices indices = findQueueFamilies(device);
+    static QueueFamilyIndices indices = findQueueFamilies(device, surface);
 
     if( indices.graphicsIndex == UINT32_MAX ||
         indices.transferIndex == UINT32_MAX ||
@@ -108,7 +110,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     }
     else
     {
-        SwapchainSupportDetails swapChainSupport = querySwapchainSupport(device);
+        SwapchainSupportDetails swapChainSupport = querySwapchainSupport(device, surface);
         if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
         {
             return 0;
@@ -136,8 +138,11 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     return score;
 }
 
-SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device)
-{
+SwapchainSupportDetails querySwapchainSupport
+(
+    const VkPhysicalDevice  &device,
+    const VkSurfaceKHR      &surface
+){
     SwapchainSupportDetails details;
     uint32_t formatCount;
     uint32_t presentModeCount;
@@ -161,7 +166,7 @@ SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device)
     return details;
 }
 
-void pickPhysicalDevice()
+void pickPhysicalDevice(const VkSurfaceKHR &surface)
 {
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
@@ -178,7 +183,7 @@ void pickPhysicalDevice()
 
     for(const auto& device : devices)
     {
-        uint32_t score = rateDeviceSuitability(device);
+        uint32_t score = rateDeviceSuitability(device, surface);
         suitabilityCandidates.insert(std::make_pair(score, device));
     }
 
@@ -186,7 +191,7 @@ void pickPhysicalDevice()
     {
         physicalDevice = suitabilityCandidates.rbegin()->second;
 
-        static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+        static QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
         logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
         logicalQueueFamilies.transferIndex = indices.transferIndex;
         logicalQueueFamilies.presentIndex = indices.presentIndex;

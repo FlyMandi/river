@@ -1,7 +1,6 @@
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
-#include "window.h"
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
@@ -11,8 +10,11 @@
 #include <algorithm>
 #include <cstdint>
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
-{
+VkExtent2D chooseSwapExtent
+(
+    const VkSurfaceCapabilitiesKHR  &capabilities,
+    GLFWwindow                      *window
+){
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
         return capabilities.currentExtent;
@@ -31,9 +33,9 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     }
 }
 
-void createSwapchain()
+void createSwapchain(const VkSurfaceKHR &surface)
 {
-    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice);
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, surface);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
     for(const auto &availableFormat : swapchainSupport.formats)
