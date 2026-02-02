@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <stdexcept>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
@@ -224,12 +225,21 @@ void cleanupVulkan(){
 }
 
 void drawFrame(){
-    uint32_t imageIndex;
-
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
-    vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    uint32_t imageIndex;
+    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+    if(result == VK_ERROR_OUT_OF_DATE_KHR){
+        recreateSwapChain();
+        return;
+
+    }else if(result != VK_SUCCESS){
+        printDebugLog("failed to acquire swapChain image!");
+        throw std::runtime_error("failed to acquire swapChain image!");
+    }
+
+    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -266,7 +276,15 @@ void drawFrame(){
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    vkQueuePresentKHR(presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR){
+        recreateSwapChain();
+
+    }else if(result != VK_SUCCESS){
+        printDebugLog("failed to present swapChain image!");
+        throw std::runtime_error("failed to present swapChain image!");
+    }
 
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
