@@ -64,6 +64,7 @@ void createVertexBuffer()
         throw std::runtime_error("failed to create vertex buffer!");
     }
 
+    VkMemoryRequirements vertexBufferMemoryRequirements;
     vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &vertexBufferMemoryRequirements);
 
     VkMemoryPropertyFlags flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;

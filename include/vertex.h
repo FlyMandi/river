@@ -12,6 +12,7 @@ struct Vertex
 
 extern const std::vector<Vertex> vertices;
 inline VkBuffer vertexBuffer;
+inline VkDeviceMemory vertexBufferMemory;
 
 extern void createVertexBuffer();
 
