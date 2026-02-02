@@ -192,16 +192,18 @@ void initVulkan(){
     createGraphicsPipeline();
     createFramebuffers();
     createCommandPool();
-    createCommandBuffer();
+    createCommandBuffers();
     createSyncObjects();
 }
 
 void cleanupVulkan(){
     vkDeviceWaitIdle(logicalDevice);
 
-    vkDestroySemaphore(logicalDevice, imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(logicalDevice, renderFinishedSemaphore, nullptr);
-    vkDestroyFence(logicalDevice, inFlightFence, nullptr);
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
+        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
+        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+        vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+    }
 
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
 
@@ -231,16 +233,16 @@ void cleanupVulkan(){
 void drawFrame(){
     uint32_t imageIndex;
 
-    vkWaitForFences(logicalDevice, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(logicalDevice, 1, &inFlightFence);
+    vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
-    vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-    vkResetCommandBuffer(commandBuffer, 0);
-    recordCommandBuffer(commandBuffer, imageIndex);
+    vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+    recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
     VkSubmitInfo submitInfo{};
@@ -253,9 +255,9 @@ void drawFrame(){
 
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS){
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to submit draw command buffer!");
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -272,6 +274,8 @@ void drawFrame(){
     presentInfo.pImageIndices = &imageIndex;
 
     vkQueuePresentKHR(presentQueue, &presentInfo);
+
+    currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there

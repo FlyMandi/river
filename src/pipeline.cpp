@@ -258,20 +258,27 @@ void createCommandPool(){
     }
 }
 
-void createCommandBuffer(){
+void createCommandBuffers(){
+    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
+    allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-    if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS){
+    if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to allocate command buffers!");
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }
 
 void createSyncObjects(){
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -279,13 +286,16 @@ void createSyncObjects(){
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
-    if((vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create semaphores!");
-        throw std::runtime_error("failed to create semaphores!");
-    }
-    if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFence)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create fence!");
-        throw std::runtime_error("failed to create fence!");
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
+        if((vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS 
+            || (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS){
+
+            printDebugLog(&"\nERROR: failed to create semaphore for frame " [currentFrame]);
+            throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
+        }
+        if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS){
+            printDebugLog(&"\nERROR: failed to create fence for frame " [currentFrame]);
+            throw std::runtime_error(&"failed to create fence for frame " [currentFrame]);
+        }
     }
 }
-
