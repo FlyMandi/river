@@ -90,6 +90,7 @@ void engine::pickPhysicalDevice(){
     
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
+        printDebugLog("\nERROR: failed to find any GPU with vulkan support!", 2, 1);
         throw std::runtime_error("failed to find any GPU with vulkan support!");
     }
 
@@ -106,17 +107,18 @@ void engine::pickPhysicalDevice(){
     if(suitabilityCandidates.rbegin()->first > 0){
         physicalDevice = suitabilityCandidates.rbegin()->second; 
     }else{
+        printDebugLog("\nERROR: failed to find a suitable GPU!", 2, 1);
         throw std::runtime_error("failed to find a suitable GPU!");
     }
 }
 
 engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
-    QueueFamilyIndices indices;
-    uint32_t queueFamilyCount = 0;
+    static QueueFamilyIndices indices;
+    static uint32_t queueFamilyCount = 0;
 
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
-    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    static std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
     VkBool32 presentSupport = false;
@@ -141,12 +143,12 @@ engine::QueueFamilyIndices engine::findQueueFamilies(VkPhysicalDevice device){
 }
 
 void engine::createLogicalDevice(){
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    static std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    static std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
-    float queuePriority = 1.0f;
+    static float queuePriority = 1.0f;
     for(uint32_t queueFamily : uniqueQueueFamilies){
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -174,6 +176,7 @@ void engine::createLogicalDevice(){
     }
 
     if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)){
+        printDebugLog("\nERROR: failed to create logical device.", 2, 1);
         throw std::runtime_error("failed to create logical device!");
     }
 

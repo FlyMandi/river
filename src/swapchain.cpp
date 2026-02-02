@@ -101,6 +101,7 @@ void engine::createSwapChain(){
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
         throw std::runtime_error("failed to create swap chain!");
     }
 

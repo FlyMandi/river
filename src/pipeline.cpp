@@ -13,6 +13,7 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
 
     VkShaderModule shaderModule;
     if(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create shader module!", 2, 1);
         throw std::runtime_error("failed to create shader module!");
     }
 
@@ -24,7 +25,8 @@ static std::vector<char> readFile(const std::string &filename){
 
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if(!file.is_open()){
-        throw std::runtime_error("failed to open file");
+        printDebugLog("\nERROR: failed to open file: " + filename, 2, 1);
+        throw std::runtime_error("failed to open file!");
     }
 
     size_t fileSize = (size_t)file.tellg();
@@ -41,7 +43,8 @@ static std::vector<char> readFile(const std::string &filename){
     printDebugLog(std::to_string(fileSize), 1, 2);
 
     if(buffer.size() != fileSize){
-        throw std::runtime_error("failed to correctly read from file");
+        printDebugLog("\nERROR: failed to correctly read from buffer!", 2, 1);
+        throw std::runtime_error("failed to correctly read from buffer!");
     }
 
     file.close();
@@ -147,6 +150,7 @@ void engine::createGraphicsPipeline(){
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
     if(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create pipeline layout!", 2, 1);
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -169,6 +173,7 @@ void engine::createGraphicsPipeline(){
     pipelineInfo.subpass = 0;
 
     if((vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to create graphics pipeline!", 2, 1);
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
