@@ -214,14 +214,14 @@ void createTextureImage
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        textureImage,
-        textureImageMemory
+        engine.textureImage,
+        engine.textureImageMemory
     );
 
     transitionImageLayout
     (
         engine,
-        textureImage,
+        engine.textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
@@ -231,7 +231,7 @@ void createTextureImage
     (
         engine,
         stagingBuffer,
-        textureImage,
+        engine.textureImage,
         static_cast<uint32_t>(texWidth),
         static_cast<uint32_t>(texHeight)
     );
@@ -239,7 +239,7 @@ void createTextureImage
     transitionImageLayout
     (
         engine,
-        textureImage,
+        engine.textureImage,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
@@ -247,6 +247,14 @@ void createTextureImage
 
     vkDestroyBuffer(engine.logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(engine.logicalDevice, stagingBufferMemory, nullptr);
+
+    engine.textureImageView =   createImageView
+                                (
+                                    engine,
+                                    engine.textureImage,
+                                    VK_FORMAT_R8G8B8A8_SRGB,
+                                    VK_IMAGE_ASPECT_COLOR_BIT
+                                );
 }
 
 void createImage
@@ -331,23 +339,9 @@ VkImageView createImageView
     return imageView;
 }
 
-//TODO: expand functionality or remove unnecessary function definition for single function call
-void createTextureImageView
-(
-    const EngineData &engine
-){
-    textureImageView =  createImageView
-                        (
-                            engine,
-                            textureImage,
-                            VK_FORMAT_R8G8B8A8_SRGB,
-                            VK_IMAGE_ASPECT_COLOR_BIT
-                        );
-}
-
 void createTextureSampler
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     VkSamplerCreateInfo samplerCreateInfo{};
     samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -369,7 +363,7 @@ void createTextureSampler
 
     riverAssertVkSuccess
     (
-        vkCreateSampler(engine.logicalDevice, &samplerCreateInfo, nullptr, &textureSampler),
+        vkCreateSampler(engine.logicalDevice, &samplerCreateInfo, nullptr, &engine.textureSampler),
         "failed to create texture sampler!"
     );
 }

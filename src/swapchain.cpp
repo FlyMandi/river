@@ -123,12 +123,7 @@ void createSwapchain
 
     engine.swapchainImageFormat = surfaceFormat.format;
     engine.swapchainExtent = extent;
-}
 
-void createSwapImageViews
-(
-    EngineData &engine
-){
     engine.swapchainImageViews.resize(engine.swapchainImages.size());
 
     for(uint32_t i = 0; i < engine.swapchainImages.size(); ++i)
@@ -269,7 +264,6 @@ void recreateSwapchain
     cleanupSwapchain(engine);
 
     createSwapchain(engine, settings);
-    createSwapImageViews(engine);
     createDepthResources(engine);
     createFramebuffers(engine);
 

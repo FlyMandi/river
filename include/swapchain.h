@@ -23,11 +23,6 @@ extern void recreateSwapchain
     const UserSettings  &settings
 );
 
-extern void createSwapImageViews
-(
-    EngineData &engine
-);
-
 extern void createRenderPass
 (
     EngineData &engine

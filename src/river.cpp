@@ -337,7 +337,6 @@ void initVulkan
     createLogicalDevice(engine);
 
     createSwapchain(engine, settings);
-    createSwapImageViews(engine);
 
     createRenderPass(engine);
     createDescriptorSetLayout(engine);
@@ -348,7 +347,6 @@ void initVulkan
     createFramebuffers(engine);
 
     createTextureImage(engine, manifest);
-    createTextureImageView(engine);
     createTextureSampler(engine);
 
     loadModel(engine, manifest.projectModelPath);
@@ -371,11 +369,11 @@ void cleanupVulkan
     cleanupSyncObjects(engine);
     cleanupSwapchain(engine);
 
-    vkDestroySampler(engine.logicalDevice, textureSampler, nullptr);
+    vkDestroySampler(engine.logicalDevice, engine.textureSampler, nullptr);
 
-    vkDestroyImage(engine.logicalDevice, textureImage, nullptr);
-    vkFreeMemory(engine.logicalDevice, textureImageMemory, nullptr);
-    vkDestroyImageView(engine.logicalDevice, textureImageView, nullptr);
+    vkDestroyImage(engine.logicalDevice, engine.textureImage, nullptr);
+    vkFreeMemory(engine.logicalDevice, engine.textureImageMemory, nullptr);
+    vkDestroyImageView(engine.logicalDevice, engine.textureImageView, nullptr);
 
     vkDestroyBuffer(engine.logicalDevice, engine.vertexBuffer, nullptr);
     vkFreeMemory(engine.logicalDevice, engine.vertexBufferMemory, nullptr);
