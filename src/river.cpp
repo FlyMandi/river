@@ -270,6 +270,7 @@ void cleanupVulkan()
     vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
 
     cleanupSwapchain();
+
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 
@@ -281,8 +282,6 @@ void cleanupVulkan()
     vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-
-    vkWaitForFences(logicalDevice, 1, inFlightFences.data(), VK_TRUE, UINT64_MAX);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {

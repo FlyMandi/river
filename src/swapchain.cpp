@@ -6,6 +6,7 @@
 #include "pipeline.h"
 
 #include <algorithm>
+#include <cstdint>
 
 static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
@@ -239,6 +240,9 @@ void destroyDeferredResources(FrameResource *frame)
 
 void cleanupSwapchain()
 {
+    //TODO:#45: time all the functions that lead to resizing, where are we stopping?
+    vkQueueWaitIdle(graphicsQueue);
+
     for(size_t i = 0; i < swapchainImageCount; ++i)
     {
         frameResources[i].framebuffer2Destroy = swapchainFramebuffers[i];
@@ -260,9 +264,6 @@ void recreateSwapchain()
         glfwGetFramebufferSize(window, &width, &height);
         glfwWaitEvents();
     }
-
-    //TODO:#38: fence
-    vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapchain();
 
