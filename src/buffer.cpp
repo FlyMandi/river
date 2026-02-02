@@ -379,6 +379,7 @@ void createDepthResources
         engine,
         engine.swapchainExtent.width,
         engine.swapchainExtent.height,
+        1,
         depthFormat,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -391,6 +392,7 @@ void createDepthResources
                             (
                                 engine,
                                 engine.depthImage,
+                                1,
                                 depthFormat,
                                 VK_IMAGE_ASPECT_DEPTH_BIT
                             );
@@ -399,6 +401,7 @@ void createDepthResources
     (
         engine,
         engine.depthImage,
+        1,
         depthFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL

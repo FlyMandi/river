@@ -147,6 +147,7 @@ void createSwapchain
                                         (
                                             engine,
                                             engine.swapchainImages[i],
+                                            1,
                                             engine.swapchainImageFormat,
                                             VK_IMAGE_ASPECT_COLOR_BIT
                                         );

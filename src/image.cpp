@@ -56,6 +56,7 @@ void transitionImageLayout
 (
     EngineData          &engine,
     const VkImage       &image,
+    const uint32_t      &mipLevels,
     const VkFormat      &format,
     const VkImageLayout &oldLayout,
     const VkImageLayout &newLayout
@@ -86,7 +87,7 @@ void transitionImageLayout
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     }
     barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.levelCount = mipLevels;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
 
@@ -143,6 +144,122 @@ void transitionImageLayout
     flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
 
+internal void generateMipmaps
+(
+    EngineData          &engine,
+    const VkImage       &image,
+    const uint32_t      &mipLevels,
+    const int32_t       &texWidth,
+    const int32_t       &texHeight
+){
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, engine.graphicsCommandPool);
+
+    VkImageMemoryBarrier imageMemoryBarrier{};
+    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageMemoryBarrier.image = image;
+    imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+    imageMemoryBarrier.subresourceRange.layerCount = 1;
+    imageMemoryBarrier.subresourceRange.levelCount = 1;
+
+    int32_t mipWidth = texWidth;
+    int32_t mipHeight = texHeight;
+
+    for(uint32_t i = 1; i < mipLevels; ++i)
+    {
+        imageMemoryBarrier.subresourceRange.baseMipLevel = i - 1;
+        imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        vkCmdPipelineBarrier
+        (
+            commandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr,
+            1, &imageMemoryBarrier
+        );
+
+        VkImageBlit imageBlit{};
+        imageBlit.srcOffsets[0] = {0, 0, 0};
+        imageBlit.srcOffsets[1] =
+        {
+            mipWidth,
+            mipHeight,
+            1
+        };
+        imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageBlit.srcSubresource.mipLevel = i - 1;
+        imageBlit.srcSubresource.baseArrayLayer = 0;
+        imageBlit.srcSubresource.layerCount = 1;
+        imageBlit.dstOffsets[0] = {0, 0, 0};
+        imageBlit.dstOffsets[1] =
+        {
+            mipWidth  > 1 ? mipWidth  / 2 : 1,
+            mipHeight > 1 ? mipHeight / 2 : 1,
+            1
+        };
+        imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageBlit.dstSubresource.mipLevel = i;
+        imageBlit.dstSubresource.baseArrayLayer = 0;
+        imageBlit.dstSubresource.layerCount = 1;
+
+        vkCmdBlitImage
+        (
+            commandBuffer,
+            image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1, &imageBlit,
+            VK_FILTER_LINEAR
+        );
+
+        imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier
+        (
+            commandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0, 0, nullptr, 0, nullptr,
+            1, &imageMemoryBarrier
+        );
+
+        if(mipWidth > 1)
+        {
+            mipWidth /= 2;
+        }
+
+        if(mipHeight > 1)
+        {
+            mipHeight /= 2;
+        }
+    }
+
+    imageMemoryBarrier.subresourceRange.baseMipLevel = mipLevels - 1;
+    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier
+    (
+        commandBuffer,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0, 0, nullptr, 0, nullptr,
+        1, &imageMemoryBarrier
+    );
+
+    flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
+}
+
 void createTextureImage
 (
     EngineData              &engine,
@@ -161,6 +278,8 @@ void createTextureImage
                             STBI_rgb_alpha
                         );
 
+    engine.mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
     const char* stbi_error = stbi_failure_reason();
 
     if(!pixels)
@@ -170,8 +289,7 @@ void createTextureImage
             std::format
             (
                 "failed to load texture image from {}: {}",
-                manifest.projectTexturePath.string(),
-                stbi_failure_reason()
+                manifest.projectTexturePath.string(), stbi_failure_reason()
             )
         );
     }
@@ -210,9 +328,10 @@ void createTextureImage
         engine,
         texWidth,
         texHeight,
+        engine.mipLevels,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         engine.textureImage,
         engine.textureImageMemory
@@ -222,6 +341,7 @@ void createTextureImage
     (
         engine,
         engine.textureImage,
+        engine.mipLevels,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
@@ -236,13 +356,13 @@ void createTextureImage
         static_cast<uint32_t>(texHeight)
     );
 
-    transitionImageLayout
+    generateMipmaps
     (
         engine,
         engine.textureImage,
-        VK_FORMAT_R8G8B8A8_SRGB,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        engine.mipLevels,
+        static_cast<int32_t>(texWidth),
+        static_cast<int32_t>(texHeight)
     );
 
     vkDestroyBuffer(engine.logicalDevice, stagingBuffer, nullptr);
@@ -252,6 +372,7 @@ void createTextureImage
                                 (
                                     engine,
                                     engine.textureImage,
+                                    engine.mipLevels,
                                     VK_FORMAT_R8G8B8A8_SRGB,
                                     VK_IMAGE_ASPECT_COLOR_BIT
                                 );
@@ -262,6 +383,7 @@ void createImage
     const EngineData            &engine,
     const uint32_t              &width,
     const uint32_t              &height,
+    const uint32_t              &mipLevels,
     const VkFormat              &format,
     const VkImageTiling         &tiling,
     const VkImageUsageFlags     &usage,
@@ -275,7 +397,7 @@ void createImage
     imageCreateInfo.extent.width = width;
     imageCreateInfo.extent.height = height;
     imageCreateInfo.extent.depth = 1;
-    imageCreateInfo.mipLevels = 1;
+    imageCreateInfo.mipLevels = mipLevels;
     imageCreateInfo.arrayLayers = 1;
 
     //in an edge case, this format might not be supported. conversions will be done eventually
@@ -313,10 +435,11 @@ void createImage
 
 VkImageView createImageView
 (
-    const EngineData    &engine,
-    VkImage             image,
-    VkFormat            format,
-    VkImageAspectFlags  aspectFlags
+    const EngineData            &engine,
+    const VkImage               &image,
+    const uint32_t              &mipLevels,
+    const VkFormat              &format,
+    const VkImageAspectFlags    &aspectFlags
 ){
     VkImageViewCreateInfo viewCreateInfo{};
     viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -325,7 +448,7 @@ VkImageView createImageView
     viewCreateInfo.format = format;
     viewCreateInfo.subresourceRange.aspectMask = aspectFlags;
     viewCreateInfo.subresourceRange.baseMipLevel = 0;
-    viewCreateInfo.subresourceRange.levelCount = 1;
+    viewCreateInfo.subresourceRange.levelCount = mipLevels;
     viewCreateInfo.subresourceRange.baseArrayLayer = 0;
     viewCreateInfo.subresourceRange.layerCount = 1;
 

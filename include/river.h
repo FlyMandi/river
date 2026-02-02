@@ -161,6 +161,7 @@ struct EngineData
     std::vector<VkDeviceMemory>         uniformBuffersMemory{};
     std::vector<void*>                  uniformBuffersMapped{};
 
+    uint32_t                            mipLevels;
     VkImage                             textureImage;
     VkImageView                         textureImageView;
     VkDeviceMemory                      textureImageMemory;

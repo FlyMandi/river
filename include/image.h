@@ -9,6 +9,7 @@ extern void createImage
     const EngineData            &engine,
     const uint32_t              &width,
     const uint32_t              &height,
+    const uint32_t              &mipLevels,
     const VkFormat              &format,
     const VkImageTiling         &tiling,
     const VkImageUsageFlags     &usage,
@@ -19,10 +20,11 @@ extern void createImage
 
 extern VkImageView createImageView
 (
-    const EngineData    &engine,
-    VkImage             image,
-    VkFormat            format,
-    VkImageAspectFlags  aspectFlags
+    const EngineData            &engine,
+    const VkImage               &image,
+    const uint32_t              &mipLevels,
+    const VkFormat              &format,
+    const VkImageAspectFlags    &aspectFlags
 );
 
 extern void createTextureImage
@@ -40,6 +42,7 @@ extern void transitionImageLayout
 (
     EngineData          &engine,
     const VkImage       &image,
+    const uint32_t      &mipLevels,
     const VkFormat      &format,
     const VkImageLayout &oldLayout,
     const VkImageLayout &newLayout
