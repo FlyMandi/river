@@ -1,4 +1,4 @@
-param( 
+param(
     [Parameter(position=0,Mandatory=$false)]
     $build = "Debug",
     [Parameter(position=1,Mandatory=$false)]
@@ -56,12 +56,12 @@ if("MSVC" -eq $compiler)
     $VS = Join-Path $env:PROGRAMFILES "\Microsoft Visual Studio\2022\Community\"
 
     if($nAMD)
-    { 
-        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\" 
+    {
+        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\"
     }
     else
     {
-        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" 
+        $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\"
     }
 
     &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
@@ -78,5 +78,7 @@ elseIf("g++" -eq $compiler)
 
 if(0 -eq $LASTEXITCODE)
 {
+    Write-Host "compiled successfully!" -ForegroundColor Green
+    Write-Host "running $target..."
     &$target
 }
