@@ -3,9 +3,10 @@
 
 #include "river.h"
 #include "device.h"
+#include "buffer.h"
+
 #include <cstring>
 #include <set>
-#include "vertex.h"
 
 //HACK: hardcoded vertices
 const std::vector<Vertex> vertices =

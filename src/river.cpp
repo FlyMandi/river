@@ -4,7 +4,7 @@
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
-#include "vertex.h"
+#include "buffer.h"
 
 #include <cstdint>
 #include <cstring>

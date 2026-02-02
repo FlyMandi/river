@@ -1,8 +1,9 @@
+#include "vulkan/vulkan_core.h"
+
 #include "river.h"
 #include "device.h"
 #include "swapchain.h"
-#include "vertex.h"
-#include "vulkan/vulkan_core.h"
+#include "buffer.h"
 #include "pipeline.h"
 
 #include <filesystem>
