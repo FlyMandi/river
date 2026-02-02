@@ -7,7 +7,7 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
     framebufferResized = VK_TRUE;
 }
 
-void initGLFW()
+void initGLFW(GLFWwindow* window, int width, int height, const char* projectName)
 {
     glfwInit();
 

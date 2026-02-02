@@ -20,9 +20,12 @@ int WinMain()
 
 int main()
 {
-    initEditor();
+    projectManifest manifest;
+    userSettings settings;
+
+    initEditor(manifest);
     initGLFW();
-    initVulkan();
+    initVulkan(manifest);
 
     loopEditor();
 

@@ -36,7 +36,7 @@ template<> struct std::hash<Vertex>
     }
 };
 
-void loadModel()
+void loadModel(const std::filesystem::path &modelPath)
 {
     tinyobj::attrib_t attributes;
     std::vector<tinyobj::shape_t> shapes;
@@ -46,7 +46,7 @@ void loadModel()
 
     riverAssert
     (
-        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, projectModelPath.string().c_str()),
+        tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, modelPath.string().c_str()),
         (warn + error)
     );
 

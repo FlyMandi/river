@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 #include <array>
+#include <filesystem>
 
 struct Vertex
 {
@@ -43,7 +44,7 @@ inline std::vector<VkBuffer> uniformBuffers{};
 inline std::vector<VkDeviceMemory> uniformBuffersMemory{};
 inline std::vector<void*> uniformBuffersMapped{};
 
-extern void loadModel();
+extern void loadModel(const std::filesystem::path &modelPath);
 
 extern void createBuffer
 (

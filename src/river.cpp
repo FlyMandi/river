@@ -307,7 +307,7 @@ static void createInstance()
     );
 }
 
-void initVulkan()
+void initVulkan(const projectManifest &manifest)
 {
     createInstance();
 
@@ -334,7 +334,7 @@ void initVulkan()
     createTextureImageView();
     createTextureSampler();
 
-    loadModel();
+    loadModel(manifest.projectModelPath);
     createVertexBuffer();
     createUniformBuffers();
 
@@ -487,7 +487,7 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void getProjectRoot(const char *rootName)
+std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
@@ -495,20 +495,19 @@ void getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            projectRoot = current;
-            projectLog  = current / "log" / "river.log";
             riverLog(std::format("set project root to {}", current.string()), RIV_LOG_LEVEL_TRACE);
+            return current;
         }
         current = current.parent_path();
     }
 }
 
-void riverSetupLog()
+void riverSetupLog(const std::filesystem::path &path)
 {
 #ifdef DEBUG
     return;
 #endif
-    logFile.open(projectLog, std::ios::trunc);
+    logFile.open(path, std::ios::trunc);
     riverAssert(logFile.is_open(), "failed to open log file!");
 }
 

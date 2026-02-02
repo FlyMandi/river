@@ -1,52 +1,49 @@
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
 #include <filesystem>
 #include <vector>
 #include <fstream>
 
-inline uint32_t currentFrame = 0;
+#define persistent static
+#define global_var static
+#define internal_f static
+
+static uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
 
-constexpr uint8_t logLevel = 0;
+global_var VkInstance instance;
+global_var std::ofstream logFile;
 
-inline const char* projectName;
-inline std::string projectVersion;
-
-inline std::filesystem::path projectRoot;
-inline std::filesystem::path projectLog;
-#define projectLogFolder = projectRoot / "log";
-
-inline std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_MODEL_PATH";
-inline std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
-
-inline VkInstance instance;
-
-extern void initVulkan();
-extern void cleanupVulkan();
-
-extern void drawFrame();
-
-extern void getProjectRoot(const char *rootName);
-extern void riverSetupLog();
-extern void riverCloseLog();
-
-inline std::ofstream logFile;
-
-#ifdef DEBUG
-inline VkDebugUtilsMessengerEXT debugMessenger;
-
-const std::vector<const char*> validationLayers =
+struct projectManifest
 {
-    "VK_LAYER_KHRONOS_validation",
-    "VK_LAYER_KHRONOS_synchronization2",
-    // "VK_LAYER_LUNARG_crash_diagnostic",
-    "VK_LAYER_LUNARG_monitor",
-    "VK_LAYER_RTSS"
+    uint8_t logLevel;
+    const char* projectName = "RIV_UNINITIALIZED_PROJECT";
+    std::string projectVersion = "RIV_UNINITIALIZED_VERSION";
+    std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PROJECT_ROOT";
+    std::filesystem::path projectLog = "RIV_UNINITIALIZED_PROJECT_LOG";
+    std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_MODEL_PATH";
+    std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_TEXTURE_PATH";
 };
-#endif
+
+struct userSettings
+{
+    uint32_t windowHeight;
+    uint32_t windowWidth;
+
+    VkPresentModeKHR presentMode;
+};
+
+struct engineData
+{
+    GLFWwindow *window;
+
+    VkSurfaceKHR surface;
+};
 
 enum RiverLogLevel
 {
@@ -57,6 +54,28 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_ASSERT    = 4,
     RIV_LOG_LEVEL_UNDEFINED = 5
 };
+
+extern void initVulkan(const projectManifest &manifest);
+extern void cleanupVulkan();
+
+extern void drawFrame();
+
+extern std::filesystem::path getProjectRoot(const char *rootName);
+extern void riverSetupLog(const std::filesystem::path &path);
+extern void riverCloseLog();
+
+#ifdef DEBUG
+global_var VkDebugUtilsMessengerEXT debugMessenger;
+
+const std::vector<const char*> validationLayers =
+{
+    "VK_LAYER_KHRONOS_validation",
+    "VK_LAYER_KHRONOS_synchronization2",
+    // "VK_LAYER_LUNARG_crash_diagnostic",
+    "VK_LAYER_LUNARG_monitor",
+    "VK_LAYER_RTSS"
+};
+#endif
 
 const char* riverTranslateVkResult(VkResult code);
 

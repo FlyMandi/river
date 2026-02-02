@@ -3,26 +3,28 @@
 #include "window.h"
 #include <filesystem>
 
-void initEditor()
+void initEditor(projectManifest &manifest)
 {
     //TODO:#40: main menu GUI. buttons:
     //load project
     //create new project
     //exit
 
-    //HACK: currently no project manifest, so all hardcoded.
-    projectName = "riverTest";
-    projectVersion = "0.0.0";
+    //HACK: currently no project manifest, so all hardcoded. later acquire from file.
+    manifest.projectName = "riverTest";
+    manifest.projectVersion = "0.0.0";
+    manifest.logLevel = 0;
 
     riverWindowWidth = 1920;
     riverWindowHeight = 1080;
 
-    getProjectRoot("river");
+    manifest.projectRoot = getProjectRoot("river");
+    manifest.projectLog = manifest.projectRoot / "log" / "river.log";
 
-    projectModelPath = std::filesystem::canonical(projectRoot / "assets/models/WB_Vase.obj");
-    projectTexturePath = std::filesystem::canonical(projectRoot / "assets/textures/WB_Vase_Mat_Base_color.jpg");
+    manifest.projectModelPath = std::filesystem::canonical(manifest.projectRoot / "assets/models/WB_Vase.obj");
+    manifest.projectTexturePath = std::filesystem::canonical(manifest.projectRoot / "assets/textures/WB_Vase_Mat_Base_color.jpg");
 
-    riverSetupLog();
+    riverSetupLog(manifest.projectLog);
 }
 
 void loopEditor()
