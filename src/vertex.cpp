@@ -1,10 +1,6 @@
-#include "vulkan/vulkan_core.h"
 #include "vertex.h"
 
-#include <array>
-#include <cstddef>
-
-static VkVertexInputBindingDescription getBindingDescription(){
+VkVertexInputBindingDescription getVertexBindingDescription(){
     VkVertexInputBindingDescription bindingDescription{}; 
     bindingDescription.binding = 0;
     bindingDescription.stride = sizeof(Vertex);
@@ -13,13 +9,18 @@ static VkVertexInputBindingDescription getBindingDescription(){
     return bindingDescription;
 }
 
-static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions(){
+std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(){
     std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
     attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 1;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[0].offset = offsetof(Vertex, color);
 
     return attributeDescriptions;
 }
