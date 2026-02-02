@@ -2,9 +2,9 @@
 #include "window.h"
 #include "editor.h"
 
-#ifndef _WIN32
+#if !defined(DEBUG) && defined(_WIN32)
 
-int main(){
+int WinMain(){
     initEditor();
     initGLFW();
     initVulkan();
@@ -20,7 +20,7 @@ int main(){
 
 #else
 
-int WinMain(){
+int main(){
     initEditor();
     initGLFW();
     initVulkan();
