@@ -596,8 +596,8 @@ void createGraphicsPipeline(){
         std::cout << "current directory: " << std::filesystem::current_path() << '\n'; 
     }
     
-    const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
-    const std::filesystem::path fragPath = appRoot / "bin\\fragTest.frag.spv";
+    const std::filesystem::path vertPath = appRoot / "river\\bin\\vertTest.vert.spv";
+    const std::filesystem::path fragPath = appRoot / "river\\bin\\fragTest.frag.spv";
 
     auto vertShaderCode = readFile(vertPath.string());
     auto fragShaderCode = readFile(fragPath.string());
