@@ -54,6 +54,7 @@ static std::vector<char> readFile(const std::string &filename){
     return buffer;
 }
 
+//TODO: create pipeline.h and pipeline.cpp, move functions
 void engine::createGraphicsPipeline(){
     printDebugLog("current directory: ", 0, 0);
     printDebugLog(std::filesystem::current_path().string(), 0, 2);
