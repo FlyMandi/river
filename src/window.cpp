@@ -5,6 +5,10 @@
 #include <stdexcept>
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height){
+    printDebugLog('\0', "window resized to: ");
+    printDebugLog(width);
+    printDebugLog("x");
+    printDebugLog(height, '\n');
     framebufferResized = true;
 }
 
