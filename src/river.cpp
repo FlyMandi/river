@@ -426,6 +426,9 @@ void cleanupVulkan()
 
     cleanupSwapchain();
 
+    vkDestroyImage(logicalDevice, textureImage, nullptr);
+    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
+
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 

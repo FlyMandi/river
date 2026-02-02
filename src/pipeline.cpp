@@ -304,12 +304,12 @@ void createCommandPools()
     );
 }
 
-VkCommandBuffer beginSingleTimeCommands()
+VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool)
 {
     VkCommandBufferAllocateInfo commandbufAllocInfo{};
     commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     commandbufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    commandbufAllocInfo.commandPool = transferCommandPool;
+    commandbufAllocInfo.commandPool = commandPool;
     commandbufAllocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -328,7 +328,7 @@ VkCommandBuffer beginSingleTimeCommands()
     return commandBuffer;
 }
 
-void endSingleTimeCommands(VkCommandBuffer commandBuffer)
+void endSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool commandPool, VkQueue queue)
 {
     vkEndCommandBuffer(commandBuffer);
 
@@ -337,11 +337,11 @@ void endSingleTimeCommands(VkCommandBuffer commandBuffer)
     singleTimeSubmitInfo.commandBufferCount = 1;
     singleTimeSubmitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(transferQueue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
+    vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
 
-    vkQueueWaitIdle(transferQueue);
+    vkQueueWaitIdle(queue);
 
-    vkFreeCommandBuffers(logicalDevice, transferCommandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
 }
 
 void createCommandBuffers()
