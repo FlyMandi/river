@@ -108,7 +108,7 @@ void createSwapChain(){
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create swap chain!");
+        printDebugLog("failed to create swap chain!");
         throw std::runtime_error("failed to create swap chain!");
     }
 
@@ -142,7 +142,7 @@ void createImageViews(){
         createInfo.subresourceRange.layerCount = 1;
 
         if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
-            printDebugLog("\nERROR: failed to create image views!");
+            printDebugLog("failed to create image views!");
             throw std::runtime_error("failed to create image views!");
         }
     }
@@ -188,7 +188,7 @@ void createRenderPass(){
     renderPassInfo.pDependencies = &dependency;
 
     if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create render pass!");
+        printDebugLog("failed to create render pass!");
         throw std::runtime_error("failed to create render pass!");
     }
 }

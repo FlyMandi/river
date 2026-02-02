@@ -149,7 +149,7 @@ void createGraphicsPipeline()
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
     if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create pipeline layout!");
+        printDebugLog("failed to create pipeline layout!");
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -172,7 +172,7 @@ void createGraphicsPipeline()
     pipelineInfo.subpass = 0;
 
     if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create graphics pipeline!");
+        printDebugLog("failed to create graphics pipeline!");
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
@@ -197,7 +197,7 @@ void createFramebuffers()
         framebufferInfo.layers = 1;
 
         if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
-            printDebugLog("\nERROR: failed to create framebuffer!");
+            printDebugLog("failed to create framebuffer!");
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
@@ -209,7 +209,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
     if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to begin recording command buffer!");
+        printDebugLog("failed to begin recording command buffer!");
         throw std::runtime_error("failed to begin recording command buffer!");
     }
     
@@ -249,7 +249,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     vkCmdEndRenderPass(commandBuffer);
 
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to record command buffer!");
+        printDebugLog("failed to record command buffer!");
         throw std::runtime_error("failed to record command buffer!");
     }
 }
@@ -264,7 +264,7 @@ void createCommandPool()
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
     if((vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create command pool!");
+        printDebugLog("failed to create command pool!");
         throw std::runtime_error("failed to create command pool!");
     }
 }
@@ -281,7 +281,7 @@ void createCommandBuffers()
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
     if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to allocate command buffers!");
+        printDebugLog("failed to allocate command buffers!");
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }
@@ -303,11 +303,11 @@ void createSyncObjects()
         if((vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS 
             || (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS){
 
-            printDebugLog(&"\nERROR: failed to create semaphore for frame " [currentFrame]);
+            printDebugLog(&"failed to create semaphore for frame " [currentFrame]);
             throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
         }
         if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS){
-            printDebugLog(&"\nERROR: failed to create fence for frame " [currentFrame]);
+            printDebugLog(&"failed to create fence for frame " [currentFrame]);
             throw std::runtime_error(&"failed to create fence for frame " [currentFrame]);
         }
     }

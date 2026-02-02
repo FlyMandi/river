@@ -126,7 +126,7 @@ static void setupDebugMessenger()
     populateDebugMessengerCreateInfo(createInfo);
 
     if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS){
-        printDebugLog('\n', "ERROR: failed to set up debug messenger.");
+        printDebugLog("failed to set up debug messenger.");
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }
@@ -142,7 +142,7 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
 static void createInstance()
 {
     if(BUILD_DEBUG && !checkValidationLayerSupport()){
-        printDebugLog('\n', "ERROR: validation layers requested, but not available!");
+        printDebugLog("validation layers requested, but not available!");
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
@@ -161,7 +161,7 @@ static void createInstance()
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
     if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        printDebugLog('\n', "ERROR: extensions required, but not available!");
+        printDebugLog("extensions required, but not available!");
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
@@ -185,7 +185,7 @@ static void createInstance()
     }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
-        printDebugLog('\n', "ERROR: failed to create instance.");
+        printDebugLog("failed to create instance.");
         throw std::runtime_error("failed to create instance.");
     }
 }
@@ -275,7 +275,7 @@ void drawFrame()
     submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
     if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to submit draw command buffer!");
+        printDebugLog("failed to submit draw command buffer!");
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
