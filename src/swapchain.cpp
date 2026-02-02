@@ -193,20 +193,16 @@ void destroyDeferredResources(FrameResource *frame)
 
 void cleanupSwapchain()
 {
-    std::vector<VkSemaphore> semaphores;
-    semaphores.reserve(imageAvailableSemaphores.size() + renderFinishedSemaphores.size());
-    semaphores.insert(semaphores.end(), imageAvailableSemaphores.begin(), imageAvailableSemaphores.end());
-    semaphores.insert(semaphores.end(), renderFinishedSemaphores.begin(), renderFinishedSemaphores.end());
-
-    VkSemaphoreWaitInfo semaphoreWaitInfo{};
-    semaphoreWaitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-    semaphoreWaitInfo.semaphoreCount = static_cast<uint32_t>(semaphores.size());
-    semaphoreWaitInfo.pSemaphores = semaphores.data();
-
-    vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
-    riverLog("waited for semaphores.", RIV_LOG_LEVEL_TRACE);
-    vkWaitForFences(logicalDevice, MAX_FRAMES_IN_FLIGHT, inFlightFences.data(), VK_TRUE, UINT64_MAX);
-    riverLog("waited for fences.", RIV_LOG_LEVEL_TRACE);
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        if(inFlightFences[i] != VK_NULL_HANDLE)
+        {
+            vkWaitForFences(logicalDevice, 1, &inFlightFences[i], VK_FALSE, UINT64_MAX);
+        }
+        vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+        inFlightFences[i] = VK_NULL_HANDLE;
+    }
+    inFlightFences.clear();
 
     for(size_t i = 0; i < swapchainImageCount; ++i)
     {

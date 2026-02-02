@@ -1,4 +1,5 @@
 #include "vulkan/vulkan_core.h"
+#include <filesystem>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -125,9 +126,11 @@ void createTextureImage()
     int texHeight;
     int texChannels;
 
+    const std::filesystem::path texPath = std::filesystem::canonical(projectRoot / "assets/textures/texture.jpg");
+
     stbi_uc *pixels =   stbi_load
                         (
-                            "assets/textures/texture.jpg",
+                            texPath.string().c_str(),
                             &texWidth,
                             &texHeight,
                             &texChannels,

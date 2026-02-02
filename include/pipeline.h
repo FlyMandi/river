@@ -1,7 +1,7 @@
 #pragma once
 
+#include "swapchain.h"
 #include "vulkan/vulkan_core.h"
-#include <vector>
 
 inline VkRenderPass renderPass;
 inline VkPipeline graphicsPipeline;
@@ -20,9 +20,9 @@ inline VkQueue graphicsQueue;
 inline VkQueue presentQueue;
 inline VkQueue transferQueue;
 
-inline std::vector<VkSemaphore> imageAvailableSemaphores;
-inline std::vector<VkSemaphore> renderFinishedSemaphores;
-inline std::vector<VkFence> inFlightFences;
+inline std::vector<VkSemaphore> imageAvailableSemaphores(MAX_FRAMES_IN_FLIGHT, {});
+inline std::vector<VkSemaphore> renderFinishedSemaphores{MAX_FRAMES_IN_FLIGHT, {}};
+inline std::vector<VkFence> inFlightFences(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
 inline VkBool32 framebufferResized = VK_FALSE;
 
@@ -45,5 +45,6 @@ extern void createDescriptorPool();
 extern void createDescriptorSets();
 
 extern void createSyncObjects();
+extern void cleanupSemaphores();
 
 extern void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);

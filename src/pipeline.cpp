@@ -346,13 +346,18 @@ void flushCommandBuffer
     VkFenceCreateInfo fenceCreateInfo{};
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-    vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &queueFence);
+    riverAssertVkSuccess
+    (
+        vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &queueFence),
+        "failed to create queue fence!"
+    );
 
     vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, queueFence);
 
     vkWaitForFences(logicalDevice, 1, &queueFence, VK_TRUE, UINT64_MAX);
 
     vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+    vkDestroyFence(logicalDevice, queueFence, nullptr);
 }
 
 void createCommandBuffers()
@@ -372,18 +377,29 @@ void createCommandBuffers()
     );
 }
 
+void cleanupSemaphores()
+{
+    //wip
+    for(size_t i = 0; i < swapchainImages.size(); ++i)
+    {
+        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+        renderFinishedSemaphores[i] = VK_NULL_HANDLE;
+    }
+    renderFinishedSemaphores.clear();
+
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
+        imageAvailableSemaphores[i] = VK_NULL_HANDLE;
+    }
+    imageAvailableSemaphores.clear();
+}
+
 void createSyncObjects()
 {
-    for(auto semaphore : renderFinishedSemaphores)
-    {
-        if(semaphore)
-        {
-            vkDestroySemaphore(logicalDevice, semaphore, nullptr);
-        }
-    }
-
-    renderFinishedSemaphores.clear();
     renderFinishedSemaphores.resize(swapchainImages.size());
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -396,9 +412,6 @@ void createSyncObjects()
             "failed to create renderFinishedSemaphore!"
         );
     }
-
-    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;

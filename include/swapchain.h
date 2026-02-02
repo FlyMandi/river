@@ -10,9 +10,9 @@ inline VkSwapchainKHR swapchain;
 inline VkFormat swapchainImageFormat;
 inline VkExtent2D swapchainExtent;
 
-inline std::vector<VkImage> swapchainImages;
-inline std::vector<VkImageView> swapchainImageViews;
-inline std::vector<VkFramebuffer> swapchainFramebuffers;
+inline std::vector<VkImage> swapchainImages{};
+inline std::vector<VkImageView> swapchainImageViews{};
+inline std::vector<VkFramebuffer> swapchainFramebuffers{};
 
 inline uint32_t swapchainImageCount;
 

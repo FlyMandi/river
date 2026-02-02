@@ -33,9 +33,9 @@ inline VkImage depthImage;
 inline VkDeviceMemory depthImageMemory;
 inline VkImageView depthImageView;
 
-inline std::vector<VkBuffer> uniformBuffers;
-inline std::vector<VkDeviceMemory> uniformBuffersMemory;
-inline std::vector<void*> uniformBuffersMapped;
+inline std::vector<VkBuffer> uniformBuffers{};
+inline std::vector<VkDeviceMemory> uniformBuffersMemory{};
+inline std::vector<void*> uniformBuffersMapped{};
 
 extern void createBuffer
 (

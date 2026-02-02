@@ -347,15 +347,20 @@ void initVulkan()
 
 void cleanupVulkan()
 {
+    vkDeviceWaitIdle(logicalDevice);
+
+    cleanupSemaphores();
     cleanupSwapchain();
 
     vkDestroySampler(logicalDevice, textureSampler, nullptr);
-    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
-    vkDestroyImage(logicalDevice, textureImage, nullptr);
-    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
     vkDestroyImage(logicalDevice, textureImage, nullptr);
     vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
+    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
+
+    vkDestroyImage(logicalDevice, depthImage, nullptr);
+    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
 
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
@@ -365,17 +370,11 @@ void cleanupVulkan()
 
     vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(logicalDevice, graphicsPipelineLayout, nullptr);
-    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
-
-        vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
-
         vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
         vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
     }
