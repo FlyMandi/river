@@ -1,4 +1,5 @@
 #include "river.h"
+#include "vulkan/vulkan_core.h"
 #include "window.h"
 #include "device.h"
 #include "pipeline.h"
@@ -129,7 +130,7 @@ void pickPhysicalDevice()
     
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
-        printDebugLog('\n', "ERROR: failed to find any GPU with vulkan support!");
+        printDebugLog("failed to find any GPU with vulkan support!");
         throw std::runtime_error("failed to find any GPU with vulkan support!");
     }else{
         printDebugLog('\0', "found GPU with vulkan support!", '\n');
@@ -148,8 +149,9 @@ void pickPhysicalDevice()
     if(suitabilityCandidates.rbegin()->first > 0){
         physicalDevice = suitabilityCandidates.rbegin()->second; 
         printDebugLog('\0', "found suitable GPU.", '\n');
+
     }else{
-        printDebugLog('\n', "ERROR: failed to find a suitable GPU!");
+        printDebugLog("failed to find a suitable GPU!");
         throw std::runtime_error("failed to find a suitable GPU!");
     }
 }
@@ -195,4 +197,6 @@ void createLogicalDevice()
 
     vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
+
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 }
