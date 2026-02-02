@@ -307,7 +307,8 @@ void recordCommandBuffer
 
     vkCmdEndRenderPass(commandBuffer);
 
-    RIV_ASSERT_VK_SUCCESS(vkEndCommandBuffer(commandBuffer), "failed to end recording command buffer!");
+    result = vkEndCommandBuffer(commandBuffer);
+    RIV_ASSERT_VK_SUCCESS(result, "failed to end recording command buffer!");
 }
 
 void createCommandPools
