@@ -21,9 +21,8 @@ struct UniformBufferObject
     glm::mat4 projection;
 };
 
-//HACK: eventually these won't be const anymore
-extern const std::vector<Vertex> vertices;
-extern const std::vector<uint32_t> indices;
+inline std::vector<Vertex> vertices{};
+inline std::vector<uint32_t> indices{};
 
 inline VkBuffer vertexBuffer;
 inline VkDeviceMemory vertexBufferMemory;
@@ -36,6 +35,8 @@ inline VkImageView depthImageView;
 inline std::vector<VkBuffer> uniformBuffers{};
 inline std::vector<VkDeviceMemory> uniformBuffersMemory{};
 inline std::vector<void*> uniformBuffersMapped{};
+
+extern void loadModel();
 
 extern void createBuffer
 (
