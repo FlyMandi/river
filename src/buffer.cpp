@@ -1,11 +1,15 @@
-#include "swapchain.h"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "vulkan/vulkan_core.h"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "pipeline.h"
 #include "river.h"
 #include "device.h"
+#include "swapchain.h"
 #include "buffer.h"
 
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <set>
@@ -265,5 +269,17 @@ void createUniformBuffers()
 
 void updateUniformBuffer(uint32_t currentImage)
 {
+    static auto startTime = std::chrono::high_resolution_clock::now();
 
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    UniformBufferObject uniformBuffer{};
+    uniformBuffer.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    uniformBuffer.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    uniformBuffer.projection = glm::perspective(glm::radians(45.0f), swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
+
+    uniformBuffer.projection[1][1] *= -1;
+
+    std::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
 }
