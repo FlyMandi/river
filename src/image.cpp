@@ -4,9 +4,10 @@
 #include "stb_image.h"
 
 #include "river.h"
-#include "image.h"
-#include "buffer.h"
 #include "device.h"
+#include "pipeline.h"
+#include "buffer.h"
+#include "image.h"
 
 void createTextureImage()
 {
@@ -116,4 +117,18 @@ void createImage
     );
 
     vkBindImageMemory(logicalDevice, image, imageMem, 0);
+}
+
+void transitionImageLayout
+(
+    VkImage         image,
+    VkFormat        format,
+    VkImageLayout   oldLayout,
+    VkImageLayout   newLayout
+){
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    //FIXME: work
+
+    endSingleTimeCommands(commandBuffer);
 }
