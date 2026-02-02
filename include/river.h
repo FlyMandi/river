@@ -18,8 +18,6 @@ constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
 inline int currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
-//TODO: rename this, because when debugging, there is no log (lmao)
-#define DEBUG_LOG appRoot / "debug.log" 
  
 inline const char *appName;
 inline const char *appVersion;
