@@ -241,6 +241,7 @@ void initVulkan()
     createCommandPools();
     createVertexBuffer();
     createUniformBuffers();
+    createDescriptorPool();
     createCommandBuffers();
     createSyncObjects();
 }
