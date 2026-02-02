@@ -17,7 +17,7 @@ inline bool window_SHOULDCLOSE = false;
 
 inline const char *engineName = "River";
 inline const char *appName;
-inline const char *version;
+inline const char *appVersion;
 
 inline const uint32_t WIDTH = 1920;
 inline const uint32_t HEIGHT = 1080;
