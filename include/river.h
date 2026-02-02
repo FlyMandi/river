@@ -7,12 +7,9 @@
 #include <filesystem>
 #include <vector>
 
-//TODO: wherever I'm using build_DEBUG to print something out to the console, get rid of it.
-//instead, throw a useful error OR write a function that will output it on the actual application screen
-//like skyrim SKSE logs, FreeType might be the go-to
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
     const bool build_DEBUG = true;
-#else 
+#else
     const bool build_DEBUG = false;
 #endif
 
@@ -28,7 +25,7 @@ inline const uint32_t HEIGHT = 1080;
 inline GLFWwindow *window;
 
 inline std::filesystem::path appRoot;
-std::filesystem::path getProjectRoot(const char* rootName);
+inline std::filesystem::path debugLog;
 
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -70,3 +67,6 @@ void drawFrame();
 void initGLFW();
 void cleanupGLFW();
 void windowPollEvents();
+
+std::filesystem::path getProjectRoot(const char* rootName);
+void printDebugLog(const std::string &text, std::filesystem::path &logFile);
