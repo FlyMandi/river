@@ -2,9 +2,6 @@
 
 #include "vulkan/vulkan_core.h"
 
-//OPTIM: try to minimize the amount of data types. See if it makes sense to make own data structures
-//vectors, for example, since I'm really not using most (if any) of the functionality
-//maybe just get rid of vectors in favour of another resizeable list
 #include <ctime>
 #include <filesystem>
 #include <iomanip>
