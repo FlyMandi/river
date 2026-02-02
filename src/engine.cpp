@@ -167,9 +167,7 @@ bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<
                 }
             }
         if(!extFound){ 
-            if(build_DEBUG){ 
-                std::cout << "not found: \t" << required << '\n'; 
-            }
+            printDebugLog("not found:\t", debugLog, 0, 0);
             return false; 
         } 
     }
@@ -247,9 +245,8 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
         score += 100;
     }
 
-    if(build_DEBUG){
-        std::cout << '\n' << deviceProperties.deviceName << ": score " << score << '\n';
-    }
+    printDebugLog(deviceProperties.deviceName, debugLog, 0, 1);
+    printDebugLog("score", debugLog, 1, 0);
 
     return score;
 }
@@ -323,9 +320,7 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>
 VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            if(build_DEBUG){ 
-                std::cout << "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR" << '\n'; 
-            } 
+            printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 1);
             return availablePresentMode;
         }
     }
