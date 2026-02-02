@@ -7,6 +7,7 @@
 #include <set>
 #include "vertex.h"
 
+//HACK: hardcoded vertices
 const std::vector<Vertex> vertices =
 {
     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
