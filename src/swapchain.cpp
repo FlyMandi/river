@@ -54,7 +54,6 @@ void createSwapchain()
         }
     }
 
-    //TODO: move chooseswapextent inline here
     VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities);
 
     swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
