@@ -9,7 +9,7 @@
 #include <optional>
 
 #ifdef NDEBUG
-    const bool isDebugMode = false;
+    const bool config_DEBUG = false;
 #else 
     const bool config_DEBUG = true;
 #endif
