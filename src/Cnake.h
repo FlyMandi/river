@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine_Window.h"
+#include "Engine_Pipeline.h"
 #include <string>
 
 namespace engine{
@@ -13,10 +14,11 @@ class Cnake {
     void run();
 
  private:
-    const std::string m_Version = "0.0.1";
+    const std::string m_Version = "0.0.2";
 
  private:
-    EngineWindow engineWindow{w_WIDTH, w_HEIGHT, "Cnake " + m_Version}; 
+    EngineWindow engineWindow{w_WIDTH, w_HEIGHT, "Cnake " + m_Version};
+    EnginePipeline enginePipeline{"T:/Repository/Cnake/src/shaders/simple_shader.vert.spv", "T:/Repository/Cnake/src/shaders/simple_shader.frag.spv"};
 };
 
 }
