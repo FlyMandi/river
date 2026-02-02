@@ -11,24 +11,23 @@ namespace engine{
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-extern std::filesystem::path appRoot;
-extern std::filesystem::path debugLog;
+inline std::filesystem::path appRoot;
+inline std::filesystem::path debugLog;
 
-extern VkInstance instance;
+inline VkInstance instance;
 
-extern VkQueue graphicsQueue;
-extern VkQueue presentQueue;
+inline VkQueue graphicsQueue;
+inline VkQueue presentQueue;
 
+inline VkRenderPass renderPass;
+inline VkPipelineLayout pipelineLayout;
+inline VkPipeline graphicsPipeline;
+inline VkCommandPool commandPool;
+inline VkCommandBuffer commandBuffer;
 
-extern VkRenderPass renderPass;
-extern VkPipelineLayout pipelineLayout;
-extern VkPipeline graphicsPipeline;
-extern VkCommandPool commandPool;
-extern VkCommandBuffer commandBuffer;
-
-extern VkSemaphore imageAvailableSemaphore;
-extern VkSemaphore renderFinishedSemaphore;
-extern VkFence inFlightFence;
+inline VkSemaphore imageAvailableSemaphore;
+inline VkSemaphore renderFinishedSemaphore;
+inline VkFence inFlightFence;
 
 extern void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
 

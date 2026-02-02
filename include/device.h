@@ -22,13 +22,13 @@ struct QueueFamilyIndices{
 
 namespace device{
 
-extern VkDebugUtilsMessengerEXT debugMessenger;
+inline VkDebugUtilsMessengerEXT debugMessenger;
 
-extern VkPhysicalDevice physicalDevice;
-extern VkPhysicalDeviceProperties deviceProperties;
-extern VkPhysicalDeviceFeatures deviceFeatures;
+inline VkPhysicalDevice physicalDevice;
+inline VkPhysicalDeviceProperties deviceProperties;
+inline VkPhysicalDeviceFeatures deviceFeatures;
 
-extern VkDevice logicalDevice;
+inline VkDevice logicalDevice;
 
 extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);

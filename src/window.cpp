@@ -20,5 +20,5 @@ void window::cleanupGLFW(){
 void window::pollEvents(){
 //TODO: better use of GLFW event system, there has to be a better way to check for window exit
     glfwPollEvents();
-    window_SHOULDCLOSE = glfwWindowShouldClose(pWindow);
+    SHOULDCLOSE = glfwWindowShouldClose(pWindow);
 }
