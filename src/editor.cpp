@@ -2,6 +2,8 @@
 #include "river.h"
 #include "window.h"
 
+#include <filesystem>
+
 void initEditor(){
     //TODO: main menu GUI. buttons:
     //load project
@@ -15,7 +17,7 @@ void initEditor(){
     HEIGHT = 1080;
     appName = "riverTest";
     appVersion = "0.0.0";
-
+    appRoot = std::filesystem::current_path();
 }
 
 void loopEditor(){
