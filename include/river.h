@@ -53,7 +53,7 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_ASSERT = 4
 };
 
-static const std::string logLevelStamps[] =
+static const char* logLevelStamps[] =
 {
     "[RIV_TRACE]: ",
     "[RIV_DEBUG]: ",
@@ -61,7 +61,7 @@ static const std::string logLevelStamps[] =
     "[RIV_ERROR]: ",
 };
 
-static const std::string logLevelANSI[] =
+static const char* logLevelANSI[] =
 {
     "\033[30;1;1m",
     "\033[37;1;1m",
