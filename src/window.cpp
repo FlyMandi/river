@@ -2,10 +2,12 @@
 #include "pipeline.h"
 #include "river.h"
 
-#include <stdexcept>
-
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
+    riverLog("new swap height:", RIV_LOG_LEVEL_TRACE);
+    riverLog(height, RIV_LOG_LEVEL_TRACE);
+    riverLog("new swap width:", RIV_LOG_LEVEL_TRACE);
+    riverLog(width, RIV_LOG_LEVEL_TRACE);
     framebufferResized = VK_TRUE;
 }
 
@@ -19,10 +21,7 @@ void initGLFW()
 
     if(nullptr == window)
     {
-        #ifdef DEBUG
-            printDebugLog('\0', "failed to create GLFW window!", '\n');
-        #endif
-        throw std::runtime_error("failed to create GLFW window!");
+        riverLog("failed to create GLFW window!", RIV_LOG_LEVEL_ERROR);
     }
 
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
@@ -41,9 +40,6 @@ void createSurface()
     //GLFW sub-windows? or Vulkan scissor?
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog('\n', "failed to create window surface!");
-        #endif
-        throw std::runtime_error("failed to create window surface!");
+        riverLog("failed to create window surface!", RIV_LOG_LEVEL_ERROR);
     }
 }

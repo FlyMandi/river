@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <cstring>
 #include <set>
-#include <stdexcept>
 
 //HACK: hardcoded vertices & indices
 const std::vector<Vertex> vertices =
@@ -65,10 +64,8 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
         }
     }
 
-    #ifdef DEBUG
-        printDebugLog("failed to find suitable memory type!");
-    #endif
-    throw std::runtime_error("failed to find suitable memory type!");
+    riverLog("failed to find suitable memory type!", RIV_LOG_LEVEL_ERROR);
+    return UINT32_MAX;
 }
 
 void createBuffer(  
@@ -98,11 +95,7 @@ void createBuffer(
 
     if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog('\0', "failed to create buffer! usage flags: ");
-            printDebugLog(usageFlags);
-        #endif
-        throw std::runtime_error("failed to create buffer!");
+        riverLog("failed to create buffer!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkMemoryRequirements memRequirements;
@@ -115,18 +108,10 @@ void createBuffer(
 
     if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to allocate buffer memory! usage flags: ");
-            printDebugLog(usageFlags);
-        #endif
-        throw std::runtime_error("failed to allocate buffer memory!");
+        riverLog("failed to allocate buffer!", RIV_LOG_LEVEL_ERROR);
     }
-    #ifdef DEBUG
-        printDebugLog('\0', "allocated buffer memory: ");
-        printDebugLog(allocInfo.allocationSize);
-        printDebugLog("B, usage flags: ");
-        printDebugLog(usageFlags, '\n');
-    #endif
+    riverLog("created buffer with usage flags: " , RIV_LOG_LEVEL_DEBUG);
+    riverLog(usageFlags, RIV_LOG_LEVEL_DEBUG);
 
     vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
@@ -140,10 +125,7 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 
     if(vkCreateFence(logicalDevice, &transferFenceCreateInfo, nullptr, &transferFence) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create transfer fence!");
-        #endif
-        throw std::runtime_error("failed to create transfer fence!");
+        riverLog("failed to create transfer fence!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkCommandBufferAllocateInfo transferAllocInfo{}; 

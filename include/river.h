@@ -14,6 +14,7 @@
 inline uint8_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
+constexpr uint8_t logLevel = 1;
  
 inline const char *appName;
 inline const char *appVersion;
@@ -33,34 +34,47 @@ extern void drawFrame();
 extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
 
-#ifdef DEBUG
 //TODO:#37: eventually add log levels: [TRACE], [DEBUG], [WARN], [ERROR]
 //pass as argument to function, [DEBUG] by default
 //obv trace shows all, error shows least
 
-void printDebugLog(const auto &text){
-    std::cout << text;
-}
+//FIXME: WIP
+enum RiverLogLevel
+{
+    RIV_LOG_LEVEL_TRACE = 0,
+    RIV_LOG_LEVEL_DEBUG = 1,
+    RIV_LOG_LEVEL_WARN  = 2,
+    RIV_LOG_LEVEL_ERROR = 3
+};
 
-void printDebugLog(const auto &text, const char &newline){
-    std::cout << text << newline;
-}
+void riverLog(const auto &text, const RiverLogLevel level)
+{
+    if(level < logLevel)
+    {
+        return;
+    }
 
-void printDebugLog(const char &tab, const auto &text){
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
     tm buf;
     localtime_s(&buf, &now);
 
-    std::cout << std::put_time(&buf, "[%T] ") << tab << text;
+    switch(level)
+    {
+    case RIV_LOG_LEVEL_TRACE:
+        std::cout << std::put_time(&buf, "[%T]-") << "[RIV_TRACE]: " << text << std::endl;
+        return;
+
+    case RIV_LOG_LEVEL_DEBUG:
+        std::cout << std::put_time(&buf, "[%T]-") << "[RIV_DEBUG]: " << text << std::endl;
+        return;
+
+    case RIV_LOG_LEVEL_WARN:
+        std::cout << std::put_time(&buf, "[%T]-") << "[RIV_WARN]:  " << text << std::endl;
+        return;
+
+    case RIV_LOG_LEVEL_ERROR:
+        std::cerr << std::put_time(&buf, "[%T]-") << "[RIV_ERROR]: " << text << std::endl;
+        abort();
+    }
 }
-
-void printDebugLog(const char &tab, const auto &text, const char &newline){
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    tm buf;
-    localtime_s(&buf, &now);
-
-    std::cout << std::put_time(&buf, "[%T] ") << tab << text << newline;
-}
-#endif

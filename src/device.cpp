@@ -129,11 +129,10 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
         score += 250;
     }
 
-    #ifdef DEBUG
-        printDebugLog('\0', deviceProperties.deviceName);
-        printDebugLog(", score: ");
-        printDebugLog(score, '\n');
-    #endif
+    riverLog("found GPU:", RIV_LOG_LEVEL_DEBUG);
+    riverLog(deviceProperties.deviceName, RIV_LOG_LEVEL_DEBUG);
+    riverLog("score:", RIV_LOG_LEVEL_DEBUG);
+    riverLog(score, RIV_LOG_LEVEL_DEBUG);
 
     return score;
 }
@@ -170,10 +169,7 @@ void pickPhysicalDevice()
     
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
-        #ifdef DEBUG
-            printDebugLog("failed to find any GPU with vulkan support!");
-        #endif
-        throw std::runtime_error("failed to find any GPU with vulkan support!");
+        riverLog("failed to find any GPU with vulkan support!", RIV_LOG_LEVEL_ERROR);
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -196,16 +192,11 @@ void pickPhysicalDevice()
         logicalQueueFamilies.transferIndex = indices.transferIndex;
         logicalQueueFamilies.presentIndex = indices.presentIndex;
 
-        #ifdef DEBUG
-            printDebugLog('\0', "found suitable GPU.", '\n');
-        #endif
+        riverLog("found suitable GPU.", RIV_LOG_LEVEL_DEBUG);
     }
     else
     {
-        #ifdef DEBUG
-            printDebugLog("failed to find a suitable GPU!");
-        #endif
-        throw std::runtime_error("failed to find a suitable GPU!");
+        riverLog("failed to find a suitable GPU!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -248,10 +239,7 @@ void createLogicalDevice()
     #endif
 
     if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS){
-        #ifdef DEBUG
-            printDebugLog('\n', "failed to create logical device.");
-        #endif
-        throw std::runtime_error("failed to create logical device!");
+        riverLog("failed to create logical device.", RIV_LOG_LEVEL_ERROR);
     }
 
     vkGetDeviceQueue(logicalDevice, logicalQueueFamilies.graphicsIndex, 0, &graphicsQueue);

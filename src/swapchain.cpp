@@ -26,7 +26,7 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
         {
             #ifdef DEBUG
-                printDebugLog('\0', "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", '\n');
+                riverLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", RIV_LOG_LEVEL_DEBUG);
             #endif
             return availablePresentMode;
         }
@@ -37,15 +37,13 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
         {
             #ifdef DEBUG
-                printDebugLog('\0', "present mode: VK_PRESENT_MODE_MAILBOX_KHR", '\n');
+                riverLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", RIV_LOG_LEVEL_DEBUG);
             #endif
             return availablePresentMode;
         }
     }
 
-    #ifdef DEBUG
-        printDebugLog('\0', "present mode: VK_PRESENT_MODE_FIFO_KHR", '\n');
-    #endif
+    riverLog("present mode: VK_PRESENT_MODE_FIFO_KHR", RIV_LOG_LEVEL_DEBUG);
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -53,12 +51,10 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
-        #ifdef DEBUG
-            printDebugLog('\0', "swap size: ");
-            printDebugLog(capabilities.currentExtent.width);
-            printDebugLog("x");
-            printDebugLog(capabilities.currentExtent.height, '\n');
-        #endif
+        riverLog("swap width: ", RIV_LOG_LEVEL_TRACE);
+        riverLog(capabilities.currentExtent.width, RIV_LOG_LEVEL_TRACE);
+        riverLog("swap height: ", RIV_LOG_LEVEL_TRACE);
+        riverLog(capabilities.currentExtent.height, RIV_LOG_LEVEL_TRACE);
 
         return capabilities.currentExtent;
     }
@@ -72,12 +68,10 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        #ifdef DEBUG
-            printDebugLog('\0', "swap width (clamped): ");
-            printDebugLog(actualExtent.width, '\n');
-            printDebugLog('\0', "swap height (clamped): ");
-            printDebugLog(actualExtent.height, '\n');
-        #endif
+        riverLog("swap width (clamped): ", RIV_LOG_LEVEL_TRACE);
+        riverLog(actualExtent.width, RIV_LOG_LEVEL_TRACE);
+        riverLog("swap height (clamped): ", RIV_LOG_LEVEL_TRACE);
+        riverLog(actualExtent.height, RIV_LOG_LEVEL_TRACE);
         
         return actualExtent;
     }
@@ -136,10 +130,7 @@ void createSwapchain()
 
     if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create swap chain!");
-        #endif
-        throw std::runtime_error("failed to create swap chain!");
+        riverLog("failed to create swap chain!", RIV_LOG_LEVEL_ERROR);
     }
 
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
@@ -175,10 +166,7 @@ void createImageViews()
 
         if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
         {
-            #ifdef DEBUG
-                printDebugLog("failed to create image views!");
-            #endif
-            throw std::runtime_error("failed to create image views!");
+            riverLog("failed to create image views!", RIV_LOG_LEVEL_ERROR);
         }
     }
 }
@@ -225,10 +213,7 @@ void createRenderPass()
 
     if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create render pass!");
-        #endif
-        throw std::runtime_error("failed to create render pass!");
+        riverLog("failed to create render pass!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -280,7 +265,5 @@ void recreateSwapchain()
     createImageViews();
     createFramebuffers();
 
-    #ifdef DEBUG
-        printDebugLog('\0', "swap recreated.", '\n');
-    #endif
+    riverLog("swap recreated.", RIV_LOG_LEVEL_DEBUG);
 }

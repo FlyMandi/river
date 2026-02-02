@@ -21,10 +21,7 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
     VkShaderModule shaderModule;
     if(vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create shader module!");
-        #endif
-        throw std::runtime_error("failed to create shader module!");
+        riverLog("failed to create shader module!", RIV_LOG_LEVEL_ERROR);
     }
 
     return shaderModule;
@@ -45,10 +42,7 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
     file.read(buffer.data(), fileSize);
 
     if(buffer.size() != fileSize){
-        #ifdef DEBUG
-            printDebugLog("failed to correctly read from file!");
-        #endif
-        throw std::runtime_error("failed to correctly read from buffer!");
+        riverLog("failed to correctly read from file!", RIV_LOG_LEVEL_ERROR);
     }
 
     file.close();
@@ -160,10 +154,7 @@ void createGraphicsPipeline()
 
     if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create pipeline layout!");
-        #endif
-        throw std::runtime_error("failed to create pipeline layout!");
+        riverLog("failed to create pipeline layout!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -186,10 +177,7 @@ void createGraphicsPipeline()
 
     if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create graphics pipeline!");
-        #endif
-        throw std::runtime_error("failed to create graphics pipeline!");
+        riverLog("failed to create graphics pipeline!", RIV_LOG_LEVEL_ERROR);
     }
 
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
@@ -218,10 +206,7 @@ void createFramebuffers()
 
         if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
         {
-            #ifdef DEBUG
-                printDebugLog("failed to create framebuffer!");
-            #endif
-            throw std::runtime_error("failed to create framebuffer!");
+            riverLog("failed to create framebuffer!", RIV_LOG_LEVEL_ERROR);
         }
     }
 }
@@ -233,10 +218,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to begin recording command buffer!");
-        #endif
-        throw std::runtime_error("failed to begin recording command buffer!");
+        riverLog("failed to begin recording command buffer!", RIV_LOG_LEVEL_ERROR);
     }
     
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
@@ -282,10 +264,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to record command buffer!");
-        #endif
-        throw std::runtime_error("failed to record command buffer!");
+        riverLog("failed to record command buffer!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -298,10 +277,7 @@ void createCommandPools()
 
     if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create graphics command pool!");
-        #endif
-        throw std::runtime_error("failed to create graphics command pool!");
+        riverLog("failed to create graphics command pool!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkCommandPoolCreateInfo transferPoolInfo{};
@@ -311,10 +287,7 @@ void createCommandPools()
 
     if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create transfer command pool!");
-        #endif
-        throw std::runtime_error("failed to create transfer command pool!");
+        riverLog("failed to create transfer command pool!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -330,10 +303,7 @@ void createCommandBuffers()
 
     if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to allocate command buffers!");
-        #endif
-        throw std::runtime_error("failed to allocate command buffers!");
+        riverLog("failed to allocate command buffers!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -355,18 +325,12 @@ void createSyncObjects()
         if( (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS ||
             (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS
         ){
-            #ifdef DEBUG
-                printDebugLog(&"failed to create semaphore for frame " [currentFrame]);
-            #endif
-            throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
+            riverLog("failed to create semaphore!", RIV_LOG_LEVEL_ERROR);
         }
 
         if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS)
         {
-            #ifdef DEBUG
-                printDebugLog(&"failed to create fence for frame " [currentFrame]);
-            #endif
-            throw std::runtime_error(&"failed to create fence for frame " [currentFrame]);
+            riverLog("failed to create fence!", RIV_LOG_LEVEL_ERROR);
         }
     }
 }
@@ -387,10 +351,7 @@ void createDescriptorSetLayout()
 
     if(vkCreateDescriptorSetLayout(logicalDevice, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create descriptor set layout!");
-        #endif
-        throw std::runtime_error("failed to create descriptor set layout!");
+        riverLog("failed to create descriptor set layout!", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -407,12 +368,9 @@ void createDescriptorPool()
     descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorPoolCreateInfo.flags = 0;
     
-    if(vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool) == VK_SUCCESS)
+    if(vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create descriptor pool.");
-        #endif
-        throw std::runtime_error("failed to create descriptor pool.");
+        riverLog("failed to create descriptor pool.", RIV_LOG_LEVEL_ERROR);
     }
 
     //FIXME: WIP

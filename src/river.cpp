@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <stdexcept>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
 (
@@ -17,11 +16,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
     void                                        *userData
 ){
-    #ifdef DEBUG
-        printDebugLog('\0', "[VL] ");
-        printDebugLog(callbackData->pMessage, '\n');
-    #endif
-
+    riverLog("VL says:", RIV_LOG_LEVEL_DEBUG);
+    riverLog(callbackData->pMessage, RIV_LOG_LEVEL_DEBUG);
     return VK_FALSE;
 }
 
@@ -60,14 +56,12 @@ static std::vector<const char*> getRequiredExtensions()
 
 static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
 {
-    #ifdef DEBUG
-        printDebugLog('\0', "Present:", '\n');
-        for(const auto &extension : *instanceExt)
-        {
-            printDebugLog('\t', extension.extensionName, '\n');
-        }
-        printDebugLog('\0', "Required:", '\n');
-    #endif
+    riverLog("Present:", RIV_LOG_LEVEL_DEBUG);
+    for(const auto &extension : *instanceExt)
+    {
+        riverLog(extension.extensionName, RIV_LOG_LEVEL_DEBUG);
+    }
+    riverLog("Required:", RIV_LOG_LEVEL_DEBUG);
 
     for(const auto &required : *requiredExt)
     {
@@ -77,20 +71,15 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
             {
                 if(0 == strcmp(required, present.extensionName))
                 {
-                    #ifdef DEBUG
-                        printDebugLog('\t', required, '\n');
-                    #endif
-
+                    riverLog(required, RIV_LOG_LEVEL_DEBUG);
                     extFound = VK_TRUE;
                     break;
                 }
             }
         if(!extFound)
         {
-            #ifdef DEBUG
-                printDebugLog('\0', "!!!", '\t');
-                printDebugLog(required, '\n');
-            #endif
+            riverLog("extension not found: ", RIV_LOG_LEVEL_WARN);
+            riverLog(required, RIV_LOG_LEVEL_WARN);
 
             return VK_FALSE; 
         } 
@@ -120,6 +109,8 @@ static VkBool32 checkValidationLayerSupport()
         }
         if(!layerFound)
         {
+            riverLog("validation layer not found: ", RIV_LOG_LEVEL_WARN);
+            riverLog(layer, RIV_LOG_LEVEL_WARN);
             return VK_FALSE; 
         }
     }
@@ -146,8 +137,7 @@ static void setupDebugMessenger()
 
     if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
     {
-        printDebugLog("failed to set up debug messenger.");
-        throw std::runtime_error("failed to set up debug messenger!");
+        riverLog("failed to set up debug messenger.", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -166,8 +156,7 @@ static void createInstance()
     #ifdef DEBUG
         if(!checkValidationLayerSupport())
         {
-            printDebugLog("validation layers requested, but not available!");
-            throw std::runtime_error("validation layers requested, but not available!");
+            riverLog("validation layers requested, but not available!", RIV_LOG_LEVEL_ERROR);
         }
     #endif
 
@@ -187,10 +176,7 @@ static void createInstance()
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
     if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions))
     {
-        #ifdef DEBUG
-            printDebugLog("extensions required, but not available!");
-        #endif
-        throw std::runtime_error("extensions required, but not available!"); 
+        riverLog("extensions required, but not available!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkInstanceCreateInfo createInfo{};
@@ -214,10 +200,7 @@ static void createInstance()
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to create instance.");
-        #endif
-        throw std::runtime_error("failed to create instance.");
+        riverLog("failed to create instance.", RIV_LOG_LEVEL_ERROR);
     }
 }
 
@@ -248,7 +231,6 @@ void initVulkan()
 
 void cleanupVulkan()
 {
-    //TODO:#38: fences.
     std::vector<VkSemaphore> semaphores;
     semaphores.reserve(imageAvailableSemaphores.size() + renderFinishedSemaphores.size());
     semaphores.insert(semaphores.end(), imageAvailableSemaphores.begin(), imageAvailableSemaphores.end());
@@ -315,10 +297,7 @@ void drawFrame()
     }
     else if(result != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to acquire swapChain image!");
-        #endif
-        throw std::runtime_error("failed to acquire swapChain image!");
+        riverLog("failed to acquire swapchain image!", RIV_LOG_LEVEL_ERROR);
     }
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
@@ -344,10 +323,7 @@ void drawFrame()
 
     if(vkQueueSubmit(graphicsQueue, 1, &drawSubmitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to submit draw command buffer!");
-        #endif
-        throw std::runtime_error("failed to submit draw command buffer!");
+        riverLog("failed to submit draw command buffer!", RIV_LOG_LEVEL_ERROR);
     }
 
     VkSwapchainKHR swapchains[] = 
@@ -373,10 +349,7 @@ void drawFrame()
     }
     else if(result != VK_SUCCESS)
     {
-        #ifdef DEBUG
-            printDebugLog("failed to present swapChain image!");
-        #endif
-        throw std::runtime_error("failed to present swapChain image!");
+        riverLog("failed to present swapchain image!", RIV_LOG_LEVEL_ERROR);
     }
 
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
@@ -391,10 +364,8 @@ std::filesystem::path getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            #ifdef DEBUG
-                printDebugLog('\0', "project root: ");
-                printDebugLog(current, '\n');
-            #endif
+            riverLog("project root: ", RIV_LOG_LEVEL_DEBUG);
+            riverLog(current, RIV_LOG_LEVEL_DEBUG);
             return current;
         }
         current = current.parent_path();
