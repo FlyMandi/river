@@ -379,38 +379,29 @@ void createCommandBuffers()
 
 void cleanupSemaphores()
 {
-    //wip
-    for(size_t i = 0; i < swapchainImages.size(); ++i)
-    {
-        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
-        renderFinishedSemaphores[i] = VK_NULL_HANDLE;
-    }
-    renderFinishedSemaphores.clear();
-
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
         imageAvailableSemaphores[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed imageAvailableSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
+
+        vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
+        renderFinishedSemaphores[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed renderFinishedSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
     }
-    imageAvailableSemaphores.clear();
 }
 
 void createSyncObjects()
 {
-    renderFinishedSemaphores.resize(swapchainImages.size());
-    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
-        riverAssertVkSuccess
-        (
-            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
-            "failed to create renderFinishedSemaphore!"
-        );
     }
 
     VkFenceCreateInfo fenceInfo{};
@@ -424,7 +415,16 @@ void createSyncObjects()
             riverAssertVkSuccess
             (
                 vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
-                "failed to create imageAvailableSemaphore!"
+                std::format("failed to create imageAvailableSemaphore No. {}", i)
+            );
+        }
+
+        if(renderFinishedSemaphores[i] == VK_NULL_HANDLE)
+        {
+            riverAssertVkSuccess
+            (
+                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
+                std::format("failed to create renderFinishedSemaphore No. {}", i)
             );
         }
 
@@ -433,7 +433,7 @@ void createSyncObjects()
             riverAssertVkSuccess
             (
                 vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
-                "failed to create inFlightFence!"
+                std::format("failed to create inFlightFence No. {}", i)
             );
         }
     }

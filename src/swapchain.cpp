@@ -107,7 +107,8 @@ void createSwapchain()
     );
 
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
-    swapchainImages.resize(swapchainImageCount);
+    swapchainImages.resize(swapchainImageCount, VK_NULL_HANDLE);
+    imagesInFlight.resize(swapchainImageCount, VK_NULL_HANDLE);
     vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, swapchainImages.data());
 
     swapchainImageFormat = surfaceFormat.format;
@@ -201,6 +202,7 @@ void cleanupSwapchain()
         }
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
         inFlightFences[i] = VK_NULL_HANDLE;
+        riverLog(std::format("destroyed inFlightFence No. {}", i), RIV_LOG_LEVEL_TRACE);
     }
     inFlightFences.clear();
 
@@ -212,7 +214,7 @@ void cleanupSwapchain()
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
-    riverLog("cleaned up swapchain.", RIV_LOG_LEVEL_TRACE);
+    riverLog("destroyed swapchain.", RIV_LOG_LEVEL_TRACE);
 }
 
 void recreateSwapchain()
@@ -229,12 +231,28 @@ void recreateSwapchain()
 
     riverLog(std::format("trying to recreate swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 
-    cleanupSwapchain();
+    for (size_t i = 0; i < imagesInFlight.size(); ++i)
+    {
+        if(imagesInFlight[i] != VK_NULL_HANDLE)
+        {
+            vkWaitForFences(logicalDevice, 1, &imagesInFlight[i], VK_TRUE, UINT64_MAX);
+            imagesInFlight[i] = VK_NULL_HANDLE;
+        }
+    }
+
+    for(size_t i = 0; i < swapchainImageCount; ++i)
+    {
+        frameResources[i].framebuffer2Destroy = swapchainFramebuffers[i];
+        frameResources[i].imageView2Destroy = swapchainImageViews[i];
+        destroyDeferredResources(&frameResources[i]);
+    }
+
+    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
+    riverLog("cleaned up swapchain.", RIV_LOG_LEVEL_TRACE);
 
     createSwapchain();
     createSwapImageViews();
     createFramebuffers();
-    createSyncObjects();
 
     riverLog(std::format("recreated swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 }

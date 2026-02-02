@@ -408,6 +408,13 @@ void drawFrame()
             &imageIndex
         );
 
+    if(imagesInFlight[imageIndex] != VK_NULL_HANDLE)
+    {
+        vkWaitForFences(logicalDevice, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    }
+
+    imagesInFlight[imageIndex] = inFlightFences[currentFrame];
+
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         recreateSwapchain();
@@ -418,7 +425,6 @@ void drawFrame()
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
-    //I'm not sure about necessary destruction, actually
     destroyDeferredResources(&frameResources[currentFrame]);
     vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
@@ -437,7 +443,7 @@ void drawFrame()
 
     drawSubmitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
     drawSubmitInfo.waitSemaphoreCount = 1;
-    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[imageIndex];
+    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
     drawSubmitInfo.signalSemaphoreCount = 1;
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
@@ -458,7 +464,7 @@ void drawFrame()
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[imageIndex];
+    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;
