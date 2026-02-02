@@ -45,8 +45,10 @@ std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(
 
 uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags)
 {
-    for(uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; ++i){
-        if(typeFilter & (1 << i) && ((deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags)){
+    for(uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; ++i)
+    {
+        if(typeFilter & (1 << i) && ((deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags))
+        {
             return i;
         }
     }
@@ -82,7 +84,8 @@ void createBuffer(
     bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
     bufferInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 
-    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS){
+    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog('\0', "failed to create buffer! usage flags: ");
             printDebugLog(usageFlags);
@@ -98,7 +101,8 @@ void createBuffer(
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findSuitableMemoryType(memRequirements.memoryTypeBits, memPropertyFlags);
 
-    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS){
+    if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to allocate buffer memory! usage flags: ");
             printDebugLog(usageFlags);
