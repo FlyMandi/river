@@ -1,8 +1,8 @@
 param( 
     [Parameter(position=0,Mandatory=$false)]
-    $OS = "Win64",
-    [Parameter(position=1,Mandatory=$false)]
     $build = "Debug",
+    [Parameter(position=1,Mandatory=$false)]
+    $OS = "Win64",
     [Parameter(position=2,Mandatory=$false)]
     [switch]$nAMD = $false 
 )
