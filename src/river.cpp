@@ -17,6 +17,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
     void                                        *userData
 ){
+    //TODO:#47: translate VL message severity into RIV_
+    //secondly, can I know which layer is outputting the msg?
     riverLog("VL says:", RIV_LOG_LEVEL_DEBUG);
     riverLog(callbackData->pMessage, RIV_LOG_LEVEL_DEBUG);
     return VK_FALSE;
@@ -96,6 +98,7 @@ static VkBool32 checkValidationLayerSupport()
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
+    riverLog("Using VLs:", RIV_LOG_LEVEL_DEBUG);
     for(const char *layer : validationLayers)
     {
         VkBool32 layerFound = VK_FALSE;
@@ -104,6 +107,7 @@ static VkBool32 checkValidationLayerSupport()
         {
             if(0 == strcmp(layerPresent.layerName, layer))
             {
+                riverLog(layerPresent.layerName, RIV_LOG_LEVEL_DEBUG);
                 layerFound = VK_TRUE;
                 break;
             }
