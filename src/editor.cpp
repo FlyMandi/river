@@ -2,8 +2,6 @@
 #include "river.h"
 #include "window.h"
 
-#include <filesystem>
-
 void initEditor()
 {
     //TODO:#40: main menu GUI. buttons:
@@ -14,9 +12,11 @@ void initEditor()
     //HACK: currently no project manifest, so all hardcoded.
     riverWindowWidth = 1920;
     riverWindowHeight = 1080;
-    riverAppName = "riverTest";
-    riverAppVersion = "0.0.0";
-    riverAppRoot = getProjectRoot("river");
+
+    projectName = "riverTest";
+    projectVersion = "0.0.0";
+    getProjectRoot("river");
+    setupLog();
 }
 
 void loopEditor()
@@ -32,7 +32,6 @@ void loopEditor()
 
 void cleanupEditor()
 {
-    //NOTE: currently nothing else to do here.
-    //this will change when river gets proj files.
     cleanupVulkan();
+    closeLog();
 }

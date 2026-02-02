@@ -209,6 +209,8 @@ void cleanupSwapchain()
 
 void recreateSwapchain()
 {
+    riverLog("recreating swapchain...", RIV_LOG_LEVEL_TRACE);
+
     int width = 0;
     int height = 0;
 
@@ -226,5 +228,5 @@ void recreateSwapchain()
     createFramebuffers();
     createSyncObjects();
 
-    riverLog("recreated swapchain.", RIV_LOG_LEVEL_TRACE);
+    riverLog(std::format("recreated swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 }

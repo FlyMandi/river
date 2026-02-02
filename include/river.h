@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <fstream>
 
 inline uint32_t currentFrame = 0;
 
@@ -11,10 +12,12 @@ constexpr auto ENGINE_NAME = "River";
 
 constexpr uint8_t logLevel = 0;
 
-inline const char *riverAppName;
-inline const char *riverAppVersion;
+inline const char* projectName;
+inline std::string projectVersion;
 
-inline std::filesystem::path riverAppRoot;
+inline std::filesystem::path projectRoot;
+inline std::filesystem::path projectLog;
+#define projectLogFolder = projectRoot / "log";
 
 inline VkInstance instance;
 
@@ -23,8 +26,11 @@ extern void cleanupVulkan();
 
 extern void drawFrame();
 
-extern std::filesystem::path getProjectRoot(const char *rootName);
-extern void clearLogs(const std::filesystem::path &baseDir);
+extern void getProjectRoot(const char *rootName);
+extern void setupLog();
+extern void closeLog();
+
+inline std::ofstream logFile;
 
 #ifdef DEBUG
 inline VkDebugUtilsMessengerEXT debugMessenger;
@@ -51,9 +57,7 @@ enum RiverLogLevel
 
 const char* riverTranslateVkResult(VkResult code);
 
-//TODO:#43: write logs & asserts to a file in release builds AND
-//show an actual useful runtime error message box, not just "abort has been called"
-extern void riverLog(const char* text, const RiverLogLevel level);
-extern void riverAssert(bool condition, const char* assertFailureMsg);
-extern void riverAssertVkSuccess(VkResult result, const char* assertFailureMsg);
-extern void riverThrow(const char* throwMsg);
+extern void riverLog(const std::string_view text, const RiverLogLevel level);
+extern void riverAssert(bool condition, const std::string_view assertFailureMsg);
+extern void riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg);
+extern void riverThrow(const std::string_view throwMsg);

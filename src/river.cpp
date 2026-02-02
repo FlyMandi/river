@@ -113,10 +113,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     void                                        *userData
 ){
     //can I know which layer is outputting the msg?
-    std::string msg = "VL says: ";
-    msg += callbackData->pMessage;
-
-    riverLog(msg.c_str(), severityTranslation(messageSeverity));
+    riverLog
+    (
+        std::format("VL says: {}", callbackData->pMessage),
+        severityTranslation(messageSeverity)
+    );
     return VK_FALSE;
 }
 
@@ -165,7 +166,7 @@ static VkBool32 checkValidationLayerSupport()
 
             riverLog
             (
-                msg.c_str(),
+                msg,
                 RIV_LOG_LEVEL_WARN
             );
             return VK_FALSE;
@@ -245,7 +246,7 @@ static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, s
             std::string msg = "extension not found: ";
             msg += required;
 
-            riverLog(msg.c_str(), RIV_LOG_LEVEL_ERROR);
+            riverLog(msg, RIV_LOG_LEVEL_ERROR);
 
             return VK_FALSE;
         }
@@ -261,7 +262,7 @@ static void createInstance()
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = riverAppName;
+    appInfo.pApplicationName = projectName;
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
     appInfo.pEngineName = ENGINE_NAME;
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
@@ -491,7 +492,7 @@ void drawFrame()
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-std::filesystem::path getProjectRoot(const char *rootName)
+void getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
 
@@ -499,21 +500,30 @@ std::filesystem::path getProjectRoot(const char *rootName)
     {
         if(strcmp(current.filename().string().c_str(), rootName) == 0)
         {
-            return current;
+            projectRoot = current;
+            projectLog  = current / "log" / "river.log";
         }
         current = current.parent_path();
     }
-    return current;
 }
 
-void clearLogs(const std::filesystem::path &baseDir)
+void setupLog()
 {
-    for(const auto &log : std::filesystem::directory_iterator(baseDir))
+#ifdef DEBUG
+    return;
+#endif
+    logFile.open(projectLog, std::ios::trunc);
+    riverAssert(logFile.is_open(), "failed to open log file!");
+}
+
+void closeLog()
+{
+#ifdef DEBUG
+    return;
+#endif
+    if(logFile.is_open())
     {
-        if(".log" == log.path().extension())
-        {
-            std::filesystem::remove(log);
-        }
+        logFile.close();
     }
 }
 
@@ -537,13 +547,14 @@ std::string riverTimestamp()
     return std::format ("[{:02}:{:02}:{:02}] ", buf.tm_hour, buf.tm_min, buf.tm_sec);
 }
 
-void riverLog(const char* text, const RiverLogLevel level)
+void riverLog(const std::string_view text, const RiverLogLevel level)
 {
     if(level < logLevel)
     {
         return;
     }
 
+#ifdef DEBUG
     if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
     {
         std::cerr << logLevelANSI[level] << riverTimestamp()
@@ -553,38 +564,59 @@ void riverLog(const char* text, const RiverLogLevel level)
 
     std::cout << logLevelANSI[level] << riverTimestamp()
         << logLevelStamps[level] << text << clearANSI << '\n';
+#else
+
+    if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
+    {
+        std::cerr << riverTimestamp() << logLevelStamps[level] << text << '\n';
+    }
+
+    logFile << riverTimestamp() << logLevelStamps[level] << text << '\n' << std::flush;
+#endif
 }
 
-void riverAssert(bool condition, const char* assertFailureMsg)
+void riverAssert(bool condition, const std::string_view assertFailureMsg)
 {
     if(condition)
     {
         return;
     }
 
+#ifdef DEBUG
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
         << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << clearANSI << '\n';
+#else
+    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << assertFailureMsg << '\n' << std::flush;
+#endif
 
     abort();
 }
 
-void riverAssertVkSuccess(VkResult result, const char* assertFailureMsg)
+void riverAssertVkSuccess(VkResult result, const std::string_view assertFailureMsg)
 {
     if(result == VK_SUCCESS)
     {
         return;
     }
-
-    uint32_t logLevel = RIV_LOG_LEVEL_ASSERT;
-
-    std::cerr << logLevelANSI[logLevel] << riverTimestamp() << logLevelStamps[logLevel]
+#ifdef DEBUG
+    std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT]
         << riverTranslateVkResult(result) << ": " << assertFailureMsg << clearANSI << '\n';
+
+#else
+    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << riverTranslateVkResult(result)
+        << ": " <<  assertFailureMsg << '\n' << std::flush;
+#endif
 
     abort();
 }
 
-void riverThrow(const char *throwMsg)
+void riverThrow(const std::string_view throwMsg)
 {
     std::cerr << logLevelANSI[RIV_LOG_LEVEL_ASSERT] << riverTimestamp()
         << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << clearANSI << '\n';
+#ifndef DEBUG
+    logFile << riverTimestamp() << logLevelStamps[RIV_LOG_LEVEL_ASSERT] << ": " << throwMsg << '\n' << std::flush;
+#endif
+
+    abort();
 }

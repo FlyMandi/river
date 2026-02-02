@@ -44,6 +44,11 @@ if(-Not(Test-Path ".\build\"))
     &mkdir ".\build\"
 }
 
+if($build -eq "release" -and (-Not(Test-Path ".\log\")))
+{
+    &mkdir ".\log\"
+}
+
 &premake5 ecc
 
 $target = ".\bin\$OS" + "_$build\River.exe"
