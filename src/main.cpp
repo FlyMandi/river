@@ -14,7 +14,6 @@ int WinMain()
 
     cleanupEditor();
     cleanupGLFW();
-    cleanupVulkan();
 }
 
 #else
@@ -29,7 +28,6 @@ int main()
 
     cleanupEditor();
     cleanupGLFW();
-    cleanupVulkan();
 }
 
 #endif
