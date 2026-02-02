@@ -15,7 +15,14 @@ void initGLFW()
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    window = glfwCreateWindow(riverWindowWidth, riverWindowHeight, riverAppName, nullptr, nullptr);
+    window =    glfwCreateWindow
+                (
+                    riverWindowWidth,
+                    riverWindowHeight,
+                    projectName,
+                    nullptr,
+                    nullptr
+                );
 
     riverAssert(nullptr != window, "failed to create GLFW window!");
 
