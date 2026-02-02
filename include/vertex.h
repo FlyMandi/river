@@ -11,6 +11,9 @@ struct Vertex
 };
 
 extern const std::vector<Vertex> vertices;
+inline VkBuffer vertexBuffer;
+
+extern void createVertexBuffer();
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
 extern std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions();

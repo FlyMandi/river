@@ -4,6 +4,7 @@
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
+#include "vertex.h"
 
 #include <cstdint>
 #include <cstring>
@@ -194,6 +195,7 @@ void initVulkan(){
     createGraphicsPipeline();
     createFramebuffers();
     createCommandPool();
+    createVertexBuffer();
     createCommandBuffers();
     createSyncObjects();
 }

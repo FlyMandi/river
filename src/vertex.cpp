@@ -1,4 +1,14 @@
+#include "vulkan/vulkan_core.h"
+
+#include "river.h"
+#include "device.h"
 #include "vertex.h"
+
+const std::vector<Vertex> vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
 
 VkVertexInputBindingDescription getVertexBindingDescription(){
     VkVertexInputBindingDescription bindingDescription{}; 
@@ -25,8 +35,16 @@ std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(
     return attributeDescriptions;
 }
 
-const std::vector<Vertex> vertices = {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-};
+void createVertexBuffer(){
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
+
+    bufferInfo.usage = VK_BUFFER_USAGE_2_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if(vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
+        printDebugLog('\0', "failed to create vertex buffer!");
+        throw std::runtime_error("failed to create vertex buffer!");
+    }
+}
