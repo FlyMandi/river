@@ -12,5 +12,5 @@ $VS = Join-Path $env:PROGRAMFILES "\Microsoft Visual Studio\2022\Community\"
 if($nAMD){ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\" }
 else{ $MSBuild = Join-Path $VS "\MSBuild\Current\bin\amd64\" }
 
-.\shader_comp.ps1
 &"$MSBuild\MSBuild.exe" .\build\Cnake.sln -p:Configuration=$build
+.\shader_comp.ps1
