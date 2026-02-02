@@ -27,8 +27,8 @@ extern void cleanupVulkan();
 extern void drawFrame();
 
 extern void getProjectRoot(const char *rootName);
-extern void setupLog();
-extern void closeLog();
+extern void riverSetupLog();
+extern void riverCloseLog();
 
 inline std::ofstream logFile;
 
