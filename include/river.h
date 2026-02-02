@@ -65,6 +65,9 @@ struct UniformBufferObject
 
 struct ProjectManifest
 {
+    ProjectManifest& operator=(const ProjectManifest&) = delete;
+    ProjectManifest& operator=(const ProjectManifest&&) = delete;
+
     std::string             projectName         = "RIV_UNINITIALIZED_STRING";
     std::string             projectVersion      = "RIV_UNINITIALIZED_STRING";
     std::filesystem::path   projectRoot         = "RIV_UNINITIALIZED_PATH";
@@ -79,6 +82,9 @@ struct ProjectManifest
 
 struct UserSettings
 {
+    UserSettings& operator=(const UserSettings&) = delete;
+    UserSettings& operator=(const UserSettings&&) = delete;
+
     uint32_t            windowHeight;
     uint32_t            windowWidth;
 
@@ -89,6 +95,9 @@ struct UserSettings
 
 struct EngineData
 {
+    EngineData& operator=(const EngineData&) = delete;
+    EngineData& operator=(const EngineData&&) = delete;
+
     GLFWwindow                          *window;
     std::string                         windowName;
 
@@ -157,9 +166,6 @@ struct EngineData
     VkDeviceMemory                      textureImageMemory;
 
     VkSampler                           textureSampler;
-
-    EngineData& operator=(const EngineData&) = delete;
-    EngineData& operator=(const EngineData&&) = delete;
 };
 
 enum RiverLogLevel
