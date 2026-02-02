@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
+#include <cstdlib>
 #include <stdexcept>
 #include <array>
 #include <format>
@@ -48,8 +49,10 @@ void Cnake::createPipeline(){
     pipelineConfig.renderPass = engineSwapChain.getRenderPass(); 
     pipelineConfig.pipelineLayout = pipelineLayout; 
 
-    std::string vert = "../src/shaders/simple_shader.vert.spv";
-    std::string frag = "../src/shaders/simple_shader.frag.spv";
+    std::string repo = std::getenv("REPO");
+    std::string vert = repo + "Cnake\\src\\shaders\\simple_shader.vert.spv";
+    std::string frag = repo + "Cnake\\src\\shaders\\simple_shader.frag.spv";
+
     if(!std::filesystem::exists(vert) || !std::filesystem::exists(frag)){
         throw std::runtime_error("could not find the necessary shaders for pipeline construction.");
     }
