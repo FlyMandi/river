@@ -8,7 +8,8 @@ function Out-Shader{
         $fileName
     )
     $baseName = $fileName.baseName
-    $target = Join-Path $bin "$baseName.spv"
+    $ext = $fileName.extension
+    $target = Join-Path $bin "$baseName$ext.spv"
     $param = $fileName, '-o', $target 
     
     &$glslc $param
