@@ -16,6 +16,7 @@ foreach($platform in $Platforms){
 
 &premake5 gmake
 &premake5 ecc
+.\shader_comp.ps1
 Push-Location ".\build\"
 &make
 Pop-Location
