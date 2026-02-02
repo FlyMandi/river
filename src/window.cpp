@@ -6,10 +6,12 @@
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    printDebugLog('\0', "window resized to: ");
-    printDebugLog(width);
-    printDebugLog("x");
-    printDebugLog(height, '\n');
+    #ifdef DEBUG
+        printDebugLog('\0', "window resized to: ");
+        printDebugLog(width);
+        printDebugLog("x");
+        printDebugLog(height, '\n');
+    #endif
     framebufferResized = true;
 }
 
@@ -22,7 +24,9 @@ void initGLFW()
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
     if(nullptr == window){
-        printDebugLog('\0', "failed to create GLFW window!", '\n');
+        #ifdef DEBUG
+            printDebugLog('\0', "failed to create GLFW window!", '\n');
+        #endif
         throw std::runtime_error("failed to create GLFW window!");
     }
 
@@ -41,7 +45,9 @@ void createSurface()
     //TODO: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){
-        printDebugLog('\n', "failed to create window surface!");
+        #ifdef DEBUG
+            printDebugLog('\n', "failed to create window surface!");
+        #endif
         throw std::runtime_error("failed to create window surface!");
     }
 }

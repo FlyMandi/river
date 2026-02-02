@@ -17,8 +17,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         void                                        *userData
     ){
 
-    printDebugLog('\0', "[VL] ");
-    printDebugLog(callbackData->pMessage, '\n');
+    #ifdef DEBUG
+        printDebugLog('\0', "[VL] ");
+        printDebugLog(callbackData->pMessage, '\n');
+    #endif
 
     return VK_FALSE;
 }
@@ -46,34 +48,45 @@ static std::vector<const char*> getRequiredExtensions()
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    if(BUILD_DEBUG){
+    #ifdef DEBUG
         extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
-    }
+    #endif
 
     return extensions;
 }
 
 static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
 {
-    printDebugLog('\0', "Present:", '\n');
-    for(const auto &extension : *instanceExt){
-        printDebugLog('\t', extension.extensionName, '\n');
-    }
+    #ifdef DEBUG
+        printDebugLog('\0', "Present:", '\n');
+        for(const auto &extension : *instanceExt){
+            printDebugLog('\t', extension.extensionName, '\n');
+        }
 
-    printDebugLog('\0', "Required:", '\n');
+        printDebugLog('\0', "Required:", '\n');
+    #endif
+
     for(const auto &required : *requiredExt){
         bool extFound = false;
         
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
-                    printDebugLog('\t', required, '\n');
+
+                    #ifdef DEBUG
+                        printDebugLog('\t', required, '\n');
+                    #endif
+
                     extFound = true;
                     break;
                 }
             }
         if(!extFound){ 
-            printDebugLog('\0', "!!!", '\t');
-            printDebugLog(required, '\n');
+
+            #ifdef DEBUG
+                printDebugLog('\0', "!!!", '\t');
+                printDebugLog(required, '\n');
+            #endif
+
             return false; 
         } 
     }
@@ -116,11 +129,9 @@ static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT 
     createInfo.pfnUserCallback = debugCallback;
 }
 
+#ifdef DEBUG
 static void setupDebugMessenger()
 {
-    if(!BUILD_DEBUG){ 
-        return; 
-    }
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
@@ -138,13 +149,18 @@ static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator
         func(instance, debugMessenger, allocator);
     }
 }
+#endif
 
 static void createInstance()
 {
-    if(BUILD_DEBUG && !checkValidationLayerSupport()){
-        printDebugLog("validation layers requested, but not available!");
-        throw std::runtime_error("validation layers requested, but not available!");
-    }
+    #ifdef DEBUG
+        if(!checkValidationLayerSupport()){
+            #ifdef DEBUG
+                printDebugLog("validation layers requested, but not available!");
+            #endif
+            throw std::runtime_error("validation layers requested, but not available!");
+        }
+    #endif
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -161,7 +177,9 @@ static void createInstance()
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
     if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        printDebugLog("extensions required, but not available!");
+        #ifdef DEBUG
+            printDebugLog("extensions required, but not available!");
+        #endif
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
@@ -173,19 +191,21 @@ static void createInstance()
     createInfo.enabledLayerCount = 0;
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if(BUILD_DEBUG){
+    #ifdef DEBUG
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
         createInfo.ppEnabledLayerNames = validationLayers.data();
         
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-    }else{
+    #else
         createInfo.enabledLayerCount = 0;
         createInfo.pNext = nullptr;
-    }
+    #endif
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
-        printDebugLog("failed to create instance.");
+        #ifdef DEBUG
+            printDebugLog("failed to create instance.");
+        #endif
         throw std::runtime_error("failed to create instance.");
     }
 }
@@ -193,7 +213,11 @@ static void createInstance()
 void initVulkan()
 {
     createInstance();
-    setupDebugMessenger();
+
+    #ifdef DEBUG
+        setupDebugMessenger();
+    #endif
+
     createSurface();
     pickPhysicalDevice();
     createLogicalDevice();
@@ -230,9 +254,9 @@ void cleanupVulkan()
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
 
-    if(BUILD_DEBUG){
+    #ifdef DEBUG
         DestroyDebugUtilsMessengerEXT(nullptr); 
-    }
+    #endif
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
@@ -250,7 +274,9 @@ void drawFrame()
         return;
 
     }else if(result != VK_SUCCESS){
-        printDebugLog("failed to acquire swapChain image!");
+        #ifdef DEBUG
+            printDebugLog("failed to acquire swapChain image!");
+        #endif
         throw std::runtime_error("failed to acquire swapChain image!");
     }
 
@@ -276,7 +302,9 @@ void drawFrame()
     submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
     if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS){
-        printDebugLog("failed to submit draw command buffer!");
+        #ifdef DEBUG
+            printDebugLog("failed to submit draw command buffer!");
+        #endif
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -298,7 +326,9 @@ void drawFrame()
         recreateSwapChain();
 
     }else if(result != VK_SUCCESS){
-        printDebugLog("failed to present swapChain image!");
+        #ifdef DEBUG
+            printDebugLog("failed to present swapChain image!");
+        #endif
         throw std::runtime_error("failed to present swapChain image!");
     }
 
@@ -312,8 +342,10 @@ std::filesystem::path getProjectRoot(const char *rootName)
 
     for(int i = 0; i < 3; ++i){
         if(strcmp(current.filename().string().c_str(), rootName) == 0){
-            printDebugLog('\0', "project root: ");
-            printDebugLog(current, '\n');
+            #ifdef DEBUG
+                printDebugLog('\0', "project root: ");
+                printDebugLog(current, '\n');
+            #endif
             return current;
         }else{
             current = current.parent_path();

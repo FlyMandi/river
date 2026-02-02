@@ -93,9 +93,11 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
         score += 100;
     }
 
-    printDebugLog('\0', deviceProperties.deviceName);
-    printDebugLog(", score: ");
-    printDebugLog(score, '\n');
+    #ifdef DEBUG
+        printDebugLog('\0', deviceProperties.deviceName);
+        printDebugLog(", score: ");
+        printDebugLog(score, '\n');
+    #endif
 
     return score;
 }
@@ -130,10 +132,10 @@ void pickPhysicalDevice()
     
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
-        printDebugLog("failed to find any GPU with vulkan support!");
+        #ifdef DEBUG
+            printDebugLog("failed to find any GPU with vulkan support!");
+        #endif
         throw std::runtime_error("failed to find any GPU with vulkan support!");
-    }else{
-        printDebugLog('\0', "found GPU with vulkan support!", '\n');
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -148,10 +150,14 @@ void pickPhysicalDevice()
 
     if(suitabilityCandidates.rbegin()->first > 0){
         physicalDevice = suitabilityCandidates.rbegin()->second; 
-        printDebugLog('\0', "found suitable GPU.", '\n');
+        #ifdef DEBUG
+            printDebugLog('\0', "found suitable GPU.", '\n');
+        #endif
 
     }else{
-        printDebugLog("failed to find a suitable GPU!");
+        #ifdef DEBUG
+            printDebugLog("failed to find a suitable GPU!");
+        #endif
         throw std::runtime_error("failed to find a suitable GPU!");
     }
 }
@@ -183,15 +189,17 @@ void createLogicalDevice()
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    if(BUILD_DEBUG){
+    #ifdef DEBUG
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
-    }else{
+    #else
         createInfo.enabledLayerCount = 0;
-    }
+    #endif
 
     if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS){
-        printDebugLog('\n', "failed to create logical device.");
+        #ifdef DEBUG
+            printDebugLog('\n', "failed to create logical device.");
+        #endif
         throw std::runtime_error("failed to create logical device!");
     }
 

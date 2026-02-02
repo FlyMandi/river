@@ -21,29 +21,37 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
-            printDebugLog('\0', "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", '\n');
+            #ifdef DEBUG
+                printDebugLog('\0', "present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", '\n');
+            #endif
             return availablePresentMode;
         }
     }
 
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode){
-            printDebugLog('\0', "present mode: VK_PRESENT_MODE_MAILBOX_KHR", '\n');
+            #ifdef DEBUG
+                printDebugLog('\0', "present mode: VK_PRESENT_MODE_MAILBOX_KHR", '\n');
+            #endif
             return availablePresentMode;
         }
     }
 
-    printDebugLog('\0', "present mode: VK_PRESENT_MODE_FIFO_KHR", '\n');
+    #ifdef DEBUG
+        printDebugLog('\0', "present mode: VK_PRESENT_MODE_FIFO_KHR", '\n');
+    #endif
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
-        printDebugLog('\0', "swap size: ");
-        printDebugLog(capabilities.currentExtent.width);
-        printDebugLog("x");
-        printDebugLog(capabilities.currentExtent.height, '\n');
+        #ifdef DEBUG
+            printDebugLog('\0', "swap size: ");
+            printDebugLog(capabilities.currentExtent.width);
+            printDebugLog("x");
+            printDebugLog(capabilities.currentExtent.height, '\n');
+        #endif
 
         return capabilities.currentExtent;
     }else{
@@ -55,10 +63,12 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        printDebugLog('\0', "swap width (clamped): ");
-        printDebugLog(actualExtent.width, '\n');
-        printDebugLog('\0', "swap height (clamped): ");
-        printDebugLog(actualExtent.height, '\n');
+        #ifdef DEBUG
+            printDebugLog('\0', "swap width (clamped): ");
+            printDebugLog(actualExtent.width, '\n');
+            printDebugLog('\0', "swap height (clamped): ");
+            printDebugLog(actualExtent.height, '\n');
+        #endif
         
         return actualExtent;
     }
@@ -108,7 +118,9 @@ void createSwapChain(){
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
-        printDebugLog("failed to create swap chain!");
+        #ifdef DEBUG
+            printDebugLog("failed to create swap chain!");
+        #endif
         throw std::runtime_error("failed to create swap chain!");
     }
 
@@ -142,7 +154,9 @@ void createImageViews(){
         createInfo.subresourceRange.layerCount = 1;
 
         if(vkCreateImageView(logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
-            printDebugLog("failed to create image views!");
+            #ifdef DEBUG
+                printDebugLog("failed to create image views!");
+            #endif
             throw std::runtime_error("failed to create image views!");
         }
     }
@@ -188,7 +202,9 @@ void createRenderPass(){
     renderPassInfo.pDependencies = &dependency;
 
     if((vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass)) != VK_SUCCESS){
-        printDebugLog("failed to create render pass!");
+        #ifdef DEBUG
+            printDebugLog("failed to create render pass!");
+        #endif
         throw std::runtime_error("failed to create render pass!");
     }
 }
@@ -223,5 +239,7 @@ void recreateSwapChain(){
     createImageViews();
     createFramebuffers();
 
-    printDebugLog('\0', "swap recreated.", '\n');
+    #ifdef DEBUG
+        printDebugLog('\0', "swap recreated.", '\n');
+    #endif
 }

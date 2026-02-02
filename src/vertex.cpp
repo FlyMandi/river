@@ -48,7 +48,9 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
         }
     }
 
-    printDebugLog("failed to find suitable memory type!");
+    #ifdef DEBUG
+        printDebugLog("failed to find suitable memory type!");
+    #endif
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
@@ -61,11 +63,14 @@ void createVertexBuffer()
     vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if(vkCreateBuffer(logicalDevice, &vertexBufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
-        printDebugLog("failed to create vertex buffer!");
+        #ifdef DEBUG
+            printDebugLog("failed to create vertex buffer!");
+        #endif
         throw std::runtime_error("failed to create vertex buffer!");
-    }else{
-        printDebugLog('\0', "created vertex buffer.", '\n');
     }
+    #ifdef DEBUG
+        printDebugLog('\0', "created vertex buffer.", '\n');
+    #endif
 
     VkMemoryRequirements vertexBufferMemoryRequirements;
     vkGetBufferMemoryRequirements(logicalDevice, vertexBuffer, &vertexBufferMemoryRequirements);
@@ -78,13 +83,16 @@ void createVertexBuffer()
     allocInfo.memoryTypeIndex = findSuitableMemoryType(vertexBufferMemoryRequirements.memoryTypeBits, flags);
 
     if(vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS){
-        printDebugLog("failed to allocate vertex buffer memory!");
+        #ifdef DEBUG
+            printDebugLog("failed to allocate vertex buffer memory!");
+        #endif
         throw std::runtime_error("failed to allocate vertex buffer memory!");
-    }else{
+    }
+    #ifdef DEBUG
         printDebugLog('\0', "allocated vertex buffer memory: ");
         printDebugLog(allocInfo.allocationSize);
         printDebugLog("B", '\n');
-    }
+    #endif
 
     vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);
 

@@ -18,7 +18,9 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
 
     VkShaderModule shaderModule;
     if(vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS){
-        printDebugLog("failed to create shader module!");
+        #ifdef DEBUG
+            printDebugLog("failed to create shader module!");
+        #endif
         throw std::runtime_error("failed to create shader module!");
     }
 
@@ -39,7 +41,9 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
     file.read(buffer.data(), fileSize);
 
     if(buffer.size() != fileSize){
-        printDebugLog("failed to correctly read from file!");
+        #ifdef DEBUG
+            printDebugLog("failed to correctly read from file!");
+        #endif
         throw std::runtime_error("failed to correctly read from buffer!");
     }
 
@@ -149,7 +153,9 @@ void createGraphicsPipeline()
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
     if(vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS){
-        printDebugLog("failed to create pipeline layout!");
+        #ifdef DEBUG
+            printDebugLog("failed to create pipeline layout!");
+        #endif
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -172,7 +178,9 @@ void createGraphicsPipeline()
     pipelineInfo.subpass = 0;
 
     if((vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline)) != VK_SUCCESS){
-        printDebugLog("failed to create graphics pipeline!");
+        #ifdef DEBUG
+            printDebugLog("failed to create graphics pipeline!");
+        #endif
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
@@ -197,7 +205,9 @@ void createFramebuffers()
         framebufferInfo.layers = 1;
 
         if(vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
-            printDebugLog("failed to create framebuffer!");
+            #ifdef DEBUG
+                printDebugLog("failed to create framebuffer!");
+            #endif
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
@@ -209,7 +219,9 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
     if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
-        printDebugLog("failed to begin recording command buffer!");
+        #ifdef DEBUG
+            printDebugLog("failed to begin recording command buffer!");
+        #endif
         throw std::runtime_error("failed to begin recording command buffer!");
     }
     
@@ -252,7 +264,9 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     vkCmdEndRenderPass(commandBuffer);
 
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
-        printDebugLog("failed to record command buffer!");
+        #ifdef DEBUG
+            printDebugLog("failed to record command buffer!");
+        #endif
         throw std::runtime_error("failed to record command buffer!");
     }
 }
@@ -267,7 +281,9 @@ void createCommandPool()
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
     if((vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool)) != VK_SUCCESS){
-        printDebugLog("failed to create command pool!");
+        #ifdef DEBUG
+            printDebugLog("failed to create command pool!");
+        #endif
         throw std::runtime_error("failed to create command pool!");
     }
 }
@@ -284,7 +300,9 @@ void createCommandBuffers()
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
     if(vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS){
-        printDebugLog("failed to allocate command buffers!");
+        #ifdef DEBUG
+            printDebugLog("failed to allocate command buffers!");
+        #endif
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }
@@ -306,11 +324,15 @@ void createSyncObjects()
         if((vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i])) != VK_SUCCESS 
             || (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i])) != VK_SUCCESS){
 
-            printDebugLog(&"failed to create semaphore for frame " [currentFrame]);
+            #ifdef DEBUG
+                printDebugLog(&"failed to create semaphore for frame " [currentFrame]);
+            #endif
             throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
         }
         if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS){
-            printDebugLog(&"failed to create fence for frame " [currentFrame]);
+            #ifdef DEBUG
+                printDebugLog(&"failed to create fence for frame " [currentFrame]);
+            #endif
             throw std::runtime_error(&"failed to create fence for frame " [currentFrame]);
         }
     }
