@@ -10,13 +10,13 @@
 #include <cstring>
 #include <stdexcept>
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
-        const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
-        void                                        *userData
-    ){
-
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
+(
+    VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+    const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
+    void                                        *userData
+){
     #ifdef DEBUG
         printDebugLog('\0', "[VL] ");
         printDebugLog(callbackData->pMessage, '\n');
@@ -25,15 +25,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
-static VkResult CreateDebugUtilsMessengerEXT(
-        VkInstance                                  instance,
-        const VkDebugUtilsMessengerCreateInfoEXT    *createInfo,
-        const VkAllocationCallbacks                 *allocator,
-        VkDebugUtilsMessengerEXT                    *debugMessenger
-    ){
-
+static VkResult CreateDebugUtilsMessengerEXT
+(
+    VkInstance                                  instance,
+    const VkDebugUtilsMessengerCreateInfoEXT    *createInfo,
+    const VkAllocationCallbacks                 *allocator,
+    VkDebugUtilsMessengerEXT                    *debugMessenger
+){
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if(nullptr != func){
+    if(nullptr != func)
+    {
         return func(instance, createInfo, allocator, debugMessenger);
     }else{
         return VK_ERROR_EXTENSION_NOT_PRESENT;
@@ -205,7 +206,8 @@ static void createInstance()
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
-    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+    if(!checkInstanceExtensions(&requiredExtensions, &instanceExtensions))
+    {
         #ifdef DEBUG
             printDebugLog("extensions required, but not available!");
         #endif
@@ -231,7 +233,8 @@ static void createInstance()
         createInfo.pNext = nullptr;
     #endif
 
-    if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
+    if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to create instance.");
         #endif
@@ -275,7 +278,8 @@ void cleanupVulkan()
     vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
 
-    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i){
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
@@ -298,13 +302,15 @@ void drawFrame()
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-    if(result == VK_ERROR_OUT_OF_DATE_KHR){
+    if(result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
         recreateSwapChain();
         return;
-
-    }else if(result != VK_SUCCESS){
+    }
+    else if(result != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to acquire swapChain image!");
         #endif
@@ -332,15 +338,17 @@ void drawFrame()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS){
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to submit draw command buffer!");
         #endif
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
-    VkSwapchainKHR swapChains[] = {
-        swapChain
+    VkSwapchainKHR swapchains[] = 
+    {
+        swapchain
     };
 
     VkPresentInfoKHR presentInfo{};
@@ -349,16 +357,18 @@ void drawFrame()
     presentInfo.pWaitSemaphores = signalSemaphores;
 
     presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
+    presentInfo.pSwapchains = swapchains;
     presentInfo.pImageIndices = &imageIndex;
 
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized){
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
+    {
         framebufferResized = false;
         recreateSwapChain();
-
-    }else if(result != VK_SUCCESS){
+    }
+    else if(result != VK_SUCCESS)
+    {
         #ifdef DEBUG
             printDebugLog("failed to present swapChain image!");
         #endif
@@ -373,14 +383,17 @@ std::filesystem::path getProjectRoot(const char *rootName)
 {
     std::filesystem::path current = std::filesystem::current_path();
 
-    for(int i = 0; i < 3; ++i){
-        if(strcmp(current.filename().string().c_str(), rootName) == 0){
+    for(int i = 0; i < 3; ++i)
+    {
+        if(strcmp(current.filename().string().c_str(), rootName) == 0)
+        {
             #ifdef DEBUG
                 printDebugLog('\0', "project root: ");
                 printDebugLog(current, '\n');
             #endif
             return current;
-        }else{
+        }
+        else{
             current = current.parent_path();
         }
     }
@@ -389,8 +402,10 @@ std::filesystem::path getProjectRoot(const char *rootName)
 
 void clearLogs(const std::filesystem::path &baseDir)
 {
-    for(const auto &log : std::filesystem::directory_iterator(baseDir)){
-        if(".log" == log.path().extension()){
+    for(const auto &log : std::filesystem::directory_iterator(baseDir))
+    {
+        if(".log" == log.path().extension())
+        {
             std::filesystem::remove(log);
         }
     }

@@ -55,19 +55,21 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-void createBuffer(  VkDeviceSize            bufferSize, 
-                    VkBufferUsageFlags      usageFlags, 
-                    VkMemoryPropertyFlags   memPropertyFlags, 
-                    VkBuffer                &buffer, 
-                    VkDeviceMemory          &bufferMemory,
-                    std::set<uint32_t>      &uniqueQueueFamilies)
-{
+void createBuffer(  
+    VkDeviceSize            bufferSize, 
+    VkBufferUsageFlags      usageFlags, 
+    VkMemoryPropertyFlags   memPropertyFlags, 
+    VkBuffer                &buffer, 
+    VkDeviceMemory          &bufferMemory,
+    std::set<uint32_t>      &uniqueQueueFamilies
+){
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = bufferSize;
     bufferInfo.usage = usageFlags;
 
-    if(uniqueQueueFamilies.size() == 1){
+    if(uniqueQueueFamilies.size() == 1)
+    {
         bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
     }else{
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

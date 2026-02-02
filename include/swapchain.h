@@ -4,7 +4,7 @@
 
 #include <vector>
 
-inline VkSwapchainKHR swapChain;
+inline VkSwapchainKHR swapchain;
 inline VkFormat swapChainImageFormat;
 inline VkExtent2D swapChainExtent;
 
