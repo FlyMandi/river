@@ -2,6 +2,9 @@
 
 #include "vulkan/vulkan_core.h"
 
+//TODO: try to minimize the amount of data types. See if it makes sense to make own data structures
+//vectors, for example, since I'm really not using most (if any) of the functionality
+//maybe just get rid of vectors in favour of another resizeable list
 #include <filesystem>
 #include <vector>
 
@@ -13,7 +16,6 @@
 
 #define MAX_FRAMES_IN_FLIGHT 2
 #define ENGINE_NAME "River"
-//TODO: evaluate this fucker
 #define DEBUG_LOG appRoot / "debug.log" 
  
 inline const char *appName;
