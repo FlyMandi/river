@@ -4,6 +4,7 @@
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
+#include "buffer.h"
 #include "image.h"
 
 #include <algorithm>
@@ -178,6 +179,10 @@ void createRenderPass()
 
 void cleanupSwapchain()
 {
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
+    vkDestroyImage(logicalDevice, depthImage, nullptr);
+    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+
     for(size_t i = 0; i < swapchainFramebuffers.size(); ++i)
     {
         vkDestroyFramebuffer(logicalDevice, swapchainFramebuffers[i], nullptr);
@@ -189,7 +194,6 @@ void cleanupSwapchain()
     }
 
     vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
-    riverLog("destroyed swapchain.", RIV_LOG_LEVEL_TRACE);
 }
 
 void recreateSwapchain()
@@ -206,8 +210,10 @@ void recreateSwapchain()
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapchain();
+
     createSwapchain();
     createSwapImageViews();
+    createDepthResources();
     createFramebuffers();
 
     riverLog(std::format("recreated swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);

@@ -324,12 +324,11 @@ void initVulkan()
 
     createRenderPass();
     createDescriptorSetLayout();
-
     createGraphicsPipeline();
-    createFramebuffers();
 
     createCommandPools();
     createDepthResources();
+    createFramebuffers();
 
     createTextureImage();
     createTextureImageView();
@@ -357,10 +356,6 @@ void cleanupVulkan()
     vkDestroyImage(logicalDevice, textureImage, nullptr);
     vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
     vkDestroyImageView(logicalDevice, textureImageView, nullptr);
-
-    vkDestroyImage(logicalDevice, depthImage, nullptr);
-    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
-    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
 
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
