@@ -1,4 +1,5 @@
 ---@diagnostic disable: undefined-global, undefined-field
+require"vendor/premake-ecc/ecc"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 workspace("Cnake")
