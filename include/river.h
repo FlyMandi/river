@@ -15,7 +15,7 @@ inline uint8_t currentFrame = 0;
 constexpr auto ENGINE_NAME = "River";
 
 //if specified logLevel is 4+, only asserts will be thrown
-constexpr uint8_t logLevel = 1;
+constexpr uint8_t logLevel = 0;
  
 inline const char *appName;
 inline const char *appVersion;
@@ -58,7 +58,7 @@ enum RiverLogLevel
 
 //TODO:#43: write logs & asserts to a file in release builds AND
 //show an actual useful runtime error message box, not just "abort has been called"
-inline void riverLog(const auto &text, const RiverLogLevel level)
+inline void riverLog(const auto &text, const RiverLogLevel &level)
 {
     if(level < logLevel)
     {
