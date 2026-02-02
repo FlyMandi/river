@@ -1,4 +1,4 @@
-#include "h/cnake.h"
+#include "h/game.h"
 
 void createMainMenu(){
 

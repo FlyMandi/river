@@ -1,4 +1,5 @@
 #include "h/engine.h"
+#include <stdexcept>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -9,8 +10,13 @@
 VkInstance instance;
 VkDebugUtilsMessengerEXT debugMessenger;
 
+VkPhysicalDevice physicalDevice;
 VkPhysicalDeviceProperties deviceProperties;
 VkPhysicalDeviceFeatures deviceFeatures;
+
+VkDevice device;
+
+VkQueue graphicsQueue;
 
 VkResult CreateDebugUtilsMessengerEXT(
         VkInstance                                  instance,
@@ -142,7 +148,7 @@ uint32_t rateDeviceSuitability(VkPhysicalDevice device){
 
 void pickPhysicalDevice(){
     uint32_t deviceCount = 0;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    physicalDevice = VK_NULL_HANDLE;
     
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     if(0 == deviceCount){
@@ -188,10 +194,44 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
     return indices;
 }
 
+void createLogicalDevice(){
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    float queuePriority = 1.0f;
+
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos = &queueCreateInfo;
+    createInfo.queueCreateInfoCount = 1;
+    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.enabledExtensionCount = 0;
+
+    if(enableValidationLayers){
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }else{
+        createInfo.enabledLayerCount = 0;
+    }
+
+    if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)){
+        throw std::runtime_error("failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(device, indices.graphicsFamily.has_value(), 0, &graphicsQueue);
+}
+
 void initVulkan(){
     createInstance();
     setupDebugMessenger();
     pickPhysicalDevice();
+    createLogicalDevice();
 }
 
 void createInstance(){
@@ -244,9 +284,9 @@ void createInstance(){
 }
 
 void cleanupVulkan(){
-    if(enableValidationLayers){
-        DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-    }
+    vkDestroyDevice(device, nullptr);
+
+    if(enableValidationLayers){ DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr); }
 
     vkDestroyInstance(instance, nullptr);
 }

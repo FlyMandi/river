@@ -2,7 +2,7 @@
 
 void run();
 void initGLFW();
-void gameLoop();
 void cleanupGLFW();
 
+void gameLoop();
 void createMainMenu(); 
