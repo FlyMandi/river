@@ -33,5 +33,5 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ### Plans:
 - building an editor that's able to save & load models/projects
 - learn and implement material shaders, compute shaders, etc
-- create an API to write games with
+- create an API to write games with (no scripting, pure C++)
 - anything else I'm motivated enough to implement
