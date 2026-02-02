@@ -14,6 +14,8 @@
     const bool config_DEBUG = true;
 #endif
 
+inline const char *engineName = "";
+
 inline const int MAX_FRAMES_IN_FLIGHT = 2;
 
 inline VkInstance instance;
