@@ -11,13 +11,12 @@
 
 #ifdef NDEBUG
     const bool config_DEBUG = false;
-#else 
+#else
     const bool config_DEBUG = true;
 #endif
 
-
 const std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation" 
+    "VK_LAYER_KHRONOS_validation"
 };
 
 const std::vector<const char*> deviceExtensions = {
@@ -26,7 +25,7 @@ const std::vector<const char*> deviceExtensions = {
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+        VkDebugUtilsMessageTypeFlagsEXT             messageType,
         const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
         void                                        *pUserData
     ){
@@ -47,7 +46,7 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &create
 
 void DestroyDebugUtilsMessengerEXT(
         VkInstance                  instance,
-        VkDebugUtilsMessengerEXT    messenger, 
+        VkDebugUtilsMessengerEXT    messenger,
         const VkAllocationCallbacks *pAllocator
 );
 
@@ -55,7 +54,7 @@ struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
 
-    bool isComplete(){ 
+    bool isComplete(){
         return graphicsFamily.has_value() && presentFamily.has_value();
     }
 };
@@ -79,7 +78,8 @@ void createSwapChain();
 void createImageViews();
 void createRenderPass();
 void createGraphicsPipeline();
-void createFrameBuffers();
+void createFramebuffers();
+void createCommandPool();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
@@ -90,7 +90,7 @@ void setupDebugMessenger();
 
 bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 uint32_t rateDeviceSuitability(VkPhysicalDevice device);
-void pickPhysicalDevice();      
+void pickPhysicalDevice();
 
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
