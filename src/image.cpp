@@ -16,7 +16,7 @@ static void copyBufferToImage
     uint32_t    width,
     uint32_t    height
 ){
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(graphicsCommandPool);
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -49,7 +49,7 @@ static void copyBufferToImage
         &region
     );
 
-    endSingleTimeCommands(commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(commandBuffer, graphicsCommandPool, graphicsQueue);
 }
 
 static void transitionImageLayout
@@ -60,7 +60,7 @@ static void transitionImageLayout
     VkImageLayout   newLayout
 ){
 
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(graphicsCommandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -116,7 +116,7 @@ static void transitionImageLayout
         &barrier
     );
 
-    endSingleTimeCommands(commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(commandBuffer, graphicsCommandPool, graphicsQueue);
 }
 
 void createTextureImage()

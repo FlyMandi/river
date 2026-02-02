@@ -138,7 +138,7 @@ void createBuffer
 
 void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(transferCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(transferCommandPool);
 
     VkBufferCopy transferCopyRegion{};
     transferCopyRegion.size = bufferSize;
@@ -147,7 +147,7 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
 
-    endSingleTimeCommands(commandBuffer, transferCommandPool, transferQueue);
+    flushCommandBuffer(commandBuffer, transferCommandPool, transferQueue);
 }
 
 void createVertexBuffer()

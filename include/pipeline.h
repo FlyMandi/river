@@ -32,8 +32,13 @@ extern void createFramebuffers();
 extern void createCommandPools();
 extern void createCommandBuffers();
 
-extern VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool);
-extern void endSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool commandPool, VkQueue queue);
+extern VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool);
+extern void flushCommandBuffer
+(
+    VkCommandBuffer commandBuffer,
+    VkCommandPool   commandPool,
+    VkQueue         queue
+);
 
 extern void createDescriptorSetLayout();
 extern void createDescriptorPool();

@@ -305,7 +305,7 @@ void createCommandPools()
     );
 }
 
-VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool)
+VkCommandBuffer setupCommandBuffer(VkCommandPool commandPool)
 {
     VkCommandBufferAllocateInfo commandbufAllocInfo{};
     commandbufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -329,8 +329,12 @@ VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool)
     return commandBuffer;
 }
 
-void endSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool commandPool, VkQueue queue)
-{
+void flushCommandBuffer
+(
+    VkCommandBuffer commandBuffer,
+    VkCommandPool   commandPool,
+    VkQueue         queue
+){
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo singleTimeSubmitInfo{};
@@ -338,9 +342,15 @@ void endSingleTimeCommands(VkCommandBuffer commandBuffer, VkCommandPool commandP
     singleTimeSubmitInfo.commandBufferCount = 1;
     singleTimeSubmitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, VK_NULL_HANDLE);
+    VkFence queueFence;
+    VkFenceCreateInfo fenceCreateInfo{};
+    fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-    vkQueueWaitIdle(queue);
+    vkCreateFence(logicalDevice, &fenceCreateInfo, nullptr, &queueFence);
+
+    vkQueueSubmit(queue, 1, &singleTimeSubmitInfo, queueFence);
+
+    vkWaitForFences(logicalDevice, 1, &queueFence, VK_TRUE, UINT64_MAX);
 
     vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
 }
