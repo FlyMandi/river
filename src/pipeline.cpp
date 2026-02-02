@@ -79,7 +79,7 @@ void createGraphicsPipeline()
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
     std::vector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-    
+
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
@@ -194,9 +194,9 @@ void createFramebuffers()
 
     for(size_t i = 0; i < swapchainImageViews.size(); ++i)
     {
-        VkImageView attachments[] = 
-        { 
-            swapchainImageViews[i] 
+        VkImageView attachments[] =
+        {
+            swapchainImageViews[i]
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -226,7 +226,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
         vkBeginCommandBuffer(commandBuffer, &beginInfo),
         "failed to begin recording command buffer!"
     );
-    
+
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -245,7 +245,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkBuffer vertexBuffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    
+
     vkCmdBindIndexBuffer(commandBuffer, vertexBuffer, vertSize, VK_INDEX_TYPE_UINT32);
 
     VkViewport viewport{};
@@ -268,9 +268,9 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     (
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        graphicsPipelineLayout, 
-        0, 
-        1, 
+        graphicsPipelineLayout,
+        0,
+        1,
         &descriptorSets[currentFrame],
         0,
         nullptr
@@ -327,36 +327,55 @@ void createCommandBuffers()
 
 void createSyncObjects()
 {
-    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    for(auto semaphore : renderFinishedSemaphores)
+    {
+        if(semaphore)
+        {
+            vkDestroySemaphore(logicalDevice, semaphore, nullptr);
+        }
+    }
+
+    renderFinishedSemaphores.clear();
     renderFinishedSemaphores.resize(swapchainImages.size());
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    
-    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    for(size_t i = 0; i < swapchainImages.size(); ++i)
     {
-        riverAssertVkSuccess
-        (
-            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
-            "failed to create imageAvailableSemaphore!"
-        );
-
         riverAssertVkSuccess
         (
             vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]),
             "failed to create renderFinishedSemaphore!"
         );
+    }
 
-        riverAssertVkSuccess
-        (
-            vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
-            "failed to create inFlightFence!"
-        );
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        if(imageAvailableSemaphores[i] == VK_NULL_HANDLE)
+        {
+            riverAssertVkSuccess
+            (
+                vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]),
+                "failed to create imageAvailableSemaphore!"
+            );
+        }
+
+        if(inFlightFences[i] == VK_NULL_HANDLE)
+        {
+            riverAssertVkSuccess
+            (
+                vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
+                "failed to create inFlightFence!"
+            );
+        }
     }
 }
 
@@ -394,7 +413,7 @@ void createDescriptorPool()
     descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorPoolCreateInfo.flags = 0;
 
-    riverAssertVkSuccess    
+    riverAssertVkSuccess
     (
         vkCreateDescriptorPool(logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool),
         "failed to create descriptor pool."
@@ -411,7 +430,7 @@ void createDescriptorSets()
     descriptorSetAllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorSetAllocInfo.pSetLayouts = setLayouts.data();
 
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT); 
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     riverAssertVkSuccess
     (
         vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()),

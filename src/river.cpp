@@ -309,15 +309,21 @@ void cleanupVulkan()
 
 void drawFrame()
 {
-    uint32_t imageIndex;
-
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-    destroyDeferredResources(&frameResources[currentFrame]);
+    uint32_t imageIndex;
 
-    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+    VkResult result =
+        vkAcquireNextImageKHR
+        (
+            logicalDevice,
+            swapchain,
+            UINT64_MAX,
+            imageAvailableSemaphores[currentFrame],
+            VK_NULL_HANDLE,
+            &imageIndex
+        );
 
-    VkResult result = vkAcquireNextImageKHR(logicalDevice, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         recreateSwapchain();
@@ -328,21 +334,26 @@ void drawFrame()
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
+    //I'm not sure about necessary destruction, actually
+    destroyDeferredResources(&frameResources[currentFrame]);
+    vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
+
+    updateUniformBuffer(currentFrame);
+
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-
-    updateUniformBuffer(currentFrame);
+    VkPipelineStageFlags waitStages[] =
+    {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+    };
 
     VkSubmitInfo drawSubmitInfo{};
     drawSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    drawSubmitInfo.pWaitSemaphores = waitSemaphores;
+    drawSubmitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
     drawSubmitInfo.waitSemaphoreCount = 1;
-    drawSubmitInfo.pSignalSemaphores = signalSemaphores;
+    drawSubmitInfo.pSignalSemaphores = &renderFinishedSemaphores[imageIndex];
     drawSubmitInfo.signalSemaphoreCount = 1;
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
@@ -363,7 +374,7 @@ void drawFrame()
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
+    presentInfo.pWaitSemaphores = &renderFinishedSemaphores[imageIndex];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;

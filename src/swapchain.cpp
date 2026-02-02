@@ -269,6 +269,7 @@ void recreateSwapchain()
     createSwapchain();
     createImageViews();
     createFramebuffers();
+    createSyncObjects();
 
     riverLog("recreated swapchain.", RIV_LOG_LEVEL_DEBUG);
 }
