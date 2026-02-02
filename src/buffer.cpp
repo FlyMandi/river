@@ -32,7 +32,7 @@ const std::vector<uint32_t> indices =
 
 VkVertexInputBindingDescription getVertexBindingDescription()
 {
-    VkVertexInputBindingDescription bindingDescription{}; 
+    VkVertexInputBindingDescription bindingDescription{};
     bindingDescription.binding = 0;
     bindingDescription.stride = sizeof(Vertex);
     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -71,11 +71,12 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
     return UINT32_MAX;
 }
 
-void createBuffer(  
-    VkDeviceSize            bufferSize, 
-    VkBufferUsageFlags      usageFlags, 
-    VkMemoryPropertyFlags   memPropertyFlags, 
-    VkBuffer                &buffer, 
+void createBuffer
+(
+    VkDeviceSize            bufferSize,
+    VkBufferUsageFlags      usageFlags,
+    VkMemoryPropertyFlags   memPropertyFlags,
+    VkBuffer                &buffer,
     VkDeviceMemory          &bufferMemory,
     std::set<uint32_t>      &uniqueQueueFamilies
 ){
@@ -135,7 +136,7 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
         "failed to create transfer fence!"
     );
 
-    VkCommandBufferAllocateInfo transferAllocInfo{}; 
+    VkCommandBufferAllocateInfo transferAllocInfo{};
     transferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     transferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     transferAllocInfo.commandPool = transferCommandPool;
@@ -183,7 +184,7 @@ void createVertexBuffer()
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    static std::set<uint32_t> queueFamilies = 
+    static std::set<uint32_t> queueFamilies =
     {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex
@@ -191,7 +192,7 @@ void createVertexBuffer()
 
     createBuffer
     (
-        bufferSize, 
+        bufferSize,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         stagingBuffer,
@@ -208,17 +209,17 @@ void createVertexBuffer()
     vkMapMemory(logicalDevice, stagingBufferMemory, vertSize, indexSize, 0, &pData);
     std::memcpy(pData, indices.data(), (size_t)indexSize);
     vkUnmapMemory(logicalDevice, stagingBufferMemory);
-    
+
     createBuffer
     (
-        bufferSize, 
+        bufferSize,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         vertexBuffer,
         vertexBufferMemory,
         queueFamilies
     );
-    
+
     copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
@@ -228,7 +229,7 @@ void createVertexBuffer()
 void createUniformBuffers()
 {
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
-    
+
     uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
@@ -271,4 +272,3 @@ void updateUniformBuffer(uint32_t currentImage)
 
     std::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
 }
-
