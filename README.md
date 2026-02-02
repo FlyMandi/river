@@ -9,29 +9,29 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 
 ### Concepts this project has taught me so far:
 - building a graphical application ""from scratch""
-- writing platform-agnostic code, no direct interface with WIN32/POSIX
+- writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
 - debugging said code (currently via logging, raddbg and renderdoc)
-- synchronization primitives
-- the Vulkan graphics pipeline
+- synchronization primitives (using fences & semaphores to sync GPU/CPU work)
+- the Vulkan graphics pipeline & order of operations
 - command buffers, framebuffers
 - swapchain & present modes
-- shader basics
-- vertex buffers
+- indexed vertex buffers
 
 ### State:
 - there's a window...
 - ...you can resize it!
-- the window shows only a hardcoded triangle...
-- ...the triangle took 1000+ lines of code!
+- the window shows only a hardcoded rectangle...
+- ...the rectangle took 1200+ lines of code!
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
 - camera control
 - a GUI
 - a default project
+- project management, custom filetype
 
 ### Plans:
 - building an editor that's able to save & load models/projects
 - learn and implement material shaders, compute shaders, etc
-- create an API to write games with <- possibly? I'll see about what approach sticks.
-- ray tracing....... in due time.
+- create an API to write games with
+- anything else I'm motivated enough to implement
