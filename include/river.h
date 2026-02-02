@@ -60,6 +60,14 @@ static const std::string logLevelStamps[] =
     "[RIV_ERROR]: ",
 };
 
+static const std::string logLevelANSI[] =
+{
+    "\033[30;1;1m",
+    "\033[37;1;1m",
+    "\033[33;1;1m",
+    "\033[31;1;1m"
+};
+
 //ugly aah inline function definitions in header file, I know
 //this is because of the auto types, they need to be known BEFORE the link stage
 
@@ -81,6 +89,8 @@ inline void riverLog
     tm buf;
     localtime_s(&buf, &now);
 
+    std::cout << logLevelANSI[level];
+
     if(newLine)
     {
         std::cout << '\n' << std::put_time(&buf, "[%T]-") << logLevelStamps[level];
@@ -88,11 +98,11 @@ inline void riverLog
 
     if(level == RIV_LOG_LEVEL_WARN || level == RIV_LOG_LEVEL_ERROR)
     {
-        std::cerr << text;
+        std::cerr << text << "\033[0m";
         return;
     }
 
-    std::cout << text;
+    std::cout << text << "\033[0m";
 }
 
 inline void riverAssert(bool condition, const auto &assertFailureMsg)

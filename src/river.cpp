@@ -30,12 +30,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback
     const VkDebugUtilsMessengerCallbackDataEXT  *callbackData,
     void                                        *userData
 ){
-    //TODO:#47: can I know which layer is outputting the msg?
-    std::cout << "\033[33;1;1m";
+    //can I know which layer is outputting the msg?
     riverLog("VL Says: ", severityTranslation(messageSeverity));
     riverLog(callbackData->pMessage, severityTranslation(messageSeverity), false);
-    std::cout << "\033[0m";
-
     return VK_FALSE;
 }
 
