@@ -38,6 +38,18 @@ std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(
     return attributeDescriptions;
 }
 
+uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags)
+{
+    for(uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; ++i){
+        if(typeFilter & (1 << i) && ((deviceMemoryProperties.memoryTypes[i].propertyFlags & flags) == flags)){
+            return i;
+        }
+    }
+
+    printDebugLog("failed to find suitable memory type!");
+    throw std::runtime_error("failed to find suitable memory type!");
+}
+
 void createVertexBuffer()
 {
     VkBufferCreateInfo bufferInfo{};
