@@ -9,6 +9,92 @@
 #include "buffer.h"
 #include "image.h"
 
+static void copyBufferToImage
+(
+    VkBuffer buffer,
+    VkImage image,
+    uint32_t width,
+    uint32_t height
+){
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset =
+    {
+        0, 0, 0
+    };
+    region.imageExtent =
+    {
+        width,
+        height,
+        1
+    };
+
+    vkCmdCopyBufferToImage
+    (
+        commandBuffer,
+        buffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &region
+    );
+
+    endSingleTimeCommands(commandBuffer);
+}
+
+static void transitionImageLayout
+(
+    VkImage         image,
+    VkFormat        format,
+    VkImageLayout   oldLayout,
+    VkImageLayout   newLayout
+){
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    //TODO: fixup transitionImageLayout:
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = 0;
+
+    vkCmdPipelineBarrier
+    (
+        commandBuffer,
+        0, //TODO
+        0, //TODO
+        0,
+        0,
+        nullptr,
+        0,
+        nullptr,
+        1,
+        &barrier
+    );
+
+    endSingleTimeCommands(commandBuffer);
+}
+
 void createTextureImage()
 {
     int texWidth;
@@ -64,6 +150,30 @@ void createTextureImage()
         textureImage,
         textureImageMemory
     );
+
+    transitionImageLayout
+    (
+        textureImage,
+        VK_FORMAT_R8G8B8_SRGB,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+    );
+
+    copyBufferToImage
+    (
+        stagingBuffer,
+        textureImage,
+        static_cast<uint32_t>(texWidth),
+        static_cast<uint32_t>(texHeight)
+    );
+
+    transitionImageLayout
+    (
+        textureImage,
+        VK_FORMAT_R8G8B8_SRGB,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+    );
 }
 
 void createImage
@@ -117,18 +227,4 @@ void createImage
     );
 
     vkBindImageMemory(logicalDevice, image, imageMem, 0);
-}
-
-void transitionImageLayout
-(
-    VkImage         image,
-    VkFormat        format,
-    VkImageLayout   oldLayout,
-    VkImageLayout   newLayout
-){
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
-
-    //FIXME: work
-
-    endSingleTimeCommands(commandBuffer);
 }
