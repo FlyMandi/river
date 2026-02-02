@@ -68,5 +68,5 @@ void initGLFW();
 void cleanupGLFW();
 void windowPollEvents();
 
-std::filesystem::path getProjectRoot(const char* rootName);
+void getProjectRoot(const char* rootName);
 void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
