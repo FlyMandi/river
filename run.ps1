@@ -87,6 +87,7 @@ if("MSVC" -eq $compiler)
 }
 elseIf("clang" -eq $compiler)
 {
+    #TODO: check if makefiles can't help, also try/fix this
     foreach($include in $includes)
     {
         $arguments += "-I$include"
