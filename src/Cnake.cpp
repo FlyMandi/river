@@ -25,7 +25,6 @@ class CnakeApp{
     }
 
     void verifyExtensionPresence(const char **glfwExt, std::vector<VkExtensionProperties> vulkanExt){
-        std::string glfwExtString = *glfwExt;
         std::string vulkanExtString = "";
         std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
         std::cout << "\nVulkan presents:\n";
@@ -35,7 +34,7 @@ class CnakeApp{
             std::cout << '\t' << extension.extensionName << '\n';
         }
 
-        if(vulkanExtString.find(glfwExtString) == std::string::npos){
+        if(vulkanExtString.find(*glfwExt) == std::string::npos){
             throw std::runtime_error("not all needed extensions present.");
         }
         std::cout << "\nAll needed extensions are present.";
