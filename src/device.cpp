@@ -104,7 +104,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     }
     else
     {
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+        SwapchainSupportDetails swapChainSupport = querySwapchainSupport(device);
         if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
         {
             return 0;
@@ -132,9 +132,9 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     return score;
 }
 
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device)
+SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device)
 {
-    SwapChainSupportDetails details;
+    SwapchainSupportDetails details;
     uint32_t formatCount;
     uint32_t presentModeCount;
 

@@ -40,7 +40,7 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 
 void createSwapchain()
 {
-    SwapChainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice);
+    SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice);
     VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
     for(const auto &availableFormat : swapchainSupport.formats)

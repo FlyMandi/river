@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <vector>
 
-struct SwapChainSupportDetails
+struct SwapchainSupportDetails
 {
     VkSurfaceCapabilitiesKHR capabilities{};
     std::vector<VkSurfaceFormatKHR> formats;
@@ -28,7 +28,7 @@ inline VkPhysicalDeviceFeatures deviceFeatures;
 
 inline VkDevice logicalDevice;
 
-extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+extern SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
 extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 extern void pickPhysicalDevice();
