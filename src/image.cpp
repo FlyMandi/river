@@ -9,8 +9,6 @@
 #include "buffer.h"
 #include "image.h"
 
-#include <filesystem>
-
 static void copyBufferToImage
 (
     VkBuffer    buffer,
@@ -150,18 +148,29 @@ void createTextureImage()
     int texHeight;
     int texChannels;
 
-    const std::filesystem::path texPath = std::filesystem::canonical(projectRoot / "assets/textures/texture.jpg");
-
     stbi_uc *pixels =   stbi_load
                         (
-                            texPath.string().c_str(),
+                            projectTexturePath.string().c_str(),
                             &texWidth,
                             &texHeight,
                             &texChannels,
                             STBI_rgb_alpha
                         );
 
-    riverAssert(pixels, std::format("failed to load texture image: {}", stbi_failure_reason()));
+    const char* stbi_error = stbi_failure_reason();
+
+    if(!pixels)
+    {
+        riverThrow
+        (
+            std::format
+            (
+                "failed to load texture image from {}: {}",
+                projectTexturePath.string(),
+                stbi_failure_reason()
+            )
+        );
+    }
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
