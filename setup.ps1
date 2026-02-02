@@ -1,27 +1,3 @@
-# if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
-# {
-#    if(Get-Command scoop -ErrorAction SilentlyContinue)
-#    {
-#         &scoop install premake
-#    }
-#    else
-#    {
-#         $sourceRepo = "premake/premake-core"
-#         $namePattern = "*windows.zip"
-#         $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
-#         $zipFolderName = $(Split-Path -Path $sourceURI -Leaf)
-#         $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName
-#         Invoke-WebRequest -Uri $sourceURI -Out $tempZIP
-#
-#         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
-#         Remove-Item $tempZIP -Force
-#    }
-# }
-# else
-# {
-#     Write-Host "Found premake5."
-# }
-
 [System.Version]$installVersion = "1.4.309.0"
 
 function Install-VulkanSDK
@@ -83,3 +59,30 @@ else
 {
     throw "ERROR: the vulkan SDK environment variable ($env:VULKAN_SDK) does not point to a valid directory."
 }
+
+#TODO: make sure MSBuild is added to path on windows
+#TODO: warn about other stuff not being added to path, such as premake5 or that no compiler was found.
+
+# if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
+# {
+#    if(Get-Command scoop -ErrorAction SilentlyContinue)
+#    {
+#         &scoop install premake
+#    }
+#    else
+#    {
+#         $sourceRepo = "premake/premake-core"
+#         $namePattern = "*windows.zip"
+#         $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
+#         $zipFolderName = $(Split-Path -Path $sourceURI -Leaf)
+#         $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName
+#         Invoke-WebRequest -Uri $sourceURI -Out $tempZIP
+#
+#         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
+#         Remove-Item $tempZIP -Force
+#    }
+# }
+# else
+# {
+#     Write-Host "Found premake5."
+# }
