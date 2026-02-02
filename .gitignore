@@ -2,6 +2,4 @@ BuildRules*
 bin/
 *.pdb
 .cache*
-compile_flags*
-compile_commands*
 build/
