@@ -15,6 +15,8 @@
 global uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
+//maybe get rid of this in the future
+constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 global std::ofstream logFile;
 global uint8_t logLevel;
@@ -69,7 +71,7 @@ struct EngineData
     VkPhysicalDeviceMemoryProperties    deviceMemoryProperties;
     VkPhysicalDeviceFeatures            deviceFeatures;
 
-    VkDevice logicalDevice;
+    VkDevice                            logicalDevice;
 
     VkSwapchainKHR                      swapchain;
     VkFormat                            swapchainImageFormat;
@@ -79,6 +81,31 @@ struct EngineData
     std::vector<VkImage>                swapchainImages{};
     std::vector<VkImageView>            swapchainImageViews{};
     std::vector<VkFramebuffer>          swapchainFramebuffers{};
+
+    VkRenderPass                        renderPass;
+    VkPipeline                          graphicsPipeline;
+    VkPipelineLayout                    graphicsPipelineLayout;
+
+    VkDescriptorSetLayout               descriptorSetLayout;
+    std::vector<VkDescriptorSet>        descriptorSets{};
+
+    VkCommandPool                       graphicsCommandPool;
+    VkCommandPool                       transferCommandPool;
+    VkDescriptorPool                    descriptorPool;
+
+    std::vector<VkCommandBuffer>        commandBuffers{};
+
+    VkQueue                             graphicsQueue;
+    VkQueue                             presentQueue;
+    VkQueue                             transferQueue;
+
+    std::vector<VkSemaphore>            imageReadyForWriteSemaphores{VK_NULL_HANDLE};
+    std::vector<VkSemaphore>            imageReadyForPresentSemaphores{VK_NULL_HANDLE};
+    VkSemaphore                         acquireSemaphore = VK_NULL_HANDLE;
+
+    std::vector<VkFence>                inFlightFences{VK_NULL_HANDLE};
+
+    VkBool32                            framebufferResized = VK_FALSE;
 };
 
 enum RiverLogLevel

@@ -16,7 +16,6 @@
 
 #include "pipeline.h"
 #include "river.h"
-#include "swapchain.h"
 #include "buffer.h"
 #include "image.h"
 
@@ -186,12 +185,12 @@ void createBuffer
 
 internal void copyBuffer
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const VkBuffer      &srcBuffer,
     const VkBuffer      &dstBuffer,
     const VkDeviceSize  &bufferSize
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, transferCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, engine.transferCommandPool);
 
     VkBufferCopy transferCopyRegion{};
     transferCopyRegion.size = bufferSize;
@@ -200,12 +199,12 @@ internal void copyBuffer
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
 
-    flushCommandBuffer(engine, commandBuffer, transferCommandPool, transferQueue);
+    flushCommandBuffer(engine, commandBuffer, engine.transferCommandPool, engine.transferQueue);
 }
 
 void createVertexBuffer
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     vertSize = sizeof(vertices[0]) * vertices.size();
     VkDeviceSize indexSize = sizeof(vertexIndices[0]) * vertexIndices.size();
@@ -261,7 +260,7 @@ void createVertexBuffer
 
 void createUniformBuffers
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
 
@@ -356,7 +355,7 @@ VkFormat findSupportedFormat
 
 void createDepthResources
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     const std::vector<VkFormat> candidates =
     {

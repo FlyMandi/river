@@ -27,7 +27,7 @@ extern VkImageView createImageView
 
 extern void createTextureImage
 (
-    const EngineData        &engine,
+    EngineData              &engine,
     const ProjectManifest   &manifest
 );
 
@@ -43,7 +43,7 @@ extern void createTextureSampler
 
 extern void transitionImageLayout
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const VkImage       &image,
     const VkFormat      &format,
     const VkImageLayout &oldLayout,

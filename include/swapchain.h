@@ -5,9 +5,6 @@
 
 #include "river.h"
 
-//maybe get rid of this in the future
-constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
 extern VkExtent2D chooseSwapExtent
 (
     const VkSurfaceCapabilitiesKHR  &capabilities,
@@ -33,7 +30,7 @@ extern void createSwapImageViews
 
 extern void createRenderPass
 (
-    const EngineData &engine
+    EngineData &engine
 );
 
 extern void cleanupSwapchain

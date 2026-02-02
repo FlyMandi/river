@@ -145,7 +145,7 @@ void createSwapImageViews
 
 void createRenderPass
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     VkAttachmentDescription colorAttachmentDescription{};
     colorAttachmentDescription.format = engine.swapchainImageFormat;
@@ -224,7 +224,7 @@ void createRenderPass
 
     riverAssertVkSuccess
     (
-        vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &renderPass),
+        vkCreateRenderPass(engine.logicalDevice, &renderPassCreateInfo, nullptr, &engine.renderPass),
         "failed to create render pass!"
     );
 }

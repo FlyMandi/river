@@ -2,7 +2,6 @@
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
-#include "swapchain.h"
 #include "buffer.h"
 #include "pipeline.h"
 
@@ -52,7 +51,7 @@ internal std::vector<char> readFile(const std::filesystem::path &filename)
 
 void createGraphicsPipeline
 (
-    const EngineData        &engine,
+    EngineData              &engine,
     const ProjectManifest   &manifest
 ){
     auto vertShaderCode = readFile(manifest.vertexShader);
@@ -164,11 +163,17 @@ void createGraphicsPipeline
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
     pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCreateInfo.setLayoutCount = 1;
-    pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+    pipelineLayoutCreateInfo.pSetLayouts = &engine.descriptorSetLayout;
 
     riverAssertVkSuccess
     (
-        vkCreatePipelineLayout(engine.logicalDevice, &pipelineLayoutCreateInfo, nullptr, &graphicsPipelineLayout),
+        vkCreatePipelineLayout
+        (
+            engine.logicalDevice,
+            &pipelineLayoutCreateInfo,
+            nullptr,
+            &engine.graphicsPipelineLayout
+        ),
         "failed to create pipeline layout!"
     );
 
@@ -186,8 +191,8 @@ void createGraphicsPipeline
     graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
     graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 
-    graphicsPipelineCreateInfo.layout = graphicsPipelineLayout;
-    graphicsPipelineCreateInfo.renderPass = renderPass;
+    graphicsPipelineCreateInfo.layout = engine.graphicsPipelineLayout;
+    graphicsPipelineCreateInfo.renderPass = engine.renderPass;
     graphicsPipelineCreateInfo.subpass = 0;
 
     riverAssertVkSuccess
@@ -199,7 +204,7 @@ void createGraphicsPipeline
             1,
             &graphicsPipelineCreateInfo,
             nullptr,
-            &graphicsPipeline
+            &engine.graphicsPipeline
         ),
         "failed to create graphics pipeline!"
     );
@@ -224,7 +229,7 @@ void createFramebuffers
 
         VkFramebufferCreateInfo framebufferCreateInfo{};
         framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferCreateInfo.renderPass = renderPass;
+        framebufferCreateInfo.renderPass = engine.renderPass;
         framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferCreateInfo.pAttachments = attachments.data();
         framebufferCreateInfo.width = engine.swapchainExtent.width;
@@ -247,9 +252,9 @@ void createFramebuffers
 
 void recordCommandBuffer
 (
-    EngineData      &engine,
-    VkCommandBuffer &commandBuffer,
-    uint32_t        &imageIndex
+    const EngineData        &engine,
+    const VkCommandBuffer   &commandBuffer,
+    const uint32_t          &imageIndex
 ){
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -266,7 +271,7 @@ void recordCommandBuffer
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.renderPass = engine.renderPass;
     renderPassInfo.framebuffer = engine.swapchainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = engine.swapchainExtent;
@@ -275,7 +280,7 @@ void recordCommandBuffer
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, engine.graphicsPipeline);
 
     VkBuffer vertexBuffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
@@ -303,10 +308,10 @@ void recordCommandBuffer
     (
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        graphicsPipelineLayout,
+        engine.graphicsPipelineLayout,
         0,
         1,
-        &descriptorSets[currentFrame],
+        &engine.descriptorSets[currentFrame],
         0,
         nullptr
     );
@@ -320,7 +325,7 @@ void recordCommandBuffer
 
 void createCommandPools
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     VkCommandPoolCreateInfo graphicsPoolInfo{};
     graphicsPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -329,7 +334,7 @@ void createCommandPools
 
     riverAssertVkSuccess
     (
-        vkCreateCommandPool(engine.logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool),
+        vkCreateCommandPool(engine.logicalDevice, &graphicsPoolInfo, nullptr, &engine.graphicsCommandPool),
         "failed to create graphics command pool!"
     );
 
@@ -340,7 +345,7 @@ void createCommandPools
 
     riverAssertVkSuccess
     (
-        vkCreateCommandPool(engine.logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool),
+        vkCreateCommandPool(engine.logicalDevice, &transferPoolInfo, nullptr, &engine.transferCommandPool),
         "failed to create transfer command pool!"
     );
 }
@@ -406,53 +411,53 @@ void flushCommandBuffer
 
 void createCommandBuffers
 (
-    const EngineData &engine
+    EngineData &engine
 ){
-    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    engine.commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = graphicsCommandPool;
+    allocInfo.commandPool = engine.graphicsCommandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+    allocInfo.commandBufferCount = static_cast<uint32_t>(engine.commandBuffers.size());
 
     riverAssertVkSuccess
     (
-        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, commandBuffers.data()),
+        vkAllocateCommandBuffers(engine.logicalDevice, &allocInfo, engine.commandBuffers.data()),
         "failed to allocate command buffers!"
     );
 }
 
 void cleanupSyncObjects
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        vkDestroySemaphore(engine.logicalDevice, imageReadyForWriteSemaphores[i], nullptr);
-        imageReadyForWriteSemaphores[i] = VK_NULL_HANDLE;
+        vkDestroySemaphore(engine.logicalDevice, engine.imageReadyForWriteSemaphores[i], nullptr);
+        engine.imageReadyForWriteSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed imageReadyForWriteSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
 
-        vkDestroySemaphore(engine.logicalDevice, imageReadyForPresentSemaphores[i], nullptr);
-        imageReadyForPresentSemaphores[i] = VK_NULL_HANDLE;
+        vkDestroySemaphore(engine.logicalDevice, engine.imageReadyForPresentSemaphores[i], nullptr);
+        engine.imageReadyForPresentSemaphores[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed imageReadyForPresentSemaphore No. {}.", i), RIV_LOG_LEVEL_TRACE);
 
-        vkDestroyFence(engine.logicalDevice, inFlightFences[i], nullptr);
-        inFlightFences[i] = VK_NULL_HANDLE;
+        vkDestroyFence(engine.logicalDevice, engine.inFlightFences[i], nullptr);
+        engine.inFlightFences[i] = VK_NULL_HANDLE;
         riverLog(std::format("destroyed inFlightFence No. {}", i), RIV_LOG_LEVEL_TRACE);
     }
-    vkDestroySemaphore(engine.logicalDevice, acquireSemaphore, nullptr);
-    acquireSemaphore = VK_NULL_HANDLE;
+    vkDestroySemaphore(engine.logicalDevice, engine.acquireSemaphore, nullptr);
+    engine.acquireSemaphore = VK_NULL_HANDLE;
     riverLog("destroyed acquireSemaphore.", RIV_LOG_LEVEL_TRACE);
 }
 
 void createSyncObjects
 (
-    const EngineData &engine
+    EngineData &engine
 ){
-    imageReadyForWriteSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
-    imageReadyForPresentSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
-    inFlightFences.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
+    engine.imageReadyForWriteSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
+    engine.imageReadyForPresentSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
+    engine.inFlightFences.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -463,7 +468,7 @@ void createSyncObjects
 
     riverAssertVkSuccess
     (
-        vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &acquireSemaphore),
+        vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &engine.acquireSemaphore),
         "failed to create acquireSemaphore."
     );
 
@@ -471,24 +476,36 @@ void createSyncObjects
     {
         riverAssertVkSuccess
         (
-            vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &imageReadyForPresentSemaphores[i]),
+            vkCreateSemaphore
+            (
+                engine.logicalDevice,
+                &semaphoreInfo,
+                nullptr,
+                &engine.imageReadyForPresentSemaphores[i]
+            ),
             std::format("failed to create imageReadyForPresentSemaphore No. {}", i)
         );
 
-        if(imageReadyForWriteSemaphores[i] == VK_NULL_HANDLE)
+        if(engine.imageReadyForWriteSemaphores[i] == VK_NULL_HANDLE)
         {
             riverAssertVkSuccess
             (
-                vkCreateSemaphore(engine.logicalDevice, &semaphoreInfo, nullptr, &imageReadyForWriteSemaphores[i]),
+                vkCreateSemaphore
+                (
+                    engine.logicalDevice,
+                    &semaphoreInfo,
+                    nullptr,
+                    &engine.imageReadyForWriteSemaphores[i]
+                ),
                 std::format("failed to create imageReadyForWriteSemaphore No. {}", i)
             );
         }
 
-        if(inFlightFences[i] == VK_NULL_HANDLE)
+        if(engine.inFlightFences[i] == VK_NULL_HANDLE)
         {
             riverAssertVkSuccess
             (
-                vkCreateFence(engine.logicalDevice, &fenceInfo, nullptr, &inFlightFences[i]),
+                vkCreateFence(engine.logicalDevice, &fenceInfo, nullptr, &engine.inFlightFences[i]),
                 std::format("failed to create inFlightFence No. {}", i)
             );
         }
@@ -497,7 +514,7 @@ void createSyncObjects
 
 void createDescriptorSetLayout
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     VkDescriptorSetLayoutBinding uniformBufferLayoutBinding{};
     uniformBufferLayoutBinding.binding = 0;
@@ -531,7 +548,7 @@ void createDescriptorSetLayout
             engine.logicalDevice,
             &descriptorSetLayoutCreateInfo,
             nullptr,
-            &descriptorSetLayout
+            &engine.descriptorSetLayout
         ),
         "failed to create descriptor set layout!"
     );
@@ -539,7 +556,7 @@ void createDescriptorSetLayout
 
 void createDescriptorPool
 (
-    const EngineData &engine
+    EngineData &engine
 ){
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -556,27 +573,27 @@ void createDescriptorPool
 
     riverAssertVkSuccess
     (
-        vkCreateDescriptorPool(engine.logicalDevice, &descriptorPoolCreateInfo, nullptr, &descriptorPool),
+        vkCreateDescriptorPool(engine.logicalDevice, &descriptorPoolCreateInfo, nullptr, &engine.descriptorPool),
         "failed to create descriptor pool."
     );
 }
 
 void createDescriptorSets
 (
-    const EngineData &engine
+    EngineData &engine
 ){
-    std::vector<VkDescriptorSetLayout> setLayouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    std::vector<VkDescriptorSetLayout> setLayouts(MAX_FRAMES_IN_FLIGHT, engine.descriptorSetLayout);
 
     VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
     descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descriptorSetAllocInfo.descriptorPool = descriptorPool;
+    descriptorSetAllocInfo.descriptorPool = engine.descriptorPool;
     descriptorSetAllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     descriptorSetAllocInfo.pSetLayouts = setLayouts.data();
 
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    engine.descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     riverAssertVkSuccess
     (
-        vkAllocateDescriptorSets(engine.logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()),
+        vkAllocateDescriptorSets(engine.logicalDevice, &descriptorSetAllocInfo, engine.descriptorSets.data()),
         "failed to allocate descriptor sets!"
     );
 
@@ -594,7 +611,7 @@ void createDescriptorSets
 
         VkWriteDescriptorSet uniformWriteDescriptorSet{};
         uniformWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        uniformWriteDescriptorSet.dstSet = descriptorSets[i];
+        uniformWriteDescriptorSet.dstSet = engine.descriptorSets[i];
         uniformWriteDescriptorSet.dstBinding = 0;
         uniformWriteDescriptorSet.dstArrayElement = 0;
         uniformWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -605,7 +622,7 @@ void createDescriptorSets
 
         VkWriteDescriptorSet samplerWriteDescriptorSet{};
         samplerWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        samplerWriteDescriptorSet.dstSet = descriptorSets[i];
+        samplerWriteDescriptorSet.dstSet = engine.descriptorSets[i];
         samplerWriteDescriptorSet.dstBinding = 1;
         samplerWriteDescriptorSet.dstArrayElement = 0;
         samplerWriteDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

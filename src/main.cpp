@@ -12,6 +12,12 @@ int main()
     ProjectManifest manifest;
     UserSettings    settings;
 
+    riverLog
+    (
+        std::format("engine struct size: {}", std::to_string(sizeof(EngineData))),
+        RIV_LOG_LEVEL_DEBUG
+    );
+
     //HACK: evtl be loaded from file inside initEditor
     settings.windowWidth = 1920;
     settings.windowHeight = 1080;

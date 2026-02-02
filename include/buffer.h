@@ -62,7 +62,7 @@ extern void createBuffer
 
 extern void createDepthResources
 (
-    const EngineData &engine
+    EngineData &engine
 );
 
 extern uint32_t findSuitableMemoryType
@@ -74,12 +74,12 @@ extern uint32_t findSuitableMemoryType
 
 extern void createVertexBuffer
 (
-    const EngineData &engine
+    EngineData &engine
 );
 
 extern void createUniformBuffers
 (
-    const EngineData &engine
+    EngineData &engine
 );
 
 extern VkFormat findSupportedFormat

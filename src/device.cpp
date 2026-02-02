@@ -1,7 +1,6 @@
 #include "river.h"
 #include "vulkan/vulkan_core.h"
 #include "device.h"
-#include "pipeline.h"
 
 #include <set>
 #include <map>
@@ -262,9 +261,9 @@ void createLogicalDevice
         "failed to create logical device."
     );
 
-    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.graphicsIndex, 0, &graphicsQueue);
-    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.transferIndex, 0, &transferQueue);
-    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.presentIndex, 0, &presentQueue);
+    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.graphicsIndex, 0, &engine.graphicsQueue);
+    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.transferIndex, 0, &engine.transferQueue);
+    vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.presentIndex, 0, &engine.presentQueue);
 
     vkGetPhysicalDeviceProperties(engine.physicalDevice, &engine.deviceProperties);
     vkGetPhysicalDeviceFeatures(engine.physicalDevice, &deviceFeatures);

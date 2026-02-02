@@ -1,10 +1,15 @@
 #include "river.h"
 #include "window.h"
-#include "pipeline.h"
 
-internal void framebufferResizeCallback(GLFWwindow* window, int width, int height)
-{
-    framebufferResized = VK_TRUE;
+internal void framebufferResizeCallback
+(
+    GLFWwindow  *window,
+    int         width,
+    int         height
+){
+    EngineData *engine = static_cast<EngineData*>(glfwGetWindowUserPointer(window));
+
+    engine->framebufferResized = VK_TRUE;
 }
 
 void initGLFW
@@ -29,6 +34,7 @@ void initGLFW
 
     riverAssert(nullptr != engine.window, "failed to create GLFW window!");
 
+    glfwSetWindowUserPointer(engine.window, &engine);
     glfwSetFramebufferSizeCallback(engine.window, framebufferResizeCallback);
 }
 

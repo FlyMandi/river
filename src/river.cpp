@@ -380,13 +380,13 @@ void cleanupVulkan
     vkDestroyBuffer(engine.logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(engine.logicalDevice, vertexBufferMemory, nullptr);
 
-    vkDestroyDescriptorPool(engine.logicalDevice, descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(engine.logicalDevice, descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(engine.logicalDevice, engine.descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(engine.logicalDevice, engine.descriptorSetLayout, nullptr);
 
-    vkDestroyPipeline(engine.logicalDevice, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(engine.logicalDevice, graphicsPipelineLayout, nullptr);
+    vkDestroyPipeline(engine.logicalDevice, engine.graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(engine.logicalDevice, engine.graphicsPipelineLayout, nullptr);
 
-    vkDestroyRenderPass(engine.logicalDevice, renderPass, nullptr);
+    vkDestroyRenderPass(engine.logicalDevice, engine.renderPass, nullptr);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
@@ -394,8 +394,8 @@ void cleanupVulkan
         vkFreeMemory(engine.logicalDevice, uniformBuffersMemory[i], nullptr);
     }
 
-    vkDestroyCommandPool(engine.logicalDevice, graphicsCommandPool, nullptr);
-    vkDestroyCommandPool(engine.logicalDevice, transferCommandPool, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, engine.graphicsCommandPool, nullptr);
+    vkDestroyCommandPool(engine.logicalDevice, engine.transferCommandPool, nullptr);
     vkDestroyDevice(engine.logicalDevice, nullptr);
 
     #ifdef DEBUG
@@ -411,7 +411,7 @@ void drawFrame
     EngineData          &engine,
     const UserSettings  &settings
 ){
-    vkWaitForFences(engine.logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(engine.logicalDevice, 1, &engine.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
 
@@ -421,7 +421,7 @@ void drawFrame
             engine.logicalDevice,
             engine.swapchain,
             UINT64_MAX,
-            acquireSemaphore,
+            engine.acquireSemaphore,
             VK_NULL_HANDLE,
             &imageIndex
         );
@@ -436,21 +436,21 @@ void drawFrame
         riverAssertVkSuccess(result, "failed to acquire swapchain image!");
     }
 
-    vkResetFences(engine.logicalDevice, 1, &inFlightFences[currentFrame]);
+    vkResetFences(engine.logicalDevice, 1, &engine.inFlightFences[currentFrame]);
 
     updateUniformBuffer(engine, currentFrame);
 
-    vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(engine, commandBuffers[currentFrame], imageIndex);
+    vkResetCommandBuffer(engine.commandBuffers[currentFrame], 0);
+    recordCommandBuffer(engine, engine.commandBuffers[currentFrame], imageIndex);
 
     std::array<VkSemaphore, 1> waitSemaphores =
     {
-        acquireSemaphore
+        engine.acquireSemaphore
     };
 
     std::array<VkSemaphore, 1> signalSemaphores =
     {
-        imageReadyForPresentSemaphores[imageIndex]
+        engine.imageReadyForPresentSemaphores[imageIndex]
     };
 
     VkPipelineStageFlags waitStages[] =
@@ -469,11 +469,11 @@ void drawFrame
 
     drawSubmitInfo.pWaitDstStageMask = waitStages;
     drawSubmitInfo.commandBufferCount = 1;
-    drawSubmitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+    drawSubmitInfo.pCommandBuffers = &engine.commandBuffers[currentFrame];
 
     riverAssertVkSuccess
     (
-        vkQueueSubmit(graphicsQueue, 1, &drawSubmitInfo, inFlightFences[currentFrame]),
+        vkQueueSubmit(engine.graphicsQueue, 1, &drawSubmitInfo, engine.inFlightFences[currentFrame]),
         "failed to submit draw command buffer!"
     );
 
@@ -485,20 +485,20 @@ void drawFrame
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &imageReadyForPresentSemaphores[imageIndex];
+    presentInfo.pWaitSemaphores = &engine.imageReadyForPresentSemaphores[imageIndex];
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapchains;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    std::swap(imageReadyForWriteSemaphores[imageIndex], acquireSemaphore);
+    std::swap(engine.imageReadyForWriteSemaphores[imageIndex], engine.acquireSemaphore);
 
-    result = vkQueuePresentKHR(presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(engine.presentQueue, &presentInfo);
 
-    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
+    if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || engine.framebufferResized)
     {
-        framebufferResized = VK_FALSE;
+        engine.framebufferResized = VK_FALSE;
         recreateSwapchain(engine, settings);
     }
     else

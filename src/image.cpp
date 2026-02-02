@@ -10,13 +10,13 @@
 
 internal void copyBufferToImage
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const VkBuffer      &buffer,
     const VkImage       &image,
     const uint32_t      &width,
     const uint32_t      &height
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, engine.graphicsCommandPool);
 
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -49,18 +49,18 @@ internal void copyBufferToImage
         &region
     );
 
-    flushCommandBuffer(engine, commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
 
 void transitionImageLayout
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const VkImage       &image,
     const VkFormat      &format,
     const VkImageLayout &oldLayout,
     const VkImageLayout &newLayout
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, graphicsCommandPool);
+    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, engine.graphicsCommandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -140,12 +140,12 @@ void transitionImageLayout
         &barrier
     );
 
-    flushCommandBuffer(engine, commandBuffer, graphicsCommandPool, graphicsQueue);
+    flushCommandBuffer(engine, commandBuffer, engine.graphicsCommandPool, engine.graphicsQueue);
 }
 
 void createTextureImage
 (
-    const EngineData        &engine,
+    EngineData              &engine,
     const ProjectManifest   &manifest
 ){
     int texWidth;
