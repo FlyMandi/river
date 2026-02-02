@@ -8,6 +8,7 @@ inline VkPipeline graphicsPipeline;
 inline VkPipelineLayout graphicsPipelineLayout;
 
 inline VkDescriptorSetLayout descriptorSetLayout;
+inline std::vector<VkDescriptorSet> descriptorSets;
 
 inline VkCommandPool graphicsCommandPool;
 inline VkCommandPool transferCommandPool;
@@ -31,6 +32,7 @@ extern void createCommandBuffers();
 
 extern void createDescriptorSetLayout();
 extern void createDescriptorPool();
+extern void createDescriptorSets();
 
 extern void createSyncObjects();
 

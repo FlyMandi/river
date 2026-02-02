@@ -372,6 +372,23 @@ void createDescriptorPool()
     {
         riverLog("failed to create descriptor pool.", RIV_LOG_LEVEL_ERROR);
     }
+}
 
-    //FIXME: WIP
+void createDescriptorSets()
+{
+    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+
+    VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
+    descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    descriptorSetAllocInfo.descriptorPool = descriptorPool;
+    descriptorSetAllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    descriptorSetAllocInfo.pSetLayouts = descriptorSetLayouts.data();
+
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT); 
+    if(vkAllocateDescriptorSets(logicalDevice, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        riverLog("failed to allocate descriptor sets!", RIV_LOG_LEVEL_ERROR);
+    }
+
+    //TODO:#41: descriptors WIP
 }
