@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <format>
 
 namespace engine{
 
@@ -316,7 +317,7 @@ void EngineSwapChain::createSyncObjects(){
         VkResult semaphoreF = vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]);
         VkResult fence = vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]);
         if(semaphoreA != VK_SUCCESS || semaphoreF != VK_SUCCESS || fence != VK_SUCCESS){
-            throw std::runtime_error("failed to create synchronization objects for a frame!");
+            throw std::runtime_error(std::format("failed to create synchronization objects for frame {}", i));
         }
     }
 }
