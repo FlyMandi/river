@@ -7,6 +7,11 @@ function Out-Shader{
     param(
         $fileName
     )
+
+    if(-Not(Test-Path $bin)){
+        &mkdir $bin
+    }
+
     $baseName = $fileName.baseName
     $ext = $fileName.extension
     $target = Join-Path $bin "$baseName$ext.spv"
