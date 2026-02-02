@@ -63,7 +63,12 @@ enum RiverLogLevel
 extern void initVulkan(const ProjectManifest &manifest);
 extern void cleanupVulkan();
 
-extern void drawFrame();
+extern void drawFrame
+(
+    const VkSurfaceKHR      &surface,
+    GLFWwindow              *window,
+    const VkPresentModeKHR  &preferredPresent
+);
 
 extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void riverSetupLog(const std::filesystem::path &path);

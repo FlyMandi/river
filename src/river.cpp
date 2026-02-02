@@ -391,8 +391,12 @@ void cleanupVulkan(EngineData &engine)
     vkDestroyInstance(instance, nullptr);
 }
 
-void drawFrame()
-{
+void drawFrame
+(
+    const VkSurfaceKHR      &surface,
+    GLFWwindow              *window,
+    const VkPresentModeKHR  &preferredPresent
+){
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
@@ -410,7 +414,7 @@ void drawFrame()
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        recreateSwapchain();
+        recreateSwapchain(surface, window, preferredPresent);
         return;
     }
     else if(result != VK_SUBOPTIMAL_KHR)
@@ -481,7 +485,7 @@ void drawFrame()
     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
     {
         framebufferResized = VK_FALSE;
-        recreateSwapchain();
+        recreateSwapchain(surface, window, preferredPresent);
     }
     else
     {
