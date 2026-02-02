@@ -2,6 +2,7 @@
 
 #include "vulkan/vulkan_core.h"
 
+#include <cstdint>
 #include <vector>
 
 struct SwapChainSupportDetails
@@ -13,9 +14,9 @@ struct SwapChainSupportDetails
 
 struct QueueFamilyIndices
 {
-    uint32_t graphicsIndex = -1;
-    uint32_t transferIndex = -1;
-    uint32_t presentIndex = -1;
+    uint32_t graphicsIndex = UINT32_MAX;
+    uint32_t transferIndex = UINT32_MAX;
+    uint32_t presentIndex  = UINT32_MAX;
 };
 
 inline QueueFamilyIndices logicalQueueFamilies;

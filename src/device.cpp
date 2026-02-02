@@ -60,14 +60,16 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
             indices.presentIndex = i;
         }
 
-        if(indices.graphicsIndex != -1 && indices.transferIndex != -1 && indices.presentIndex != -1)
-        { 
+        if( indices.graphicsIndex != UINT32_MAX && 
+            indices.transferIndex != UINT32_MAX && 
+            indices.presentIndex != UINT32_MAX
+        ){ 
             break; 
         }
         ++i;
     }
 
-    if(indices.transferIndex == -1)
+    if(indices.transferIndex == UINT32_MAX)
     {
         indices.transferIndex = indices.graphicsIndex;
     }
@@ -80,8 +82,10 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     static uint32_t score = 0;
 
     static QueueFamilyIndices indices = findQueueFamilies(device);
-    if(indices.graphicsIndex == -1 || indices.transferIndex == -1 || indices.presentIndex == -1)
-    { 
+    if( indices.graphicsIndex == UINT32_MAX || 
+        indices.transferIndex == UINT32_MAX || 
+        indices.presentIndex == UINT32_MAX
+    ){ 
         return 0; 
     }
 
