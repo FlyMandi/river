@@ -1,4 +1,5 @@
 #include "h/window.h"
+#include "GLFW/glfw3.h"
 
 void initGLFW(){
     glfwInit();
@@ -12,4 +13,9 @@ void initGLFW(){
 void cleanupGLFW(){
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void windowPollEvents(){
+    glfwPollEvents();
+    window_SHOULDCLOSE = glfwWindowShouldClose(window);
 }
