@@ -67,12 +67,14 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
         printDebugLog('\0', "Required:", '\n');
     #endif
 
-    for(const auto &required : *requiredExt){
+    for(const auto &required : *requiredExt)
+    {
         bool extFound = false;
         
-            for(const auto &present : *instanceExt){
-                if(0 == strcmp(required, present.extensionName)){
-
+            for(const auto &present : *instanceExt)
+            {
+                if(0 == strcmp(required, present.extensionName))
+                {
                     #ifdef DEBUG
                         printDebugLog('\t', required, '\n');
                     #endif
@@ -81,7 +83,8 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
                     break;
                 }
             }
-        if(!extFound){ 
+        if(!extFound)
+        {
 
             #ifdef DEBUG
                 printDebugLog('\0', "!!!", '\t');
@@ -91,7 +94,6 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
             return false; 
         } 
     }
-
     return true;
 }
 
@@ -103,16 +105,20 @@ static bool checkValidationLayerSupport()
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
-    for(const char *layer : validationLayers){
+    for(const char *layer : validationLayers)
+    {
         bool layerFound = false;
 
-        for(const auto &layerPresent : layerVec){
-            if(0 == strcmp(layerPresent.layerName, layer)){
+        for(const auto &layerPresent : layerVec)
+        {
+            if(0 == strcmp(layerPresent.layerName, layer))
+            {
                 layerFound = true;
                 break;
             }
         }
-        if(!layerFound){
+        if(!layerFound)
+        {
             return false; 
         }
     }
@@ -137,7 +143,8 @@ static void setupDebugMessenger()
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo);
 
-    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS){
+    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+    {
         printDebugLog("failed to set up debug messenger.");
         throw std::runtime_error("failed to set up debug messenger!");
     }
@@ -146,7 +153,8 @@ static void setupDebugMessenger()
 static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator)
 {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if(nullptr != func){
+    if(nullptr != func)
+    {
         func(instance, debugMessenger, allocator);
     }
 }
@@ -186,7 +194,8 @@ void copyFramebufferToDebugImageView(VkCommandBuffer commandBuffer, VkImage srcF
 static void createInstance()
 {
     #ifdef DEBUG
-        if(!checkValidationLayerSupport()){
+        if(!checkValidationLayerSupport())
+        {
             printDebugLog("validation layers requested, but not available!");
             throw std::runtime_error("validation layers requested, but not available!");
         }
