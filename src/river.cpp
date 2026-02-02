@@ -205,6 +205,8 @@ void cleanupVulkan(){
 
     cleanupSwapChain();
 
+    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
+
     vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr);
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
