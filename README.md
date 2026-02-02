@@ -23,7 +23,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ![ScreenShot of the river test project](assets/1.jpg)
 
 ### Next up:
-- finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
+- finishing the vulkan-tutorial (texture mapping to go)
 - camera control
 - a GUI (imgui / clay)
 - a default project.
@@ -32,7 +32,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ### Plans:
 - building an editor that's able to save & load models/projects
 - learn and implement material shaders, compute shaders, etc
-- create an API to write games with (no scripting, pure C++)
+- create an API to write games with (no scripting, pure C/C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
 - add a wireframe view via hotkey
 - anything else I'm motivated enough to implement, like for example:
