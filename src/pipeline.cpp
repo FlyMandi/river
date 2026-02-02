@@ -42,7 +42,8 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
     file.seekg(0);
     file.read(buffer.data(), fileSize);
 
-    if(buffer.size() != fileSize){
+    if(buffer.size() != fileSize)
+    {
         riverLog("failed to correctly read from file!", RIV_LOG_LEVEL_ERROR);
     }
 
@@ -123,7 +124,7 @@ void createGraphicsPipeline()
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.depthBiasConstantFactor = 0.0f;
     rasterizer.depthBiasClamp = 0.0f;
@@ -215,7 +216,6 @@ void createFramebuffers()
     }
 }
 
-//TODO:#41: descriptors WIP
 void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
@@ -263,6 +263,18 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     scissor.extent = swapchainExtent;
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    vkCmdBindDescriptorSets
+    (
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        graphicsPipelineLayout, 
+        0, 
+        1, 
+        &descriptorSets[currentFrame],
+        0,
+        nullptr
+    );
 
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
