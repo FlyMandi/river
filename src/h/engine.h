@@ -51,8 +51,6 @@ void DestroyDebugUtilsMessengerEXT(
         const VkAllocationCallbacks *pAllocator
 );
 
-std::filesystem::path getProjectRoot();
-
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -68,6 +66,7 @@ struct SwapChainSupportDetails {
     std::vector<VkPresentModeKHR> presentModes;
 };
 
+std::filesystem::path getProjectRoot();
 bool appShouldClose();
 
 void initVulkan();

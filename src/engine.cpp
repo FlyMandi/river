@@ -47,21 +47,6 @@ std::vector<VkImageView> swapChainImageViews;
 
 bool appShouldClose(){ return glfwWindowShouldClose(window); }
 
-std::filesystem::path getProjectRoot(){
-    std::filesystem::path current = std::filesystem::current_path();
-
-    for(int i = 0; i < 4; ++i){
-        if(strcmp(current.filename().string().c_str(), appName) == 0) {
-            if(config_DEBUG){ std::cout << "project root: " << current << '\n'; }
-            return current;
-        }else{
-            current = current.parent_path();
-        }
-    }
-
-    throw std::runtime_error("failed to find root folder!");
-}
-
 void initGLFW(){
     glfwInit();
 
@@ -85,8 +70,6 @@ void initVulkan(){
     createSwapChain();
     createImageViews();
     createGraphicsPipeline();
-    //shaders
-    //other stuf
 }
 
 void cleanupVulkan(){
@@ -100,6 +83,21 @@ void cleanupVulkan(){
 
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyInstance(instance, nullptr);
+}
+
+std::filesystem::path getProjectRoot(){
+    std::filesystem::path current = std::filesystem::current_path();
+
+    for(int i = 0; i < 4; ++i){
+        if(strcmp(current.filename().string().c_str(), appName) == 0) {
+            if(config_DEBUG){ std::cout << "project root: " << current << '\n'; }
+            return current;
+        }else{
+            current = current.parent_path();
+        }
+    }
+
+    throw std::runtime_error("failed to find root folder!");
 }
 
 void createInstance(){
@@ -150,6 +148,11 @@ void createInstance(){
         throw std::runtime_error("failed to create instance.");
     }
 }
+
+std::vector<VkDynamicState> dynamicStates = {
+    VK_DYNAMIC_STATE_VIEWPORT,
+    VK_DYNAMIC_STATE_SCISSOR
+};
 
 void setupDebugMessenger(){
     if(!config_DEBUG){ return; }
