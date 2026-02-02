@@ -23,4 +23,4 @@ inline VkImage textureImage;
 inline VkImageView textureImageView;
 inline VkDeviceMemory textureImageMemory;
 
-inline VkSampler textureImageSampler;
+inline VkSampler textureSampler;
