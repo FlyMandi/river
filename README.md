@@ -18,10 +18,8 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - indexed vertex buffers
 
 ### State:
-- there's a window...
-- ...you can resize it!
-- the window shows only a hardcoded rectangle...
-- ...the rectangle took 1500+ lines of code!
+- there's a resizeable window
+- it shows a rotating, coloured rectangle.
 
 ![ScreenShot of the river test project](assets/1.jpg) 
 
@@ -37,4 +35,5 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - learn and implement material shaders, compute shaders, etc
 - create an API to write games with (no scripting, pure C++)
 - provide API callbacks (like glfwSetFramebufferSizeCallback);
+- add a wireframe view via hotkey
 - anything else I'm motivated enough to implement
