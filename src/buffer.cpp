@@ -31,7 +31,7 @@ template<> struct std::hash<Vertex>
     size_t operator()(Vertex const& vertex) const
     {
         return  ((hash<glm::vec3>()(vertex.position) ^
-                (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
+                    (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
                 (hash<glm::vec2>()(vertex.textureCoordinate) << 1);
     }
 };
