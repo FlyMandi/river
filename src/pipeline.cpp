@@ -56,7 +56,7 @@ static std::vector<char> readFile(const std::filesystem::path &filename)
 
 void createGraphicsPipeline()
 {
-    //TODO: compiled shaders should live in some bin folder, project specific
+    //HACK: compiled shaders should live in some bin folder, project specific
     //for now, they'll live in river's bin.
     const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
     const std::filesystem::path fragPath = appRoot / "bin\\fragTest.frag.spv";

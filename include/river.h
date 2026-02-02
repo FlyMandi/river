@@ -37,7 +37,7 @@ extern void clearLogs(const std::filesystem::path &baseDir);
 #ifdef DEBUG
 extern void copyFramebufferToDebugImageView(VkCommandBuffer commandBuffer, VkImage srcFrame);
 
-//TODO: eventually add log levels: [TRACE], [DEBUG], [WARN], [ERROR]
+//TODO:#37: eventually add log levels: [TRACE], [DEBUG], [WARN], [ERROR]
 //pass as argument to function, [DEBUG] by default
 //obv trace shows all, error shows least
 

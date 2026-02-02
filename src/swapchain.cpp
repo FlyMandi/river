@@ -258,6 +258,7 @@ void recreateSwapChain()
         glfwWaitEvents();
     }
 
+    //TODO:#38: fence
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapChain();

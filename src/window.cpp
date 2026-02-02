@@ -43,7 +43,7 @@ void cleanupGLFW()
 
 void createSurface()
 {
-    //TODO: find out if I can create a surface smaller than the window.
+    //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
     {
