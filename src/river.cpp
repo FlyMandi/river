@@ -258,6 +258,7 @@ void cleanupVulkan()
     semaphoreWaitInfo.pSemaphores = semaphores.data();
 
     vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
+
     cleanupSwapchain();
     vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
@@ -267,13 +268,19 @@ void cleanupVulkan()
     vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+    
+    //OPTIM: do we need to wait for fences here?
     vkWaitForFences(logicalDevice, 1, inFlightFences.data(), VK_TRUE, UINT64_MAX);
 
     for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(logicalDevice, imageAvailableSemaphores[i], nullptr);
+
         vkDestroyFence(logicalDevice, inFlightFences[i], nullptr);
+
+        vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
+        vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
     }
 
     vkDestroyCommandPool(logicalDevice, graphicsCommandPool, nullptr);
@@ -319,19 +326,21 @@ void drawFrame()
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    updateUniformBuffer(currentFrame);
 
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-    submitInfo.signalSemaphoreCount = 1;
+    VkSubmitInfo drawSubmitInfo{};
+    drawSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+    drawSubmitInfo.pWaitSemaphores = waitSemaphores;
+    drawSubmitInfo.waitSemaphoreCount = 1;
+    drawSubmitInfo.pSignalSemaphores = signalSemaphores;
+    drawSubmitInfo.signalSemaphoreCount = 1;
 
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+    drawSubmitInfo.pWaitDstStageMask = waitStages;
+    drawSubmitInfo.commandBufferCount = 1;
+    drawSubmitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+
+    if(vkQueueSubmit(graphicsQueue, 1, &drawSubmitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
     {
         #ifdef DEBUG
             printDebugLog("failed to submit draw command buffer!");
