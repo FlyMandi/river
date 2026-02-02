@@ -107,7 +107,7 @@ if(0 -eq $LASTEXITCODE)
     .\shader_comp.ps1
 }
 
-if(0 -eq $LASTEXITCODE)
+if(0 -eq $LASTEXITCODE -and $build -eq "debug")
 {
     Write-Host "`ngenerating rdi debug info..."
 
