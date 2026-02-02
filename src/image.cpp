@@ -42,8 +42,7 @@ internal void copyBufferToImage
     vkCmdCopyBufferToImage
     (
         commandBuffer,
-        buffer,
-        image,
+        buffer, image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
         &region
