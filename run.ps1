@@ -1,6 +1,6 @@
 param(
     [Parameter(position=0,Mandatory=$false)]
-    $build = "Release",
+    $build = "Debug",
     [Parameter(position=1,Mandatory=$false)]
     $OS = "Win64",
     [Parameter(position=2,Mandatory=$false)]
