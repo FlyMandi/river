@@ -14,7 +14,10 @@ extern void createImage
     VkDeviceMemory          &imageMem
 );
 
+VkImageView createImageView(VkImage image, VkFormat format);
 extern void createTextureImage();
+extern void createTextureImageView();
 
 inline VkImage textureImage;
+inline VkImageView textureImageView;
 inline VkDeviceMemory textureImageMemory;

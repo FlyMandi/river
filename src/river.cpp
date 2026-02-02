@@ -389,7 +389,7 @@ void initVulkan()
     createLogicalDevice();
 
     createSwapchain();
-    createImageViews();
+    createSwapImageViews();
 
     createRenderPass();
     createDescriptorSetLayout();
@@ -398,7 +398,9 @@ void initVulkan()
     createFramebuffers();
 
     createCommandPools();
+
     createTextureImage();
+    createTextureImageView();
 
     createVertexBuffer();
     createUniformBuffers();
@@ -425,6 +427,10 @@ void cleanupVulkan()
     vkWaitSemaphores(logicalDevice, &semaphoreWaitInfo, UINT64_MAX);
 
     cleanupSwapchain();
+
+    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
+    vkDestroyImage(logicalDevice, textureImage, nullptr);
+    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 
     vkDestroyImage(logicalDevice, textureImage, nullptr);
     vkFreeMemory(logicalDevice, textureImageMemory, nullptr);

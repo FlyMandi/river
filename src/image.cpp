@@ -1,3 +1,4 @@
+#include "swapchain.h"
 #include "vulkan/vulkan_core.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -257,4 +258,32 @@ void createImage
     );
 
     vkBindImageMemory(logicalDevice, image, imageMem, 0);
+}
+
+VkImageView createImageView(VkImage image, VkFormat format)
+{
+    VkImageViewCreateInfo viewCreateInfo{};
+    viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewCreateInfo.image = image;
+    viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewCreateInfo.format = format;
+    viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewCreateInfo.subresourceRange.baseMipLevel = 0;
+    viewCreateInfo.subresourceRange.levelCount = 1;
+    viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+    viewCreateInfo.subresourceRange.layerCount = 1;
+
+    VkImageView imageView;
+    riverAssertVkSuccess
+    (
+        vkCreateImageView(logicalDevice, &viewCreateInfo, nullptr, &imageView),
+        "failed to create texture image view!"
+    );
+
+    return imageView;
+}
+
+void createTextureImageView()
+{
+    textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
 }

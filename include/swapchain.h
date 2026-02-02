@@ -29,7 +29,7 @@ struct FrameResource
 inline FrameResource frameResources[MAX_FRAMES_IN_FLIGHT];
 
 extern void createSwapchain();
-extern void createImageViews();
+extern void createSwapImageViews();
 extern void createRenderPass();
 
 extern void destroyDeferredResources(FrameResource *frame);
