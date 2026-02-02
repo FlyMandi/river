@@ -100,6 +100,6 @@ if(0 -eq $LASTEXITCODE)
 
 if(0 -eq $LASTEXITCODE)
 {
-    Write-Host "running $target..."
+    Write-Host "`nrunning $target..."
     &$target
 }
