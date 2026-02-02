@@ -10,7 +10,7 @@ void initEditor()
     //load project
     //create new project
     //exit
-    
+
     //HACK: currently no project manifest, so all hardcoded.
     WIDTH = 1920;
     HEIGHT = 1080;
@@ -21,7 +21,7 @@ void initEditor()
 
 void loopEditor()
 {
-    //TODO:#39 draw & exist only in specified viewport area
+    //TODO:#39: draw & exist only in specified viewport area
     //be able to have multiple viewports that can be paused (frozen) and resumed at will
     while(!glfwWindowShouldClose(window))
     {

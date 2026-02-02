@@ -56,8 +56,8 @@ foreach($file in $sourceFiles)
     $sourceFilePaths += " "
     $sourceFilePaths += $file.FullName
 }
-#TODO: flags
-#TODO: switch over to the linux version of the Vulkan SDK and the MSVC C++ stl, rid myself of MSVC
+#flags
+#switch over to the linux version of the Vulkan SDK and the MSVC C++ stl, rid myself of MSVC
 
 if("MSVC" -eq $compiler)
 {
