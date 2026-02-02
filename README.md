@@ -7,10 +7,17 @@ I've used lots of resources to learn Vulkan with C++ but left out a lot of the (
 
 I want this to be my engine, not to reinvent the wheel, but to write it for the sake of learning and write a simple game or two with it. It'll not only teach me about engine programming, but force me to use my own product, so to say.
 
-### Concepts this project has taught me so far:
+### State (DEMO):
+- there's a fully resizeable window with correct and proper vulkan instantiation
+- it shows a rotating, textured 3D model, loaded from .obj/.jpg files
+
+![Screenshot of the river test project](assets/preview.png)
+
+### What I've learned
 - building a graphical application ""from scratch""
 - writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
 - debugging said code (currently via logging, raddbg and renderdoc)
+- asserting in debug builds only, but doing so often and effectively
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
 - vulkan rasterization, viewports, scissors, multisampling
 - queue families, the swapchain & present modes
@@ -19,12 +26,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - loading & sampling textures, texels, mipmaps
 - depth buffering
 - loading 3D models
-
-### State (DEMO):
-- there's a fully resizeable window with correct and proper vulkan instantiation
-- it shows a rotating, textured 3D model, loaded from .obj/.jpg files
-
-![Screenshot of the river test project](assets/preview.png)
 
 ### Next up:
 - multisampling
