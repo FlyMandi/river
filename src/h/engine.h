@@ -37,7 +37,7 @@ const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation
 
 void createInstance();
 void initVulkan();
-void vulkanCleanup();
+void cleanupVulkan();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
