@@ -1,6 +1,5 @@
 ---@diagnostic disable: undefined-global
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-print(VULKAN_SDK)
 
 workspace("Cnake")
 configurations({ "Debug", "Release" })
