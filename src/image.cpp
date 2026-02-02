@@ -59,6 +59,7 @@ static void transitionImageLayout
     VkImageLayout   oldLayout,
     VkImageLayout   newLayout
 ){
+
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier{};
@@ -78,11 +79,34 @@ static void transitionImageLayout
     barrier.srcAccessMask = 0;
     barrier.dstAccessMask = 0;
 
+    VkPipelineStageFlags sourceStage;
+    VkPipelineStageFlags destinationStage;
+
+    if( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+        newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+    {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if(oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+            newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+    {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    }
+    else
+    {
+        riverThrow("unsupported layout transition!");
+    }
+
     vkCmdPipelineBarrier
     (
         commandBuffer,
-        0, //TODO
-        0, //TODO
+        sourceStage,
+        destinationStage,
         0,
         0,
         nullptr,
@@ -172,7 +196,7 @@ void createTextureImage()
         textureImage,
         VK_FORMAT_R8G8B8_SRGB,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
 }
 
