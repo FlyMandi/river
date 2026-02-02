@@ -17,4 +17,6 @@ struct CnakeApp{
     void run();
     void initWindow();
     void gameLoop();
+
+    void createMainMenu(); 
 };
