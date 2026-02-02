@@ -137,14 +137,15 @@ void createTextureImage()
     riverAssert(pixels, "failed to load texture image!");
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
 
     std::set<uint32_t> uniqueFamilyIndices =
     {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex
     };
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
 
     createBuffer
     (
@@ -178,7 +179,7 @@ void createTextureImage()
     transitionImageLayout
     (
         textureImage,
-        VK_FORMAT_R8G8B8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
     );
@@ -194,7 +195,7 @@ void createTextureImage()
     transitionImageLayout
     (
         textureImage,
-        VK_FORMAT_R8G8B8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
@@ -245,7 +246,7 @@ void createImage
     VkMemoryAllocateInfo mAllocInfo{};
     mAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     mAllocInfo.allocationSize = imageMemRequirements.size;
-    mAllocInfo.memoryTypeIndex = findSuitableMemoryType(imageMemRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    mAllocInfo.memoryTypeIndex = findSuitableMemoryType(imageMemRequirements.memoryTypeBits, memPropFlags);
 
     riverAssertVkSuccess
     (
