@@ -39,7 +39,7 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSur
     persistent std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, physicalQueueFamilies.data());
 
-    persistent VkBool32 presentSupport = false;
+    VkBool32 presentSupport = false;
 
     for(int i = 0; const auto &queueFamily : physicalQueueFamilies)
     {
@@ -81,8 +81,8 @@ internal uint32_t rateDeviceSuitability
     const VkPhysicalDevice  &device,
     const VkSurfaceKHR      &surface
 ){
-    static uint32_t score = 0;
-    static QueueFamilyIndices indices = findQueueFamilies(device, surface);
+    uint32_t score = 0;
+    QueueFamilyIndices indices = findQueueFamilies(device, surface);
 
     if( indices.graphicsIndex == UINT32_MAX ||
         indices.transferIndex == UINT32_MAX ||
@@ -194,7 +194,7 @@ void pickPhysicalDevice
     {
         physicalDevice = suitabilityCandidates.rbegin()->second;
 
-        static QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
+        QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
         logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
         logicalQueueFamilies.transferIndex = indices.transferIndex;
         logicalQueueFamilies.presentIndex = indices.presentIndex;

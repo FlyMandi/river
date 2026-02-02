@@ -13,7 +13,7 @@
 #include <iostream>
 #include <vector>
 
-static VkShaderModule createShaderModule(const std::vector<char> &code)
+internal VkShaderModule createShaderModule(const std::vector<char> &code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -30,7 +30,7 @@ static VkShaderModule createShaderModule(const std::vector<char> &code)
     return shaderModule;
 }
 
-static std::vector<char> readFile(const std::filesystem::path &filename)
+internal std::vector<char> readFile(const std::filesystem::path &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 

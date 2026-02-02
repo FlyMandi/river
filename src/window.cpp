@@ -2,7 +2,7 @@
 #include "window.h"
 #include "pipeline.h"
 
-static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+internal void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     framebufferResized = VK_TRUE;
 }

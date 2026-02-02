@@ -12,7 +12,7 @@
 #define global      static
 #define internal    static
 
-static uint32_t currentFrame = 0;
+global uint32_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
 

@@ -9,7 +9,7 @@
 #include "buffer.h"
 #include "image.h"
 
-static void copyBufferToImage
+internal void copyBufferToImage
 (
     VkBuffer    buffer,
     VkImage     image,
