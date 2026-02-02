@@ -1,4 +1,4 @@
-param( $config = "release" )
+param( $config = "debug" )
 &premake5 clean
 &premake5 vs2022
 .\src\win_compile_shaders.ps1
