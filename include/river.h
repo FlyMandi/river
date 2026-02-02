@@ -11,7 +11,7 @@
 
 #define TIMESTAMP 
 
-inline uint16_t currentFrame = 0;
+inline uint8_t currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
  

@@ -4,7 +4,7 @@
 
 #include <vector>
 
-constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
+constexpr uint8_t MAX_FRAMES_IN_FLIGHT = 2;
 
 inline VkSwapchainKHR swapchain;
 inline VkFormat swapchainImageFormat;
