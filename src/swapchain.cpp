@@ -54,9 +54,9 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
     {
         riverLog("swap width: ", RIV_LOG_LEVEL_TRACE);
-        riverLog(capabilities.currentExtent.width, RIV_LOG_LEVEL_TRACE);
-        riverLog("swap height: ", RIV_LOG_LEVEL_TRACE);
-        riverLog(capabilities.currentExtent.height, RIV_LOG_LEVEL_TRACE);
+        riverLog(capabilities.currentExtent.width, RIV_LOG_LEVEL_TRACE, false);
+        riverLog("swap height: ", RIV_LOG_LEVEL_TRACE, false);
+        riverLog(capabilities.currentExtent.height, RIV_LOG_LEVEL_TRACE, false);
 
         return capabilities.currentExtent;
     }
@@ -71,9 +71,9 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
         riverLog("swap width (clamped): ", RIV_LOG_LEVEL_TRACE);
-        riverLog(actualExtent.width, RIV_LOG_LEVEL_TRACE);
-        riverLog("swap height (clamped): ", RIV_LOG_LEVEL_TRACE);
-        riverLog(actualExtent.height, RIV_LOG_LEVEL_TRACE);
+        riverLog(actualExtent.width, RIV_LOG_LEVEL_TRACE, false);
+        riverLog("swap height (clamped): ", RIV_LOG_LEVEL_TRACE, false);
+        riverLog(actualExtent.height, RIV_LOG_LEVEL_TRACE, false);
 
         return actualExtent;
     }
@@ -270,5 +270,8 @@ void recreateSwapchain()
     createImageViews();
     createFramebuffers();
 
-    riverLog("swap recreated.", RIV_LOG_LEVEL_DEBUG);
+    riverLog("recreated swap size: ", RIV_LOG_LEVEL_DEBUG);
+    riverLog(height, RIV_LOG_LEVEL_DEBUG, false);
+    riverLog("x", RIV_LOG_LEVEL_DEBUG, false);
+    riverLog(width, RIV_LOG_LEVEL_DEBUG, false);
 }

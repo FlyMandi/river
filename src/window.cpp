@@ -4,10 +4,11 @@
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    riverLog("new swap size: ", RIV_LOG_LEVEL_TRACE);
+    riverLog("attempting resize: ", RIV_LOG_LEVEL_TRACE);
     riverLog(height, RIV_LOG_LEVEL_TRACE, false);
     riverLog("x", RIV_LOG_LEVEL_TRACE, false);
     riverLog(width, RIV_LOG_LEVEL_TRACE, false);
+
     framebufferResized = VK_TRUE;
 }
 
@@ -39,5 +40,3 @@ void createSurface()
         "failed to create window surface!"
     );
 }
-
-
