@@ -12,6 +12,13 @@ struct Vertex
     glm::vec3 position;
     glm::vec3 colour;
     glm::vec2 textureCoordinate;
+
+    bool operator==(const Vertex& other) const
+    {
+        return  position            == other.position   &&
+                colour              == other.colour     &&
+                textureCoordinate   == other.textureCoordinate;
+    }
 };
 
 struct UniformBufferObject
