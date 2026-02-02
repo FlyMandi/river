@@ -12,6 +12,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
 - debugging said code (currently via logging, raddbg and renderdoc)
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
+- vulkan rasterization, viewports, scissors, multisampling
 - queue families, the swapchain & present modes
 - vertex & index buffers, vertex & fragment shaders
 - uniform buffer objects and model view projection
