@@ -1,4 +1,5 @@
 #include "river.h"
+#include "vulkan/vulkan_core.h"
 #include "window.h"
 #include "device.h"
 #include "swapchain.h"
@@ -37,14 +38,13 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
-    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
-    {
+    if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         printDebugLog('\0', "swap width: ");
         printDebugLog(capabilities.currentExtent.width, '\n');
         printDebugLog('\0', "swap height: ");
         printDebugLog(capabilities.currentExtent.height, '\n');
 
-        return capabilities.currentExtent; 
+        return capabilities.currentExtent;
     }else{
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
@@ -54,9 +54,9 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-        printDebugLog('\0', "swap width: ");
+        printDebugLog('\0', "swap width (clamped): ");
         printDebugLog(actualExtent.width, '\n');
-        printDebugLog('\0', "swap height: ");
+        printDebugLog('\0', "swap height (clamped): ");
         printDebugLog(actualExtent.height, '\n');
         
         return actualExtent;
