@@ -271,8 +271,6 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
     if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to begin recording command buffer!", 2, 1);
         throw std::runtime_error("failed to begin recording command buffer!");
-    }else{
-        printDebugLog("Successfully began recording command buffer.", 0, 1);
     }
     
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
@@ -313,8 +311,6 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
     if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to record command buffer!", 2, 1);
         throw std::runtime_error("failed to record command buffer!");
-    }else{
-        printDebugLog("Successfully recorded command buffer.", 0, 1);
     }
 }
 
