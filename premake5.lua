@@ -6,7 +6,6 @@ workspace("River")
     configurations({ "Debug", "Release" })
     platforms({"Win64"})
     location("build")
-    toolset("clang")
 
     project("River")
         language("C++")
