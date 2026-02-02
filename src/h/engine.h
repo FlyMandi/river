@@ -34,6 +34,22 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
+VkResult CreateDebugUtilsMessengerEXT(
+        VkInstance                                  instance,
+        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
+        const VkAllocationCallbacks                 *pAllocator,
+        VkDebugUtilsMessengerEXT                    *pDebugMessenger
+    );
+
+void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+
+void DestroyDebugUtilsMessengerEXT(
+        VkInstance                  instance,
+        VkDebugUtilsMessengerEXT    messenger, 
+        const VkAllocationCallbacks *pAllocator
+    );
+
+
 struct QueueFamilyIndices{
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -58,6 +74,7 @@ void cleanupGLFW();
 void createInstance();
 void createLogicalDevice();
 void createSwapChain();
+void createImageViews();
 
 std::vector<const char*> getRequiredExtensions();
 bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt);
