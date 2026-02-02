@@ -11,7 +11,6 @@ workspace("River")
     --Put Waterfall in its own repo, then add river as a submodule.
     --Can't really use River without waterfall to build a game. 
     project("River")
-        kind("WindowedApp")
         links{ "glfw3", "vulkan-1" }
         language("C++")
         cppdialect("C++23")
@@ -22,6 +21,7 @@ workspace("River")
         files({ "**.h", "**.c", "**.hpp", "**.cpp" })
 
 filter("configurations:Debug")
+    kind("ConsoleApp")
     defines{"DEBUG"}
     staticruntime("off")
     runtime("Debug")
@@ -29,6 +29,7 @@ filter("configurations:Debug")
     ignoredefaultlibraries({ "MSVCRT" })
 
 filter("configurations:Release")
+    kind("WindowedApp")
     staticruntime("off")
     runtime("Release")
     symbols("Off")
