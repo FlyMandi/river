@@ -204,8 +204,8 @@ static void createInstance()
     createInfo.ppEnabledExtensionNames = requiredExtensions.data();
     createInfo.enabledLayerCount = 0;
 
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     #ifdef DEBUG
+        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
 
