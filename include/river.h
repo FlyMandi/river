@@ -30,7 +30,6 @@ const std::vector<const char*> validationLayers =
 {
     "VK_LAYER_KHRONOS_validation",
     "VK_LAYER_KHRONOS_synchronization2",
-    // TODO:#47: re-enable when this is set to trace
     // "VK_LAYER_LUNARG_crash_diagnostic",
     "VK_LAYER_RTSS"
 };
