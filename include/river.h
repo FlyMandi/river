@@ -7,6 +7,9 @@
 #include <filesystem>
 #include <vector>
 
+//TODO: wherever I'm using build_DEBUG to print something out to the console, get rid of it.
+//instead, throw a useful error OR write a function that will output it on the actual application screen
+//like skyrim SKSE logs, FreeType might be the go-to
 #ifdef DEBUG
     const bool build_DEBUG = true;
 #else 
