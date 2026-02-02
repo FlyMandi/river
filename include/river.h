@@ -4,11 +4,11 @@
 #include "device.h"
 #include "swapchain.h"
 #include "pipeline.h"
+#include "debugger.h"
 
 #include <filesystem>
 
 #if defined(DEBUG) || defined(_DEBUG)
-    #include "debugger.h"
     const bool build_DEBUG = true;
 #else
     const bool build_DEBUG = false;
@@ -33,12 +33,8 @@ std::filesystem::path appRoot;
 VkInstance instance;
 
 Window window = Window(instance, appName, appVersion);
-Device device;
-
-#if defined(DEBUG) || defined(_DEBUG)
-    Debugger debugger = Debugger(instance, device); 
-#endif
-
+Device device = Device(window);
+Debugger debugger = Debugger(instance, device);
 SwapChain swapchain = SwapChain(device);
 Pipeline pipeline;
 
