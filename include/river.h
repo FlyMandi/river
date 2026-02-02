@@ -11,7 +11,7 @@
 
 #define TIMESTAMP 
 
-constexpr auto MAX_FRAMES_IN_FLIGHT = 2;
+constexpr uint16_t MAX_FRAMES_IN_FLIGHT = 2;
 inline int currentFrame = 0;
 
 constexpr auto ENGINE_NAME = "River";
@@ -35,8 +35,6 @@ extern std::filesystem::path getProjectRoot(const char *rootName);
 extern void clearLogs(const std::filesystem::path &baseDir);
 
 #ifdef DEBUG
-extern void copyFramebufferToDebugImageView(VkCommandBuffer commandBuffer, VkImage srcFrame);
-
 //TODO:#37: eventually add log levels: [TRACE], [DEBUG], [WARN], [ERROR]
 //pass as argument to function, [DEBUG] by default
 //obv trace shows all, error shows least
