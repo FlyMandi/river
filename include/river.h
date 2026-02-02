@@ -1,12 +1,9 @@
 #pragma once
 
-#include "window.h"
-#include "device.h"
-#include "swapchain.h"
-#include "pipeline.h"
-#include "debugger.h"
+#include "vulkan/vulkan_core.h"
 
 #include <filesystem>
+#include <vector>
 
 #if defined(DEBUG) || defined(_DEBUG)
     const bool build_DEBUG = true;
@@ -16,45 +13,32 @@
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-typedef struct River{
+namespace river{
 
-River() = delete;
-River(const char *appName, const char* appVersion) : appName(appName), appVersion(appVersion){};
-River(const River&) = delete;
-River operator=(const River &) = delete;
-~River();
+inline const char *engineName = "River";
+inline const char *appName;
+inline const char *appVersion;
 
-const char *engineName = "River";
-const char *appName;
-const char *appVersion;
+inline std::filesystem::path appRoot;
+inline std::filesystem::path debugLog;
 
-std::filesystem::path appRoot;
+inline VkInstance instance;
+inline VkDebugUtilsMessengerEXT debugMessenger;
 
-VkInstance instance;
+//TODO: move queues & command buffers to diff file 
 
-Window window = Window(instance, appName, appVersion);
-Device device = Device(window);
-Debugger debugger = Debugger(instance, device);
-SwapChain swapchain = SwapChain(device);
-Pipeline pipeline;
+extern void initVulkan();
+extern void cleanupVulkan();
 
-//TODO: move queues & command buffers to diff struct
-VkQueue graphicsQueue;
-VkQueue presentQueue;
+extern void drawFrame();
 
-void createInstance();
+extern void getProjectRoot(const char* rootName);
+extern void printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines);
 
-void createCommandBuffer();
-void createCommandPool();
-void createSyncObjects();
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-void createFramebuffers();
+inline const std::vector<const char*> validationLayers = {
+    "VK_LAYER_KHRONOS_validation" 
+};
 
-void initVulkan();
-void cleanupVulkan();
+inline bool firstOpen = true;
 
-void drawFrame();
-
-void getProjectRoot(const char* rootName);
-
-}River;
+}

@@ -1,98 +1,64 @@
 #include "river.h"
+#include "window.h"
+#include "device.h"
+#include "swapchain.h"
+#include "pipeline.h"
 
-void River::initVulkan(){
+#include <cstring>
+#include <iostream>
+#include <fstream>
 
-    createInstance();
-    debugger.setupDebugMessenger();
-    window.createSurface();
-    device.pickPhysicalDevice();
-    device.createLogicalDevice();
-    swapchain.createSwapChain();
-    swapchain.createImageViews();
-    swapchain.createRenderPass();
-    pipeline.createGraphicsPipeline();
-    createFramebuffers();
-    createCommandPool();
-    createCommandBuffer();
-    createSyncObjects();
-}
-
-void River::cleanupVulkan(){
-    vkDeviceWaitIdle(device.logicalDevice);
-
-    vkDestroySemaphore(device.logicalDevice, pipeline.imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(device.logicalDevice, pipeline.renderFinishedSemaphore, nullptr);
-    vkDestroyFence(device.logicalDevice, pipeline.inFlightFence, nullptr);
-
-    vkDestroyCommandPool(device.logicalDevice, pipeline.commandPool, nullptr);
-
-    for(const auto &framebuffer : swapchain.swapChainFramebuffers){
-        vkDestroyFramebuffer(device.logicalDevice, framebuffer, nullptr);
-    }
-
-    vkDestroyPipeline(device.logicalDevice, pipeline.graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device.logicalDevice, pipeline.pipelineLayout, nullptr);
-    vkDestroyRenderPass(device.logicalDevice, pipeline.renderPass, nullptr);
-
-    for(const auto &imageView : swapchain.swapChainImageViews){
-        vkDestroyImageView(device.logicalDevice, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device.logicalDevice, swapchain.swapChain, nullptr);
-    vkDestroyDevice(device.logicalDevice, nullptr);
-
+void river::printDebugLog(const std::string &text, uint32_t tabs, uint32_t newlines){
     if(build_DEBUG){
-        debugger.DestroyDebugUtilsMessengerEXT(debugger.debugMessenger, nullptr); 
-    }
+        if(firstOpen){
+            remove(debugLog);
+            firstOpen = false;
+        }
 
-    vkDestroySurfaceKHR(instance, window.surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+        std::ofstream log(debugLog, std::ios::app);
+        if(!log.is_open()){
+            throw std::runtime_error("failed to open file");
+        }
+
+        for(;tabs > 0; --tabs){
+            log << '\t'; 
+        }
+
+            log << text;
+
+        for(;newlines > 0; --newlines){
+            log << '\n';
+        }
+
+        log.close();
+    }
 }
 
-void River::drawFrame(){
-    uint32_t imageIndex;
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+        const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
+        void                                        *pUserData
+    ){
 
-    vkWaitForFences(device.logicalDevice, 1, &pipeline.inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(device.logicalDevice, 1, &pipeline.inFlightFence);
+    std::cerr << "validation layer: " << pCallbackData->pMessage << '\n';
 
-    vkAcquireNextImageKHR(device.logicalDevice, swapchain.swapChain, UINT64_MAX, pipeline.imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
-    
-    vkResetCommandBuffer(commandBuffer, 0);
-    recordCommandBuffer(commandBuffer, imageIndex);
+    return VK_FALSE;
+}
 
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+static VkResult CreateDebugUtilsMessengerEXT(
+        VkInstance                                  instance,
+        const VkDebugUtilsMessengerCreateInfoEXT    *pCreateInfo,
+        const VkAllocationCallbacks                 *pAllocator,
+        VkDebugUtilsMessengerEXT                    *pDebugMessenger
+    ){
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-    submitInfo.signalSemaphoreCount = 1;
-
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &pipeline.commandBuffer;
-
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, pipeline.inFlightFence) != VK_SUCCESS){
-        debugger.printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
-        throw std::runtime_error("failed to submit draw command buffer!");
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if(nullptr != func){
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }else{
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
-
-    VkSwapchainKHR swapChains[] = {swapchain.swapChain};
-
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
-
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
-    presentInfo.pImageIndices = &imageIndex;
-
-    vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
 static std::vector<const char*> getRequiredExtensions(){
@@ -109,11 +75,97 @@ static std::vector<const char*> getRequiredExtensions(){
     return extensions;
 }
 
-void River::createInstance(){
-    if(build_DEBUG && !debugger.checkValidationLayerSupport()){
-        debugger.printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
+static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
+    using namespace river;
+    printDebugLog("\nPresent:", 1, 1);
+    for(const auto &extension : *instanceExt){
+        printDebugLog(extension.extensionName, 2, 1);
+    }
+
+    printDebugLog("\nRequired:", 1, 1);
+    for(const auto &required : *requiredExt){
+        bool extFound = false;
+        
+            for(const auto &present : *instanceExt){
+                if(0 == strcmp(required, present.extensionName)){
+                    printDebugLog("found:\t", 0, 0);
+                    printDebugLog(required, 1, 1);
+                    extFound = true;
+                    break;
+                }
+            }
+        if(!extFound){ 
+            printDebugLog("not found:\t", 0, 0);
+            return false; 
+        } 
+    }
+
+    return true;
+}
+
+static bool checkValidationLayerSupport(){
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    
+    std::vector<VkLayerProperties> layerVec(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
+
+    for(const char *layer : river::validationLayers){
+        bool layerFound = false;
+
+        for(const auto &layerPresent : layerVec){
+            if(0 == strcmp(layerPresent.layerName, layer)){
+                layerFound = true;
+                break;
+            }
+        }
+        if(!layerFound){
+            return false; 
+        }
+    }
+
+    return true;
+}
+
+static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
+    createInfo = {}; 
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
+}
+
+static void setupDebugMessenger(){
+    if(!build_DEBUG){ 
+        return; 
+    }
+    using namespace river;
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+    populateDebugMessengerCreateInfo(createInfo);
+
+    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to set up debug messenger.", 2, 1);
+        throw std::runtime_error("failed to set up debug messenger!");
+    }else{
+        printDebugLog("Successfully set up debug messenger.", 0, 1);
+    }
+}
+
+static void DestroyDebugUtilsMessengerEXT(VkDebugUtilsMessengerEXT messenger, const VkAllocationCallbacks *pAllocator){
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(river::instance, "vkDestroyDebugUtilsMessengerEXT");
+    if(nullptr != func){
+        func(river::instance, messenger, pAllocator);
+    }
+}
+
+static void createInstance(){
+    if(build_DEBUG && !checkValidationLayerSupport()){
+        river::printDebugLog("\nERROR: validation layers requested, but not available!", 2, 1);
         throw std::runtime_error("validation layers requested, but not available!");
     }
+    using namespace river;
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -129,10 +181,10 @@ void River::createInstance(){
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
 
     std::vector<const char*> requiredExtensions = getRequiredExtensions();
-    if(debugger.checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
-        debugger.printDebugLog("\nAll required extensions are present.", 0, 1);
+    if(checkInstanceExtensions(&requiredExtensions, &instanceExtensions)){
+        printDebugLog("\nAll required extensions are present.", 0, 1);
     }else{
-        debugger.printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
+        printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
         throw std::runtime_error("extensions required, but not available!"); 
     }
 
@@ -146,10 +198,10 @@ void River::createInstance(){
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     if(build_DEBUG){
-        createInfo.enabledLayerCount = static_cast<uint32_t>(debugger.validationLayers.size()); 
-        createInfo.ppEnabledLayerNames = debugger.validationLayers.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()); 
+        createInfo.ppEnabledLayerNames = validationLayers.data();
         
-        debugger.populateDebugMessengerCreateInfo(debugCreateInfo);
+        populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
     }else{
         createInfo.enabledLayerCount = 0;
@@ -157,154 +209,121 @@ void River::createInstance(){
     }
 
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS){
-        debugger.printDebugLog("\nERROR: failed to create instance.", 2, 1);
+        printDebugLog("\nERROR: failed to create instance.", 2, 1);
         throw std::runtime_error("failed to create instance.");
     }else{
-        debugger.printDebugLog("Successfully created instance.", 0, 1);
+        printDebugLog("Successfully created instance.", 0, 1);
     }
 }
 
-void River::createFramebuffers(){
-    swapChainFramebuffers.resize(swapChainImageViews.size());
+void river::initVulkan() {
 
-    for(size_t i = 0; i < swapChainImageViews.size(); ++i){
-        VkImageView attachments[] = { swapChainImageViews[i] };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = pipeline::renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = swapChainExtent.width;
-        framebufferInfo.height = swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if(vkCreateFramebuffer(device::logicalDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS){
-            printDebugLog("\nERROR: failed to create framebuffer!", 2, 1);
-            throw std::runtime_error("failed to create framebuffer!");
-        }else{
-            printDebugLog("Successfully created framebuffer.", 0, 1);
-        }
-    }
+  createInstance();
+  setupDebugMessenger();
+  window::createSurface();
+  device::pickPhysicalDevice();
+  device::createLogicalDevice();
+  swapchain::createSwapChain();
+  swapchain::createImageViews();
+  swapchain::createRenderPass();
+  pipeline::createGraphicsPipeline();
+  pipeline::createFramebuffers();
+  pipeline::createCommandPool();
+  pipeline::createCommandBuffer();
+  pipeline::createSyncObjects();
 }
 
-void engine::createCommandPool(){
-    QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+void river::cleanupVulkan(){
+    vkDeviceWaitIdle(device::logicalDevice);
 
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    vkDestroySemaphore(device::logicalDevice, pipeline::imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(device::logicalDevice, pipeline::renderFinishedSemaphore, nullptr);
+    vkDestroyFence(device::logicalDevice, pipeline::inFlightFence, nullptr);
 
-    if((vkCreateCommandPool(device::logicalDevice, &poolInfo, nullptr, &pipeline::commandPool)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create command pool!", 2, 1);
-        throw std::runtime_error("failed to create command pool!");
-    }else{
-        printDebugLog("Successfully created command pool.", 0, 1);
+    vkDestroyCommandPool(device::logicalDevice, pipeline::commandPool, nullptr);
+
+    for(const auto &framebuffer : swapchain::swapChainFramebuffers){
+        vkDestroyFramebuffer(device::logicalDevice, framebuffer, nullptr);
     }
+
+    vkDestroyPipeline(device::logicalDevice, pipeline::graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device::logicalDevice, pipeline::pipelineLayout, nullptr);
+    vkDestroyRenderPass(device::logicalDevice, pipeline::renderPass, nullptr);
+
+    for(const auto &imageView : swapchain::swapChainImageViews){
+        vkDestroyImageView(device::logicalDevice, imageView, nullptr);
+    }
+
+    vkDestroySwapchainKHR(device::logicalDevice, swapchain::swapChain, nullptr);
+    vkDestroyDevice(device::logicalDevice, nullptr);
+
+    if(build_DEBUG){
+        DestroyDebugUtilsMessengerEXT(debugMessenger, nullptr); 
+    }
+
+    vkDestroySurfaceKHR(instance, window::surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
 }
 
-void engine::createCommandBuffer(){
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = pipeline::commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
+void river::drawFrame(){
+    uint32_t imageIndex;
 
-    if(vkAllocateCommandBuffers(device::logicalDevice, &allocInfo, &pipeline::commandBuffer) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to allocate command buffers!", 2, 1);
-        throw std::runtime_error("failed to allocate command buffers!");
-    }else{
-        printDebugLog("Successfully allocated command buffer.", 0, 1);
+    vkWaitForFences(device::logicalDevice, 1, &pipeline::inFlightFence, VK_TRUE, UINT64_MAX);
+    vkResetFences(device::logicalDevice, 1, &pipeline::inFlightFence);
+
+    vkAcquireNextImageKHR(device::logicalDevice, swapchain::swapChain, UINT64_MAX, pipeline::imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    vkResetCommandBuffer(pipeline::commandBuffer, 0);
+    pipeline::recordCommandBuffer(pipeline::commandBuffer, imageIndex);
+
+    VkSemaphore waitSemaphores[] = {pipeline::imageAvailableSemaphore};
+    VkSemaphore signalSemaphores[] = {pipeline::renderFinishedSemaphore};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+    submitInfo.signalSemaphoreCount = 1;
+
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &pipeline::commandBuffer;
+
+    if(vkQueueSubmit(pipeline::graphicsQueue, 1, &submitInfo, pipeline::inFlightFence) != VK_SUCCESS){
+        printDebugLog("\nERROR: failed to submit draw command buffer!", 2, 1);
+        throw std::runtime_error("failed to submit draw command buffer!");
     }
-}
 
-void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex){
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    VkSwapchainKHR swapChains[] = {swapchain::swapChain};
 
-    if((vkBeginCommandBuffer(commandBuffer, &beginInfo)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to begin recording command buffer!", 2, 1);
-        throw std::runtime_error("failed to begin recording command buffer!");
-    }
-    
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = pipeline::renderPass;
-    renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChainExtent;
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &imageIndex;
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline::graphicsPipeline);
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapChainExtent.width);
-    viewport.height = static_cast<float>(swapChainExtent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = swapChainExtent;
-
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-    //NOTE: I'm specifyin the num of verts... lmfao
-    vkCmdDraw(commandBuffer, 3, 2, 0, 0);
-
-    vkCmdEndRenderPass(commandBuffer);
-
-    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to record command buffer!", 2, 1);
-        throw std::runtime_error("failed to record command buffer!");
-    }
-}
-
-void engine::createSyncObjects(){
-    VkSemaphoreCreateInfo semaphoreInfo{};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    
-    if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::renderFinishedSemaphore)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
-        throw std::runtime_error("failed to create semaphores!");
-    }else{
-        printDebugLog("Successfully created semaphores.", 0, 1);
-    }
-    if((vkCreateFence(device::logicalDevice, &fenceInfo, nullptr, &pipeline::inFlightFence)) != VK_SUCCESS){
-        printDebugLog("\nERROR: failed to create fence!", 2, 1);
-        throw std::runtime_error("failed to create fence!");
-    }else{
-        printDebugLog("Successfully created fence.", 0, 1);
-    }
+    vkQueuePresentKHR(pipeline::presentQueue, &presentInfo);
 }
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
-void River::getProjectRoot(const char *rootName){
+void river::getProjectRoot(const char *rootName){
     std::filesystem::path current = std::filesystem::current_path();
 
     for(int i = 0; i < 3; ++i){
         if(strcmp(current.filename().string().c_str(), rootName) == 0) {
             appRoot = current;
-            debugger.debugLog = current / "debug.log";
-            debugger.printDebugLog("project root:", 0, 0);
-            debugger.printDebugLog(current.string(), 1, 1);
+            debugLog = current / "debug.log";
+            printDebugLog("project root:", 0, 0);
+            printDebugLog(current.string(), 1, 1);
             return;
         }else{
             current = current.parent_path();
         }
     }
 }
-

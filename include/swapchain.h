@@ -1,32 +1,23 @@
 #pragma once
 
-#include "device.h"
-
 #include "vulkan/vulkan_core.h"
 
 #include <vector>
 
-typedef struct SwapChain{
+namespace swapchain{
 
-SwapChain() = delete;
-SwapChain(Device &device) : device(device){};
-SwapChain(const SwapChain&) = delete;
-SwapChain operator=(const SwapChain&) = delete;
-~SwapChain();
+inline VkSwapchainKHR swapChain;
+inline VkFormat swapChainImageFormat;
+inline VkExtent2D swapChainExtent;
 
-Device &device;
-VkSwapchainKHR swapChain;
-VkFormat swapChainImageFormat;
-VkExtent2D swapChainExtent;
+inline std::vector<VkImage> swapChainImages;
+inline std::vector<VkImageView> swapChainImageViews;
+inline std::vector<VkFramebuffer> swapChainFramebuffers;
 
-std::vector<VkImage> swapChainImages;
-std::vector<VkImageView> swapChainImageViews;
-std::vector<VkFramebuffer> swapChainFramebuffers;
+extern void createSwapChain();
+extern void createImageViews();
+extern void createRenderPass();
 
-void createSwapChain();
-void createImageViews();
-void createRenderPass();
+extern VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
-VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-
-}SwapChain;
+}

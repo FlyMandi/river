@@ -17,6 +17,7 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 }
 
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes){
+    using namespace river;
     for(const auto &availablePresentMode : availablePresentModes){
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode){
             printDebugLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", 0, 2);
@@ -35,7 +36,8 @@ static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
+VkExtent2D swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities){
+    using namespace river;
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width){
         printDebugLog("swap width: ", 0, 0);
         printDebugLog(std::to_string(capabilities.currentExtent.width), 0, 1);
@@ -45,7 +47,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
         return capabilities.currentExtent; 
     }else{
         int width, height;
-        glfwGetFramebufferSize(window.pWindow, &width, &height);
+        glfwGetFramebufferSize(window::pWindow, &width, &height);
 
         VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
@@ -61,8 +63,8 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilit
     }
 }
 
-void SwapChain::createSwapChain(){
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+void swapchain::createSwapChain(){
+    SwapChainSupportDetails swapChainSupport = device::querySwapChainSupport(device::physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -76,7 +78,7 @@ void SwapChain::createSwapChain(){
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface;
+    createInfo.surface = window::surface;
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -84,7 +86,7 @@ void SwapChain::createSwapChain(){
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    QueueFamilyIndices indices = device::findQueueFamilies(device::physicalDevice);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if(indices.graphicsFamily != indices.presentFamily){
@@ -104,20 +106,20 @@ void SwapChain::createSwapChain(){
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
-        engine::printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
+    if(vkCreateSwapchainKHR(device::logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS){
+        river::printDebugLog("\nERROR: failed to create swap chain!", 2, 1);
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(device::logicalDevice, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(device::logicalDevice, swapChain, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
 }
 
-void swap::createImageViews(){
+void swapchain::createImageViews(){
     swapChainImageViews.resize(swapChainImages.size()); 
 
     for(size_t i = 0; i < swapChainImages.size(); ++i){
@@ -139,15 +141,15 @@ void swap::createImageViews(){
         createInfo.subresourceRange.layerCount = 1;
 
         if(vkCreateImageView(device::logicalDevice, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS){
-            engine::printDebugLog("\nERROR: failed to create image views!", 2, 1);
+            river::printDebugLog("\nERROR: failed to create image views!", 2, 1);
             throw std::runtime_error("failed to create image views!");
         }
     }
 }
 
-void swap::createRenderPass(){
+void swapchain::createRenderPass(){
     VkAttachmentDescription colorAttachment{}; 
-    colorAttachment.format = swap::swapChainImageFormat;
+    colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -185,7 +187,7 @@ void swap::createRenderPass(){
     renderPassInfo.pDependencies = &dependency;
 
     if((vkCreateRenderPass(device::logicalDevice, &renderPassInfo, nullptr, &pipeline::renderPass)) != VK_SUCCESS){
-        engine::printDebugLog("\nERROR: failed to create render pass!", 2, 1);
+        river::printDebugLog("\nERROR: failed to create render pass!", 2, 1);
         throw std::runtime_error("failed to create render pass!");
     }
 }

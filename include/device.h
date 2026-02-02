@@ -1,7 +1,5 @@
 #pragma once
 
-#include "window.h"
-
 #include "vulkan/vulkan_core.h"
 
 #include <optional>
@@ -22,28 +20,18 @@ typedef struct QueueFamilyIndices{
     }
 }QueueFamilyIndices;
 
-typedef struct Device{
+namespace device{
 
-Device() = delete;
-Device(Window &window) : window(window){};
-Device(const Device&) = delete;
-Device operator=(const Device &) = delete;
-~Device();
+inline VkPhysicalDevice physicalDevice;
+inline VkPhysicalDeviceProperties deviceProperties;
+inline VkPhysicalDeviceFeatures deviceFeatures;
 
-Window &window;
+inline VkDevice logicalDevice;
 
-VkPhysicalDevice physicalDevice;
-VkPhysicalDeviceProperties deviceProperties;
-VkPhysicalDeviceFeatures deviceFeatures;
+extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
-VkDevice logicalDevice;
+extern void pickPhysicalDevice();
+extern void createLogicalDevice();
 
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-static uint32_t rateDeviceSuitability(VkPhysicalDevice device);
-
-void pickPhysicalDevice();
-void createLogicalDevice();
-
-}Device;
+}

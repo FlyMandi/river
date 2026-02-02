@@ -1,23 +1,28 @@
 #pragma once
 
-#include "debugger.h"
 #include "vulkan/vulkan_core.h"
 
-typedef struct Pipeline{
+namespace pipeline{
 
-Pipeline();
-~Pipeline();
+inline VkRenderPass renderPass;
+inline VkPipelineLayout pipelineLayout;
+inline VkPipeline graphicsPipeline;
+inline VkCommandPool commandPool;
+inline VkCommandBuffer commandBuffer;
 
-VkRenderPass renderPass;
-VkPipelineLayout pipelineLayout;
-VkPipeline graphicsPipeline;
-VkCommandPool commandPool;
-VkCommandBuffer commandBuffer;
+inline VkQueue graphicsQueue;
+inline VkQueue presentQueue;
 
-VkSemaphore imageAvailableSemaphore;
-VkSemaphore renderFinishedSemaphore;
-VkFence inFlightFence;
+inline VkSemaphore imageAvailableSemaphore;
+inline VkSemaphore renderFinishedSemaphore;
+inline VkFence inFlightFence;
 
-void createGraphicsPipeline();
+extern void createGraphicsPipeline();
+extern void createFramebuffers();
+extern void createCommandPool();
+extern void createCommandBuffer();
+extern void createSyncObjects();
 
-}Pipeline;
+extern void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+}
