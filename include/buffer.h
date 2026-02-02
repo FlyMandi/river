@@ -9,7 +9,7 @@
 
 struct Vertex
 {
-    glm::vec2 pos;
+    glm::vec3 pos;
     glm::vec3 colour;
     glm::vec2 texCoord;
 };
@@ -29,6 +29,10 @@ inline VkBuffer vertexBuffer;
 inline VkDeviceMemory vertexBufferMemory;
 inline VkDeviceSize vertSize;
 
+inline VkImage depthImage;
+inline VkDeviceMemory depthImageMemory;
+inline VkImageView depthImageView;
+
 inline std::vector<VkBuffer> uniformBuffers;
 inline std::vector<VkDeviceMemory> uniformBuffersMemory;
 inline std::vector<void*> uniformBuffersMapped;
@@ -42,6 +46,8 @@ extern void createBuffer
     VkDeviceMemory          &bufferMemory,
     std::set<uint32_t>      &uniqueQueueFamilies
 );
+
+extern void createDepthResources();
 
 extern uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags);
 

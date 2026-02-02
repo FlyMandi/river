@@ -11,10 +11,10 @@
 
 static void copyBufferToImage
 (
-    VkBuffer buffer,
-    VkImage image,
-    uint32_t width,
-    uint32_t height
+    VkBuffer    buffer,
+    VkImage     image,
+    uint32_t    width,
+    uint32_t    height
 ){
     VkCommandBuffer commandBuffer = beginSingleTimeCommands(graphicsCommandPool);
 
@@ -257,14 +257,18 @@ void createImage
     vkBindImageMemory(logicalDevice, image, imageMem, 0);
 }
 
-VkImageView createImageView(VkImage image, VkFormat format)
-{
+VkImageView createImageView
+(
+    VkImage             image,
+    VkFormat            format,
+    VkImageAspectFlags  aspectFlags
+){
     VkImageViewCreateInfo viewCreateInfo{};
     viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewCreateInfo.image = image;
     viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewCreateInfo.format = format;
-    viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewCreateInfo.subresourceRange.aspectMask = aspectFlags;
     viewCreateInfo.subresourceRange.baseMipLevel = 0;
     viewCreateInfo.subresourceRange.levelCount = 1;
     viewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -283,7 +287,12 @@ VkImageView createImageView(VkImage image, VkFormat format)
 //TODO: expand functionality or remove unnecessary function definition for single function call
 void createTextureImageView()
 {
-    textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+    textureImageView =  createImageView
+                        (
+                            textureImage,
+                            VK_FORMAT_R8G8B8A8_SRGB,
+                            VK_IMAGE_ASPECT_COLOR_BIT
+                        );
 }
 
 void createTextureSampler()

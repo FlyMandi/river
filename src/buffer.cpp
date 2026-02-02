@@ -1,4 +1,6 @@
+#include "image.h"
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 
 #include "glm/ext/matrix_clip_space.hpp"
@@ -22,15 +24,21 @@
 //TODO: cube
 const std::vector<Vertex> vertices =
 {
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+    {{ 0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f,  0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 };
 
 const std::vector<uint32_t> indices =
 {
-    0, 1, 2, 2, 3, 0
+    0, 1, 2, 2, 3, 0,
+    4, 5, 6, 6, 7, 4
 };
 
 VkVertexInputBindingDescription getVertexBindingDescription()
@@ -49,7 +57,7 @@ std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions(
 
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
     attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
     attributeDescriptions[1].binding = 0;
@@ -239,4 +247,65 @@ void updateUniformBuffer(uint32_t currentImage)
     uniformBuffer.projection[1][1] *= -1;
 
     ::memcpy(uniformBuffersMapped[currentImage], &uniformBuffer, sizeof(uniformBuffer));
+}
+
+static VkFormat findSupportedFormat
+(
+    const std::vector<VkFormat> &candidates,
+    VkImageTiling               tiling,
+    VkFormatFeatureFlags        features
+){
+    for(VkFormat format : candidates)
+    {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+        if( tiling == VK_IMAGE_TILING_LINEAR &&
+            ((props.linearTilingFeatures & features) == features))
+        {
+            return format;
+        }
+        else if(tiling == VK_IMAGE_TILING_OPTIMAL &&
+                ((props.optimalTilingFeatures & features) == features))
+        {
+            return format;
+        }
+    }
+    riverThrow("failed to find supported format!");
+    return VK_FORMAT_MAX_ENUM; //to silence clang
+}
+
+void createDepthResources()
+{
+    const std::vector<VkFormat> candidates =
+    {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT
+    };
+
+    VkFormat depthFormat =  findSupportedFormat
+                            (
+                                candidates,
+                                VK_IMAGE_TILING_OPTIMAL,
+                                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+                            );
+    createImage
+    (
+        swapchainExtent.width,
+        swapchainExtent.height,
+        depthFormat,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        depthImage,
+        depthImageMemory
+    );
+
+    depthImageView =    createImageView
+                        (
+                            depthImage,
+                            depthFormat,
+                            VK_IMAGE_ASPECT_DEPTH_BIT
+                        );
 }

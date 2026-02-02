@@ -398,6 +398,7 @@ void initVulkan()
     createFramebuffers();
 
     createCommandPools();
+    createDepthResources();
 
     createTextureImage();
     createTextureImageView();
