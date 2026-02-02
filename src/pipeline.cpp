@@ -360,6 +360,7 @@ void createSyncObjects()
             #endif
             throw std::runtime_error(&"failed to create semaphore for frame " [currentFrame]);
         }
+
         if((vkCreateFence(logicalDevice, &fenceInfo, nullptr, &inFlightFences[i])) != VK_SUCCESS)
         {
             #ifdef DEBUG

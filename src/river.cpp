@@ -1,5 +1,5 @@
-#include "river.h"
 #include "vulkan/vulkan_core.h"
+#include "river.h"
 #include "window.h"
 #include "device.h"
 #include "swapchain.h"
@@ -36,7 +36,9 @@ static VkResult CreateDebugUtilsMessengerEXT
     if(nullptr != func)
     {
         return func(instance, createInfo, allocator, debugMessenger);
-    }else{
+    }
+    else
+    {
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
@@ -60,7 +62,8 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
 {
     #ifdef DEBUG
         printDebugLog('\0', "Present:", '\n');
-        for(const auto &extension : *instanceExt){
+        for(const auto &extension : *instanceExt)
+        {
             printDebugLog('\t', extension.extensionName, '\n');
         }
 
@@ -85,7 +88,6 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
             }
         if(!extFound)
         {
-
             #ifdef DEBUG
                 printDebugLog('\0', "!!!", '\t');
                 printDebugLog(required, '\n');
