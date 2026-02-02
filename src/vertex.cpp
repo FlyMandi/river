@@ -60,15 +60,15 @@ void createVertexBuffer()
     vertexBufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
     vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-    if(transferFamilyIndex != graphicsFamilyIndex){
+    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.transferIndex){
         vertexBufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
     }else{
         vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
     uint32_t queueFamilyIndices[] = {
-        graphicsFamilyIndex, 
-        transferFamilyIndex
+        logicalQueueFamilies.graphicsIndex,
+        logicalQueueFamilies.transferIndex
     };
 
     vertexBufferInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);

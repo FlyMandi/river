@@ -278,7 +278,7 @@ void createCommandPools()
     VkCommandPoolCreateInfo graphicsPoolInfo{};
     graphicsPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    graphicsPoolInfo.queueFamilyIndex = graphicsFamilyIndex;
+    graphicsPoolInfo.queueFamilyIndex = logicalQueueFamilies.graphicsIndex;
 
     if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS){
         #ifdef DEBUG
@@ -290,7 +290,7 @@ void createCommandPools()
     VkCommandPoolCreateInfo transferPoolInfo{};
     transferPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     transferPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    transferPoolInfo.queueFamilyIndex = transferFamilyIndex;
+    transferPoolInfo.queueFamilyIndex = logicalQueueFamilies.transferIndex;
 
     if((vkCreateCommandPool(logicalDevice, &transferPoolInfo, nullptr, &transferCommandPool)) != VK_SUCCESS){
         #ifdef DEBUG

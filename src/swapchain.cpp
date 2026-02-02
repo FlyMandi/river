@@ -97,11 +97,11 @@ void createSwapChain(){
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     uint32_t queueFamilyIndices[] = {
-        graphicsFamilyIndex, 
-        presentFamilyIndex
+        logicalQueueFamilies.graphicsIndex, 
+        logicalQueueFamilies.presentIndex
     };
 
-    if(graphicsFamilyIndex != presentFamilyIndex){
+    if(logicalQueueFamilies.graphicsIndex != logicalQueueFamilies.presentIndex){
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
         createInfo.pQueueFamilyIndices = queueFamilyIndices;
