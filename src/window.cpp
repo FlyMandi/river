@@ -4,7 +4,8 @@
 
 #include <stdexcept>
 
-static void framebufferResizeCallback(GLFWwindow* window, int width, int height){
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
     printDebugLog('\0', "window resized to: ");
     printDebugLog(width);
     printDebugLog("x");
@@ -12,7 +13,8 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
     framebufferResized = true;
 }
 
-void initGLFW(){
+void initGLFW()
+{
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -27,13 +29,15 @@ void initGLFW(){
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 }
 
-void cleanupGLFW(){
+void cleanupGLFW()
+{
     glfwDestroyWindow(window);
     glfwTerminate();
 }
 
 
-void createSurface(){
+void createSurface()
+{
     //TODO: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
     if(glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS){

@@ -4,7 +4,8 @@
 
 #if !defined(DEBUG) && defined(_WIN32)
 
-int WinMain(){
+int WinMain()
+{
     initEditor();
     initGLFW();
     initVulkan();
@@ -14,13 +15,12 @@ int WinMain(){
     cleanupEditor();
     cleanupGLFW();
     cleanupVulkan();
-
-    return 0;
 }
 
 #else
 
-int main(){
+int main()
+{
     initEditor();
     initGLFW();
     initVulkan();
@@ -30,8 +30,6 @@ int main(){
     cleanupEditor();
     cleanupGLFW();
     cleanupVulkan();
-
-    return 0;
 }
 
 #endif

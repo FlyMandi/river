@@ -9,7 +9,8 @@
 #include <fstream>
 #include <vector>
 
-static VkShaderModule createShaderModule(const std::vector<char> &code){
+static VkShaderModule createShaderModule(const std::vector<char> &code)
+{
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
@@ -24,7 +25,8 @@ static VkShaderModule createShaderModule(const std::vector<char> &code){
     return shaderModule;
 }
 
-static std::vector<char> readFile(const std::filesystem::path &filename){
+static std::vector<char> readFile(const std::filesystem::path &filename)
+{
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if(!file.is_open()){
         throw std::runtime_error("failed to open file!");
@@ -45,7 +47,8 @@ static std::vector<char> readFile(const std::filesystem::path &filename){
     return buffer;
 }
 
-void createGraphicsPipeline(){
+void createGraphicsPipeline()
+{
     //TODO: compiled shaders should live in some bin folder, project specific
     //for now, they'll live in river's bin.
     const std::filesystem::path vertPath = appRoot / "bin\\vertTest.vert.spv";
@@ -177,7 +180,8 @@ void createGraphicsPipeline(){
     vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
 }
 
-void createFramebuffers(){
+void createFramebuffers()
+{
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
     for(size_t i = 0; i < swapChainImageViews.size(); ++i){
@@ -199,7 +203,8 @@ void createFramebuffers(){
     }
 }
 
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex){
+void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+{
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -249,7 +254,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex){
     }
 }
 
-void createCommandPool(){
+void createCommandPool()
+{
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
     VkCommandPoolCreateInfo poolInfo{};
@@ -263,7 +269,8 @@ void createCommandPool(){
     }
 }
 
-void createCommandBuffers(){
+void createCommandBuffers()
+{
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkCommandBufferAllocateInfo allocInfo{};
@@ -279,7 +286,8 @@ void createCommandBuffers(){
     }
 }
 
-void createSyncObjects(){
+void createSyncObjects()
+{
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(swapChainImages.size());
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);

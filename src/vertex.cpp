@@ -4,13 +4,15 @@
 #include "device.h"
 #include "vertex.h"
 
-const std::vector<Vertex> vertices = {
+const std::vector<Vertex> vertices =
+{
     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f},  {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 };
 
-VkVertexInputBindingDescription getVertexBindingDescription(){
+VkVertexInputBindingDescription getVertexBindingDescription()
+{
     VkVertexInputBindingDescription bindingDescription{}; 
     bindingDescription.binding = 0;
     bindingDescription.stride = sizeof(Vertex);
@@ -19,7 +21,8 @@ VkVertexInputBindingDescription getVertexBindingDescription(){
     return bindingDescription;
 }
 
-std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(){
+std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions()
+{
     std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 
     attributeDescriptions[0].binding = 0;
@@ -35,7 +38,8 @@ std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions(
     return attributeDescriptions;
 }
 
-void createVertexBuffer(){
+void createVertexBuffer()
+{
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = sizeof(vertices[0]) * vertices.size(); 

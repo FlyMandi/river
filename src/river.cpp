@@ -38,7 +38,8 @@ static VkResult CreateDebugUtilsMessengerEXT(
     }
 }
 
-static std::vector<const char*> getRequiredExtensions(){
+static std::vector<const char*> getRequiredExtensions()
+{
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
 
@@ -52,7 +53,8 @@ static std::vector<const char*> getRequiredExtensions(){
     return extensions;
 }
 
-static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
+static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
+{
     printDebugLog('\0', "Present:", '\n');
     for(const auto &extension : *instanceExt){
         printDebugLog('\t', extension.extensionName, '\n');
@@ -79,7 +81,8 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
     return true;
 }
 
-static bool checkValidationLayerSupport(){
+static bool checkValidationLayerSupport()
+{
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
     
@@ -103,7 +106,8 @@ static bool checkValidationLayerSupport(){
     return true;
 }
 
-static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
+static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
+{
     createInfo = {}; 
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -112,7 +116,8 @@ static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT 
     createInfo.pfnUserCallback = debugCallback;
 }
 
-static void setupDebugMessenger(){
+static void setupDebugMessenger()
+{
     if(!BUILD_DEBUG){ 
         return; 
     }
@@ -126,14 +131,16 @@ static void setupDebugMessenger(){
     }
 }
 
-static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator){
+static void DestroyDebugUtilsMessengerEXT(const VkAllocationCallbacks *allocator)
+{
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(nullptr != func){
         func(instance, debugMessenger, allocator);
     }
 }
 
-static void createInstance(){
+static void createInstance()
+{
     if(BUILD_DEBUG && !checkValidationLayerSupport()){
         printDebugLog('\n', "ERROR: validation layers requested, but not available!");
         throw std::runtime_error("validation layers requested, but not available!");
@@ -183,7 +190,8 @@ static void createInstance(){
     }
 }
 
-void initVulkan(){
+void initVulkan()
+{
     createInstance();
     setupDebugMessenger();
     createSurface();
@@ -200,7 +208,8 @@ void initVulkan(){
     createSyncObjects();
 }
 
-void cleanupVulkan(){
+void cleanupVulkan()
+{
     vkDeviceWaitIdle(logicalDevice);
 
     cleanupSwapChain();
@@ -228,7 +237,8 @@ void cleanupVulkan(){
     vkDestroyInstance(instance, nullptr);
 }
 
-void drawFrame(){
+void drawFrame()
+{
     vkWaitForFences(logicalDevice, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
@@ -295,7 +305,8 @@ void drawFrame(){
 }
 
 //TODO: rewrite with recursion, base case is when the current path is the drive root, throw runtime error there
-std::filesystem::path getProjectRoot(const char *rootName){
+std::filesystem::path getProjectRoot(const char *rootName)
+{
     std::filesystem::path current = std::filesystem::current_path();
 
     for(int i = 0; i < 3; ++i){
@@ -310,7 +321,8 @@ std::filesystem::path getProjectRoot(const char *rootName){
     return ".";
 }
 
-void clearLogs(const std::filesystem::path &baseDir){
+void clearLogs(const std::filesystem::path &baseDir)
+{
     for(const auto &log : std::filesystem::directory_iterator(baseDir)){
         if(".log" == log.path().extension()){
             std::filesystem::remove(log);

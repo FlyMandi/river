@@ -6,11 +6,13 @@
 #include <set>
 #include <map>
 
-const std::vector<const char*> deviceExtensions = {
+const std::vector<const char*> deviceExtensions =
+{
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
+static bool checkDeviceExtensionSupport(VkPhysicalDevice device)
+{
     uint32_t extensionCount;
 
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -26,7 +28,8 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device){
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+{
     static QueueFamilyIndices indices;
     static uint32_t queueFamilyCount = 0;
 
@@ -56,7 +59,8 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device){
     return indices;
 }
 
-static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
+static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
+{
     uint32_t score = 0;
 
     QueueFamilyIndices indices = findQueueFamilies(device);
@@ -95,7 +99,8 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device){
     return score;
 }
 
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device){
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device)
+{
     SwapChainSupportDetails details;
     uint32_t formatCount;
     uint32_t presentModeCount;
@@ -117,7 +122,8 @@ SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device){
     return details;
 }
 
-void pickPhysicalDevice(){
+void pickPhysicalDevice()
+{
     uint32_t deviceCount = 0;
     physicalDevice = VK_NULL_HANDLE;
     
@@ -183,10 +189,8 @@ void createLogicalDevice()
     }
 
     if(vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS){
-        printDebugLog('\n', "ERROR: failed to create logical device.");
+        printDebugLog('\n', "failed to create logical device.");
         throw std::runtime_error("failed to create logical device!");
-    }else{
-
     }
 
     vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);

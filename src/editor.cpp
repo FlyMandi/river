@@ -4,7 +4,8 @@
 
 #include <filesystem>
 
-void initEditor(){
+void initEditor()
+{
     //TODO: main menu GUI. buttons:
     //load project
     //create new project
@@ -20,7 +21,8 @@ void initEditor(){
     appRoot = std::filesystem::current_path();
 }
 
-void loopEditor(){
+void loopEditor()
+{
     //TODO: draw & exist only in specified viewport area
     //be able to have multiple viewports that can be paused (frozen) and resumed at will
     while(!glfwWindowShouldClose(window)){
@@ -29,7 +31,8 @@ void loopEditor(){
     }
 }
 
-void cleanupEditor(){
+void cleanupEditor()
+{
     //TODO: shutdown safely, ask for saving
     //shutdown vulkan
 }
