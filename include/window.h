@@ -13,5 +13,4 @@ inline VkSurfaceKHR surface;
 extern void initGLFW();
 extern void cleanupGLFW();
 
-extern void pollEvents();
 extern void createSurface();
