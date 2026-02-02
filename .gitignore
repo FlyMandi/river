@@ -1,5 +1,5 @@
 BuildRules*
 bin/
-*.pdb
+*.spv
 .cache*
 build/
