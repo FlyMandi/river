@@ -8,11 +8,11 @@ param(
     [Parameter(position=3,Mandatory=$false)]
     [switch]$nAMD = $false
 )
-if($IsWindows)
+if($compiler -eq "" -and $IsWindows)
 {
     $compiler = "MSVC"
 }
-elseIf($IsLinux)
+elseIf($compiler -eq "" -and $IsLinux)
 {
     $compiler = "g++"
 }
@@ -48,6 +48,17 @@ if(-Not(Test-Path ".\build\"))
 
 $target = ".\bin\$OS" + "_$build\River.exe"
 
+$sourceFiles = Get-ChildItem ".\src\" -File
+$sourceFiles += Get-ChildItem ".\include\" -File
+
+foreach($file in $sourceFiles)
+{
+    $sourceFilePaths += " "
+    $sourceFilePaths += $file.FullName
+}
+#TODO: flags
+#TODO: switch over to the linux version of the Vulkan SDK and the MSVC C++ stl, rid myself of MSVC
+
 if("MSVC" -eq $compiler)
 {
     &premake5 vs2022
@@ -65,6 +76,11 @@ if("MSVC" -eq $compiler)
 
     &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
 
+}
+elseIf("clang" -eq $compiler)
+{
+    #FIXME: it don't want
+    &clang $sourceFilePaths
 }
 elseIf("g++" -eq $compiler)
 {
