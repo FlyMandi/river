@@ -134,7 +134,7 @@ void createTextureImage()
                             STBI_rgb_alpha
                         );
 
-    riverAssert(pixels, "failed to load texture image!");
+    riverAssert(pixels, std::format("failed to load texture image: {}", stbi_failure_reason()));
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
