@@ -23,7 +23,7 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - the window shows only a hardcoded rectangle...
 - ...the rectangle took 1500+ lines of code!
 
-![ScreenShot of the river test project](assets/screenshots/1.jpg) 
+![ScreenShot of the river test project](assets/1.jpg) 
 
 ### Next up:
 - finishing the vulkan-tutorial (Uniform Buffers & Texture Mapping to go)
