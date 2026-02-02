@@ -1,7 +1,9 @@
 BuildRules*
+.cache*
+
+build/
 bin/
 obj/
-*.spv
-.cache*
-build/
-compile_commands*    
+
+compile_commands*
+raddbg*
