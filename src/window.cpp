@@ -1,14 +1,17 @@
-#include "river.h"
 #include "window.h"
+#include "pipeline.h"
+#include "river.h"
 
 #include <stdexcept>
+
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height){
+    framebufferResized = true;
+}
 
 void initGLFW(){
     glfwInit();
 
-    //TODO: add window resizeability
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(WIDTH, HEIGHT, appName, nullptr, nullptr);
 
@@ -16,12 +19,15 @@ void initGLFW(){
         printDebugLog('\0', "failed to create GLFW window!", '\n');
         throw std::runtime_error("failed to create GLFW window!");
     }
+
+    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 }
 
 void cleanupGLFW(){
     glfwDestroyWindow(window);
     glfwTerminate();
 }
+
 
 void createSurface(){
     //TODO: find out if I can create a surface smaller than the window.
