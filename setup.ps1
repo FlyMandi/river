@@ -1,26 +1,26 @@
-if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
-{
-   if(Get-Command scoop -ErrorAction SilentlyContinue)
-   {
-        &scoop install premake
-   }
-   else
-   {
-        $sourceRepo = "premake/premake-core"
-        $namePattern = "*windows.zip"
-        $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
-        $zipFolderName = $(Split-Path -Path $sourceURI -Leaf)
-        $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName
-        Invoke-WebRequest -Uri $sourceURI -Out $tempZIP
-
-        Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
-        Remove-Item $tempZIP -Force
-   }
-}
-else
-{
-    Write-Host "Found premake5."
-}
+# if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue))
+# {
+#    if(Get-Command scoop -ErrorAction SilentlyContinue)
+#    {
+#         &scoop install premake
+#    }
+#    else
+#    {
+#         $sourceRepo = "premake/premake-core"
+#         $namePattern = "*windows.zip"
+#         $sourceURI = ((Invoke-RestMethod -Method GET -Uri "https://api.github.com/repos/$sourceRepo/releases/latest").assets | Where-Object name -like $namePattern).browser_download_url
+#         $zipFolderName = $(Split-Path -Path $sourceURI -Leaf)
+#         $tempZIP = Join-Path -Path $([System.IO.Path]::GetTempPath()) -ChildPath $zipFolderName
+#         Invoke-WebRequest -Uri $sourceURI -Out $tempZIP
+#
+#         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
+#         Remove-Item $tempZIP -Force
+#    }
+# }
+# else
+# {
+#     Write-Host "Found premake5."
+# }
 
 [System.Version]$installVersion = "1.4.309.0"
 
@@ -33,6 +33,7 @@ function Install-VulkanSDK
         &curl -O https://sdk.lunarg.com/sdk/download/$installVersion/windows/VulkanSDK-$installVersion-Installer.exe
         Write-Host "`nExpect a UAC prompt."
         &.\VulkanSDK-$installVersion-Installer.exe
+        Write-Host "`nMake sure the vulkan SDK is added under the VULKAN_SDK environment variable."
     }
     elseif($isLinux)
     {
@@ -61,7 +62,17 @@ elseIf(Test-Path $env:VULKAN_SDK)
     if($vkVersion -lt $installVersion)
     {
         Write-Host "Found older Vulkan SDK installation, version $vkVersion"
-        Install-VulkanSDK
+        Write-Host "Do you want to install version $installVersion now? (y/n)"
+
+        $answer = Read-Host
+        if($answer -eq "y" -or $input -eq "yes")
+        {
+            Install-VulkanSDK
+        }
+        else
+        {
+            Write-Host "not updating automatically, please do so manually."
+        }
     }
     else
     {
@@ -70,5 +81,5 @@ elseIf(Test-Path $env:VULKAN_SDK)
 }
 else
 {
-    throw "ERROR: $env:VULKAN_SDK does not point to a valid directory."
+    throw "ERROR: the vulkan SDK environment variable ($env:VULKAN_SDK) does not point to a valid directory."
 }
