@@ -1,3 +1,4 @@
+#include "pipeline.h"
 #include "vulkan/vulkan_core.h"
 
 #include "river.h"
@@ -110,24 +111,84 @@ void createBuffer(  VkDeviceSize            bufferSize,
     vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
 
+void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
+{
+    VkCommandBufferAllocateInfo transferAllocInfo{}; 
+    transferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    transferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    transferAllocInfo.commandPool = transferCommandPool;
+    transferAllocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer transferCommandBuffer;
+    vkAllocateCommandBuffers(logicalDevice, &transferAllocInfo, &transferCommandBuffer);
+
+    VkCommandBufferBeginInfo transferBeginInfo{};
+    transferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    transferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(transferCommandBuffer, &transferBeginInfo);
+
+    VkBufferCopy transferCopyRegion{};
+    transferCopyRegion.srcOffset = 0;
+    transferCopyRegion.dstOffset = 0;
+    transferCopyRegion.size = bufferSize;
+
+    vkCmdCopyBuffer(transferCommandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
+
+    vkEndCommandBuffer(transferCommandBuffer);
+
+    VkSubmitInfo transferSubmitInfo{};
+    transferSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    transferSubmitInfo.commandBufferCount = 1;
+    transferSubmitInfo.pCommandBuffers = &transferCommandBuffer;
+
+    vkQueueSubmit(transferQueue, 1, &transferSubmitInfo, VK_NULL_HANDLE);
+    //TODO: wait for fences, not idle
+    vkQueueWaitIdle(transferQueue);
+
+    vkFreeCommandBuffers(logicalDevice, transferCommandPool, 1, &transferCommandBuffer);
+}
+
 void createVertexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+
     static std::set<uint32_t> queueFamilies = 
     {
         logicalQueueFamilies.graphicsIndex,
         logicalQueueFamilies.transferIndex
     };
 
-    createBuffer(   bufferSize, 
-                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                    vertexBuffer,
-                    vertexBufferMemory,
-                    queueFamilies);
+    createBuffer
+    (
+        bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer,
+        stagingBufferMemory,
+        queueFamilies
+    );
 
-    void* vertexBufferBegin;
-    vkMapMemory(logicalDevice, vertexBufferMemory, 0, bufferSize, 0, &vertexBufferBegin);
-    std::memcpy(vertexBufferBegin, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(logicalDevice, vertexBufferMemory);
+    void* stagingBufferBegin;
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &stagingBufferBegin);
+    std::memcpy(stagingBufferBegin, vertices.data(), (size_t)bufferSize);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
+    
+    createBuffer
+    (
+        bufferSize, 
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT   | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+        vertexBuffer,
+        vertexBufferMemory,
+        queueFamilies
+    );
+    
+    copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 }
