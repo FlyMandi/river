@@ -82,11 +82,14 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-    if(!deviceFeatures.geometryShader){ return 0; }
+    if(!deviceFeatures.geometryShader){ 
+        return 0; 
+    }
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
     if(!extensionsSupported){
         return 0;
+
     }else{
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
         if(swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()){
@@ -100,7 +103,11 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     score += deviceProperties.limits.maxImageDimension2D;
 
     if(logicalQueueFamilies.presentIndex == logicalQueueFamilies.graphicsIndex){
-        score += 100;
+        score += 500;
+    }
+    
+    if(logicalQueueFamilies.transferIndex != logicalQueueFamilies.graphicsIndex){
+        score += 250;
     }
 
     #ifdef DEBUG
