@@ -10,7 +10,8 @@
 struct Vertex
 {
     glm::vec2 pos;
-    glm::vec3 color;
+    glm::vec3 colour;
+    glm::vec2 texCoord;
 };
 
 struct UniformBufferObject
@@ -50,4 +51,4 @@ extern void createUniformBuffers();
 extern void updateUniformBuffer(uint32_t currentImage);
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
-extern std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions();
+extern std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions();
