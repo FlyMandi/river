@@ -1,10 +1,14 @@
+---@diagnostic disable: undefined-global
+require("premake-ecc/ecc")
 workspace("Cnake")
 configurations({ "Debug", "Release" })
+location("build")
 
 project("Cnake")
 kind("WindowedApp")
 language("C++")
 targetdir("bin/%{cfg.buildcfg}")
+libdirs({ "C:/Libraries/" })
 
 files({ "**.h", "**.cpp" })
 
