@@ -14,10 +14,6 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 ![Screenshot of the river test project](assets/preview.png)
 
 ### What I've learned
-- building a graphical application ""from scratch""
-- writing platform-agnostic code, no direct interface with WIN32/POSIX APIs
-- debugging said code (currently via logging, raddbg and renderdoc)
-- asserting in debug builds only, but doing so often and effectively
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
 - vulkan rasterization, viewports, scissors, multisampling
 - queue families, the swapchain & present modes
