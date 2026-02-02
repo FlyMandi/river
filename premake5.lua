@@ -7,9 +7,6 @@ workspace("River")
     platforms({ "Win64"}) --TODO: add Unix
     location("build")
 
-    --TODO: separate engine core (River) from editor GUI executable (Waterfall).
-    --Put Waterfall in its own repo, then add river as a submodule.
-    --Can't really use River without waterfall to build a game. 
     project("River")
         links{ "glfw3", "vulkan-1" }
         language("C++")
