@@ -4,9 +4,9 @@ param(
     [Parameter(position=1,Mandatory=$false)]
     $OS = "Win64",
     [Parameter(position=2,Mandatory=$false)]
-    [switch]$nAMD = $false,
+    $compiler = "MSVC",
     [Parameter(position=3,Mandatory=$false)]
-    $compiler = "MSVC"
+    [switch]$nAMD = $false
 )
 $Platforms = "Win64", "Unix"
 $Configurations = "Debug", "Release"
