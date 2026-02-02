@@ -14,7 +14,7 @@ if($compiler -eq "" -and $IsWindows)
 }
 elseIf($compiler -eq "" -and $IsLinux)
 {
-    $compiler = "g++"
+    $compiler = "clang"
 }
 
 $Platforms = "Win64", "Unix"
@@ -51,10 +51,14 @@ $target = ".\bin\$OS" + "_$build\River.exe"
 $sourceFiles = Get-ChildItem ".\src\" -File
 $sourceFiles += Get-ChildItem ".\include\" -File
 
+$includes = "$env:VULKAN_SDK\1.4.313.2\Include"
+$includes += ".\vendor\glfw-3.4-win64\include\"
+$includes += ".\vendor\stb\"
+
 foreach($file in $sourceFiles)
 {
-    $sourceFilePaths += " "
     $sourceFilePaths += $file.FullName
+    $sourceFilePaths += " "
 }
 #flags
 #switch over to the linux version of the Vulkan SDK and the MSVC C++ stl, rid myself of MSVC
@@ -75,12 +79,17 @@ if("MSVC" -eq $compiler)
     }
 
     &"$MSBuild\MSBuild.exe" .\build\River.sln -p:Configuration=$build
-
 }
 elseIf("clang" -eq $compiler)
 {
-    #it don't want
-    &clang $sourceFilePaths
+    foreach($include in $includes)
+    {
+        $arguments += "-I$include"
+    }
+
+    $arguments += "-o .\build\"
+
+    Invoke-Expression "clang $sourceFilePaths $arguments"
 }
 elseIf("g++" -eq $compiler)
 {
