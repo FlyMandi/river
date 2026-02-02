@@ -24,30 +24,22 @@ static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFor
 
 static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes)
 {
+    VkPresentModeKHR second = VK_PRESENT_MODE_MAX_ENUM_KHR;
+
     for(const auto &availablePresentMode : availablePresentModes)
     {
         if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
         {
-            #ifdef DEBUG
-                riverLog("present mode: VK_PRESENT_MODE_MAILBOX_KHR", RIV_LOG_LEVEL_TRACE);
-            #endif
             return availablePresentMode;
         }
-    }
 
-    for(const auto &availablePresentMode : availablePresentModes)
-    {
         if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
         {
-            #ifdef DEBUG
-                riverLog("present mode: VK_PRESENT_MODE_IMMEDIATE_KHR", RIV_LOG_LEVEL_TRACE);
-            #endif
-            return availablePresentMode;
+            second = availablePresentMode;
         }
     }
 
-    riverLog("present mode: VK_PRESENT_MODE_FIFO_KHR", RIV_LOG_LEVEL_TRACE);
-    return VK_PRESENT_MODE_FIFO_KHR;
+    return (second == VK_PRESENT_MODE_MAX_ENUM_KHR) ? VK_PRESENT_MODE_FIFO_KHR : second;
 }
 
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
