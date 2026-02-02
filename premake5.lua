@@ -14,7 +14,7 @@ workspace("River")
         kind("StaticLib")
         links{ "glfw3", "vulkan-1" }
         language("C++")
-        cppdialect("C++20")
+        cppdialect("C++23")
         targetdir("bin/%{cfg.buildcfg}")
         includedirs({ "./include/", "./vendor/glfw-3.4-win64/include/", "%{VULKAN_SDK}/Include/" })
         syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/glfw-3.4-win64/lib-vc2022/" })
