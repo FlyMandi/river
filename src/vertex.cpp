@@ -81,7 +81,9 @@ void createVertexBuffer()
         printDebugLog("failed to allocate vertex buffer memory!");
         throw std::runtime_error("failed to allocate vertex buffer memory!");
     }else{
-        printDebugLog('\0', "allocated vertex buffer memory.", '\n');
+        printDebugLog('\0', "allocated vertex buffer memory: ");
+        printDebugLog(allocInfo.allocationSize);
+        printDebugLog("B", '\n');
     }
 
     vkBindBufferMemory(logicalDevice, vertexBuffer, vertexBufferMemory, 0);

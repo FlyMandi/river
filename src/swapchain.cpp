@@ -223,5 +223,5 @@ void recreateSwapChain(){
     createImageViews();
     createFramebuffers();
 
-    printDebugLog('\0', "swapChain successfully recreated.", '\n');
+    printDebugLog('\0', "swap recreated.", '\n');
 }
