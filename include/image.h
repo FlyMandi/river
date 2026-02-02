@@ -25,6 +25,14 @@ extern void createTextureImage();
 extern void createTextureImageView();
 extern void createTextureSampler();
 
+extern void transitionImageLayout
+(
+    VkImage         image,
+    VkFormat        format,
+    VkImageLayout   oldLayout,
+    VkImageLayout   newLayout
+);
+
 inline VkImage textureImage;
 inline VkImageView textureImageView;
 inline VkDeviceMemory textureImageMemory;

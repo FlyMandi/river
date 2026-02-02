@@ -308,4 +308,12 @@ void createDepthResources()
                             depthFormat,
                             VK_IMAGE_ASPECT_DEPTH_BIT
                         );
+
+    transitionImageLayout
+    (
+        depthImage,
+        depthFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    );
 }
