@@ -14,16 +14,19 @@ I want this to be my engine, not to reinvent the wheel, but to write it for the 
 - synchronization primitives (using fences & semaphores to sync GPU/CPU work)
 - queue families, the swapchain & present modes
 - vertex & index buffers, vertex & fragment shaders
-- loading textures, texels, mipmaps
+- loading & sampling textures, texels
 
 ### State:
 - there's a resizeable window
-- it shows a rotating, coloured rectangle.
+- it shows a rotating, textured and coloured square.
 
 ![ScreenShot of the river test project](assets/1.jpg)
 
 ### Next up:
-- finishing the vulkan-tutorial (texture mapping to go)
+- depth buffering
+- loading 3D models
+- mipmaps
+- multisampling
 - camera control
 - a GUI (imgui / clay)
 - a default project.
