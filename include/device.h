@@ -11,14 +11,14 @@ struct SwapChainSupportDetails
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct queueFamilyIndices
+struct QueueFamilyIndices
 {
     uint32_t graphicsIndex = -1;
     uint32_t transferIndex = -1;
     uint32_t presentIndex = -1;
 };
 
-inline queueFamilyIndices logicalQueueFamilies;
+inline QueueFamilyIndices logicalQueueFamilies;
 
 inline VkPhysicalDevice physicalDevice;
 inline VkPhysicalDeviceProperties deviceProperties;
@@ -27,9 +27,8 @@ inline VkPhysicalDeviceFeatures deviceFeatures;
 
 inline VkDevice logicalDevice;
 
-//TODO: refactor -> bool querySwapChainSupport w/ reset of SwapChainSupportDetails struct
 extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-extern bool findQueueFamilies(VkPhysicalDevice device);
+extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 extern void pickPhysicalDevice();
 extern void createLogicalDevice();
