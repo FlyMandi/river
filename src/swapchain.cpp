@@ -36,8 +36,8 @@ void createSwapchain()
 
     for(const auto &availableFormat : swapchainSupport.formats)
     {
-        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format &&
-            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace
+        if( VK_FORMAT_B8G8R8A8_SRGB == availableFormat.format &&
+            availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
         ){
             surfaceFormat = availableFormat;
         }
