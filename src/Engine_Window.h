@@ -8,6 +8,13 @@
 namespace engine {
 
 class EngineWindow {
+    void initWindow();
+    const int width;
+    const int height;
+
+    std::string windowName;
+    GLFWwindow *window;
+
  public:
     EngineWindow(int w, int h, std::string name);
     ~EngineWindow();
@@ -18,15 +25,6 @@ class EngineWindow {
     bool shouldClose() { return glfwWindowShouldClose(window); }
 
     void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
-
- private:
-    void initWindow();
-    const int width;
-    const int height;
-
-    std::string windowName;
-    GLFWwindow *window;
-
 };
 
 }  // namespace engine
