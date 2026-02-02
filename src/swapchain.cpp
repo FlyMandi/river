@@ -8,40 +8,6 @@
 #include <algorithm>
 #include <cstdint>
 
-static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
-{
-    for(const auto &availableFormat : availableFormats)
-    {
-        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format &&
-            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace
-        ){
-            return availableFormat;
-        }
-    }
-
-    return availableFormats[0];
-}
-
-static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes)
-{
-    VkPresentModeKHR second = VK_PRESENT_MODE_MAX_ENUM_KHR;
-
-    for(const auto &availablePresentMode : availablePresentModes)
-    {
-        if(VK_PRESENT_MODE_MAILBOX_KHR == availablePresentMode)
-        {
-            return availablePresentMode;
-        }
-
-        if(VK_PRESENT_MODE_IMMEDIATE_KHR == availablePresentMode)
-        {
-            second = availablePresentMode;
-        }
-    }
-
-    return (second == VK_PRESENT_MODE_MAX_ENUM_KHR) ? VK_PRESENT_MODE_FIFO_KHR : second;
-}
-
 VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
     if(std::numeric_limits<uint32_t>::max() != capabilities.currentExtent.width)
@@ -74,18 +40,38 @@ VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 
 void createSwapchain()
 {
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+    SwapChainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice);
+    VkSurfaceFormatKHR surfaceFormat = swapchainSupport.formats[0];
 
-    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+    for(const auto &availableFormat : swapchainSupport.formats)
+    {
+        if( VK_FORMAT_B8G8R8_SRGB == availableFormat.format &&
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR == availableFormat.colorSpace
+        ){
+            surfaceFormat = availableFormat;
+        }
+    }
 
-    swapchainImageCount = swapChainSupport.capabilities.minImageCount + 1;
+    //TODO: extract this into user defined variable in per-project settings manifest
+    VkPresentModeKHR chosenPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-    if( 0 < swapChainSupport.capabilities.maxImageCount &&
-        swapchainImageCount > swapChainSupport.capabilities.maxImageCount
+    for(const auto &availablePresentMode : swapchainSupport.presentModes)
+    {
+        if(availablePresentMode == chosenPresentMode)
+        {
+            presentMode = availablePresentMode;
+        }
+    }
+
+    VkExtent2D extent = chooseSwapExtent(swapchainSupport.capabilities);
+
+    swapchainImageCount = swapchainSupport.capabilities.minImageCount + 1;
+
+    if( 0 < swapchainSupport.capabilities.maxImageCount &&
+        swapchainImageCount > swapchainSupport.capabilities.maxImageCount
     ){
-        swapchainImageCount = swapChainSupport.capabilities.maxImageCount;
+        swapchainImageCount = swapchainSupport.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
@@ -116,7 +102,7 @@ void createSwapchain()
         createInfo.pQueueFamilyIndices = nullptr;
     }
 
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
