@@ -27,6 +27,7 @@ inline VkPhysicalDeviceFeatures deviceFeatures;
 
 inline VkDevice logicalDevice;
 
+//TODO: refactor -> bool querySwapChainSupport w/ reset of SwapChainSupportDetails struct
 extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 extern bool findQueueFamilies(VkPhysicalDevice device);
 
