@@ -217,21 +217,25 @@ void initVulkan()
     createSurface();
     pickPhysicalDevice();
     createLogicalDevice();
+
     createSwapchain();
     createImageViews();
-    createRenderPass();
 
+    createRenderPass();
     createDescriptorSetLayout();
-    createDescriptorPool();
-    createDescriptorSets();
+
     createGraphicsPipeline();
     createFramebuffers();
+
     createCommandPools();
 
     createVertexBuffer();
     createUniformBuffers();
-    createCommandBuffers();
 
+    createDescriptorPool();
+    createDescriptorSets();
+
+    createCommandBuffers();
     createSyncObjects();
 }
 
