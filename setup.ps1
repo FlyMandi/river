@@ -12,6 +12,8 @@ if(-Not(Get-Command premake5 -ErrorAction SilentlyContinue)){
         Expand-Archive -Path $tempZIP -DestinationPath $PSScriptRoot -Force
         Remove-Item $tempZIP -Force
    }
+}else{
+    Write-Host "Found premake5."
 }
 
 [System.Version]$installVersion = "1.4.309.0"
