@@ -11,11 +11,21 @@ class CnakeApp{
     const uint32_t WIDTH = 1920;
     const uint32_t HEIGHT = 1080;
 
+    const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+#ifdef NDEBUG
+    const bool enableValidationLayers = false;
+#else 
+    const bool enableValidationLayers = true;
+#endif
+
     GLFWwindow *window;
     VkInstance instance;
 
-    void initWindow();
+    bool checkValidationLayerSupport();
+
     void verifyExtensionPresence(const char** glfwExt, std::vector<VkExtensionProperties> vulkanExt);
+    void initWindow();
     void createInstance();
     void initVulkan();
     void gameLoop();
