@@ -29,8 +29,9 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-bool findQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 {
+    static QueueFamilyIndices indices{};
     static uint32_t queueFamilyCount = 0;
 
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -38,47 +39,44 @@ bool findQueueFamilies(VkPhysicalDevice device)
     static std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, physicalQueueFamilies.data());
 
-    VkBool32 presentSupport = false;
+    static VkBool32 presentSupport = false;
 
     for(int i = 0; const auto &queueFamily : physicalQueueFamilies)
     {
         if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
-            logicalQueueFamilies.graphicsIndex = i;
+            indices.graphicsIndex = i;
+        }
 
-        }else if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT){
-            logicalQueueFamilies.transferIndex = i; 
+        if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT && i != indices.graphicsIndex){
+            indices.transferIndex = i; 
         }
         
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
         if(presentSupport){
-            logicalQueueFamilies.presentIndex = i;
+            indices.presentIndex = i;
         }
 
-        if( logicalQueueFamilies.graphicsIndex != -1 && 
-            logicalQueueFamilies.transferIndex != -1 &&
-            logicalQueueFamilies.presentIndex != -1){ 
+        if( indices.graphicsIndex != -1 && 
+            indices.transferIndex != -1 &&
+            indices.presentIndex != -1){ 
             break; 
         }
         ++i;
     }
 
-    if(logicalQueueFamilies.transferIndex == -1){
-        logicalQueueFamilies.transferIndex = logicalQueueFamilies.graphicsIndex;
+    if(indices.transferIndex == -1){
+        indices.transferIndex = indices.graphicsIndex;
     }
 
-    return( logicalQueueFamilies.graphicsIndex != -1 &&
-            logicalQueueFamilies.transferIndex != -1 &&
-            logicalQueueFamilies.presentIndex != -1);
+    return indices;
 }
 
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
 {
-    uint32_t score = 0;
+    static uint32_t score = 0;
 
-    if(!findQueueFamilies(device)){ 
-        logicalQueueFamilies.graphicsIndex= -1;
-        logicalQueueFamilies.presentIndex = -1;
-        logicalQueueFamilies.transferIndex = -1;
+    static QueueFamilyIndices deviceIndices = findQueueFamilies(device);
+    if(deviceIndices.graphicsIndex == -1 || deviceIndices.transferIndex == -1 || deviceIndices.presentIndex == -1){ 
         return 0; 
     }
 
@@ -103,13 +101,15 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
         score += 1000;
     }
-    score += deviceProperties.limits.maxImageDimension2D;
+    score += deviceProperties.limits.maxImageDimension1D;
+    score += deviceProperties.limits.maxImageDimension2D/10;
+    score += deviceProperties.limits.maxImageDimension3D/100;
 
-    if(logicalQueueFamilies.presentIndex == logicalQueueFamilies.graphicsIndex){
+    if(deviceIndices.presentIndex == deviceIndices.graphicsIndex){
         score += 500;
     }
     
-    if(logicalQueueFamilies.transferIndex != logicalQueueFamilies.graphicsIndex){
+    if(deviceIndices.transferIndex != deviceIndices.graphicsIndex){
         score += 250;
     }
 
@@ -170,6 +170,12 @@ void pickPhysicalDevice()
 
     if(suitabilityCandidates.rbegin()->first > 0){
         physicalDevice = suitabilityCandidates.rbegin()->second; 
+
+        static QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+        logicalQueueFamilies.graphicsIndex = indices.graphicsIndex;
+        logicalQueueFamilies.transferIndex = indices.transferIndex;
+        logicalQueueFamilies.presentIndex = indices.presentIndex;
+
         #ifdef DEBUG
             printDebugLog('\0', "found suitable GPU.", '\n');
         #endif
