@@ -1,6 +1,6 @@
-#include "pipeline.h"
 #include "vulkan/vulkan_core.h"
 
+#include "pipeline.h"
 #include "river.h"
 #include "device.h"
 #include "buffer.h"
@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include <set>
+#include <stdexcept>
 
 //HACK: hardcoded vertices & indices
 const std::vector<Vertex> vertices =
@@ -128,6 +129,19 @@ void createBuffer(
 
 void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
 {
+    VkFence transferFence;
+
+    VkFenceCreateInfo transferFenceCreateInfo{};
+    transferFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    if(vkCreateFence(logicalDevice, &transferFenceCreateInfo, nullptr, &transferFence) != VK_SUCCESS)
+    {
+        #ifdef DEBUG
+            printDebugLog("failed to create transfer fence!");
+        #endif
+        throw std::runtime_error("failed to create transfer fence!");
+    }
+
     VkCommandBufferAllocateInfo transferAllocInfo{}; 
     transferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     transferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -157,11 +171,13 @@ void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
     transferSubmitInfo.commandBufferCount = 1;
     transferSubmitInfo.pCommandBuffers = &transferCommandBuffer;
 
-    vkQueueSubmit(transferQueue, 1, &transferSubmitInfo, VK_NULL_HANDLE);
-    //TODO: wait for fences, not idle
-    vkQueueWaitIdle(transferQueue);
+    vkQueueSubmit(transferQueue, 1, &transferSubmitInfo, transferFence);
+
+    vkWaitForFences(logicalDevice, 1, &transferFence, VK_TRUE, UINT64_MAX);
 
     vkFreeCommandBuffers(logicalDevice, transferCommandPool, 1, &transferCommandBuffer);
+
+    vkDestroyFence(logicalDevice, transferFence, nullptr);
 }
 
 void createVertexBuffer()
