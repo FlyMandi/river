@@ -55,11 +55,19 @@ uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags
 
 void createVertexBuffer()
 {
+    uint32_t queueFamilyIndices[] = {
+        graphicsFamilyIndex, 
+        presentFamilyIndex,
+        transferFamilyIndex
+    };
+
     VkBufferCreateInfo vertexBufferInfo{};
     vertexBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vertexBufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
     vertexBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    vertexBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    vertexBufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+    vertexBufferInfo.queueFamilyIndexCount = sizeof(queueFamilyIndices)/sizeof(uint32_t);
+    vertexBufferInfo.pQueueFamilyIndices = queueFamilyIndices;
 
     if(vkCreateBuffer(logicalDevice, &vertexBufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS){
         #ifdef DEBUG

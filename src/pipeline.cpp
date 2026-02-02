@@ -273,12 +273,12 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
 void createCommandPools()
 {
-    QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+    findQueueFamilies(physicalDevice);
 
     VkCommandPoolCreateInfo graphicsPoolInfo{};
     graphicsPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     graphicsPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    graphicsPoolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    graphicsPoolInfo.queueFamilyIndex = graphicsFamilyIndex;
 
     if((vkCreateCommandPool(logicalDevice, &graphicsPoolInfo, nullptr, &graphicsCommandPool)) != VK_SUCCESS){
         #ifdef DEBUG

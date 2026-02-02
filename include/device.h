@@ -2,7 +2,6 @@
 
 #include "vulkan/vulkan_core.h"
 
-#include <optional>
 #include <vector>
 
 struct SwapChainSupportDetails
@@ -12,18 +11,9 @@ struct SwapChainSupportDetails
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-struct QueueFamilyIndices
-{
-    std::optional<uint32_t> graphicsFamily;
-    std::optional<uint32_t> presentFamily;
-    std::optional<uint32_t> transferFamily;
-
-    bool isComplete(){ 
-        return  graphicsFamily.has_value() && 
-                presentFamily.has_value() &&
-                transferFamily.has_value();
-    }
-};
+inline uint32_t graphicsFamilyIndex = -1;
+inline uint32_t presentFamilyIndex = -1;
+inline uint32_t transferFamilyIndex = -1;
 
 inline VkPhysicalDevice physicalDevice;
 inline VkPhysicalDeviceProperties deviceProperties;
@@ -33,7 +23,7 @@ inline VkDevice logicalDevice;
 
 
 extern SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+extern void findQueueFamilies(VkPhysicalDevice device);
 
 extern void pickPhysicalDevice();
 extern void createLogicalDevice();

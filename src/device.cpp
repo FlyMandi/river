@@ -29,9 +29,8 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+void findQueueFamilies(VkPhysicalDevice device)
 {
-    static QueueFamilyIndices indices;
     static uint32_t queueFamilyCount = 0;
 
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -44,36 +43,34 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
     for(int i = 0; const auto &queueFamily : queueFamilies)
     {
         if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT){
-            indices.graphicsFamily = i;
+            graphicsFamilyIndex = i;
 
         }else if(queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT){
-            indices.transferFamily = i; 
+            transferFamilyIndex = i; 
         }
         
         vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
         if(presentSupport){
-            indices.presentFamily = i;
+            presentFamilyIndex = i;
         }
 
-        if(indices.isComplete()){ 
+        if(graphicsFamilyIndex != -1 && transferFamilyIndex != -1 && presentFamilyIndex != -1){ 
             break; 
         }
         ++i;
     }
 
-    if(indices.transferFamily == -1){
-        indices.transferFamily = indices.graphicsFamily;
+    if(transferFamilyIndex == -1){
+        transferFamilyIndex = graphicsFamilyIndex;
     }
-
-    return indices;
 }
 
 static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
 {
     uint32_t score = 0;
 
-    QueueFamilyIndices indices = findQueueFamilies(device);
-    if(!indices.isComplete()){ 
+    findQueueFamilies(device);
+    if(graphicsFamilyIndex == -1 || transferFamilyIndex == -1 || presentFamilyIndex == -1){ 
         return 0; 
     }
 
@@ -97,7 +94,7 @@ static uint32_t rateDeviceSuitability(VkPhysicalDevice device)
     }
     score += deviceProperties.limits.maxImageDimension2D;
 
-    if(indices.presentFamily.value() == indices.graphicsFamily.value()){
+    if(presentFamilyIndex == graphicsFamilyIndex){
         score += 100;
     }
 
@@ -172,13 +169,13 @@ void pickPhysicalDevice()
 
 void createLogicalDevice()
 {
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    findQueueFamilies(physicalDevice);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {
-        indices.graphicsFamily.value(), 
-        indices.presentFamily.value(),
-        indices.transferFamily.value()
+        graphicsFamilyIndex,
+        transferFamilyIndex,
+        presentFamilyIndex
     };
 
     float queuePriority = 1.0f;
@@ -215,9 +212,9 @@ void createLogicalDevice()
         throw std::runtime_error("failed to create logical device!");
     }
 
-    vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
-    vkGetDeviceQueue(logicalDevice, indices.transferFamily.value(), 0, &transferQueue);
+    vkGetDeviceQueue(logicalDevice, graphicsFamilyIndex, 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, transferFamilyIndex, 0, &transferQueue);
+    vkGetDeviceQueue(logicalDevice, presentFamilyIndex, 0, &presentQueue);
 
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
 }
