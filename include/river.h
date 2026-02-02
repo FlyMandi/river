@@ -117,7 +117,7 @@ struct EngineData
     VkSurfaceKHR                        surface;
 
     QueueFamilyIndices                  logicalQueueFamilies;
-    VkPhysicalDevice                    physicalDevice = VK_NULL_HANDLE;
+    VkPhysicalDevice                    physicalDevice;
     VkPhysicalDeviceProperties          deviceProperties;
     VkPhysicalDeviceMemoryProperties    deviceMemoryProperties;
     VkPhysicalDeviceFeatures            deviceFeatures;
