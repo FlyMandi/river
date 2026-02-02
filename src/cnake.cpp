@@ -2,11 +2,24 @@
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan_core.h"
 
-#include <iostream>
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
 #include <cstring>
+
+std::vector<const char*> CnakeApp::getRequiredExtensions(){
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+    if(enableValidationLayers){
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    }
+
+    return extensions;
+}
 
 bool CnakeApp::checkValidationLayerSupport(){
     uint32_t layerCount;
@@ -30,22 +43,29 @@ bool CnakeApp::checkValidationLayerSupport(){
     return true;
 }
 
-bool CnakeApp::checkExtensionSupport(const char **glfwExt, const std::vector<VkExtensionProperties> *vulkanExt){
-    std::cout << "GLFW requires:\n" << '\t' << *glfwExt << '\n';
-
-    std::cout << "\nVulkan presents:\n";
-    for(const auto &extension : *vulkanExt){
-        std::cout << '\t' << extension.extensionName << '\n';
+bool CnakeApp::checkExtensionSupport(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt){
+    std::cout << "\n\tInstance presents:\n";
+    for(const auto &extension : *instanceExt){
+        std::cout << "\t" << extension.extensionName << '\n';
     }
 
-    bool extFound = false;
-    for(const auto &extension : *vulkanExt){
-        if(0 == strcmp(extension.extensionName, *glfwExt)){
-            extFound = true;
-            break;
-        }
+    std::cout << "\n\tRequired:\n"; 
+    
+    for(const auto &required : *requiredExt){
+        bool extFound = false;
+        
+            for(const auto &present : *instanceExt){
+                if(0 == strcmp(required, present.extensionName)){
+                    std::cout << "found:\t" << required << '\n';
+                    extFound = true;
+                    break;
+                }
+            }
+        if(!extFound){ 
+            std::cout << "not found: \t" << required << '\n';
+            return false; 
+        } 
     }
-    if(!extFound){ return false; } 
 
     return true;
 }
@@ -64,18 +84,6 @@ void CnakeApp::createInstance(){
         throw std::runtime_error("validation layers requested, but not available!");
     }
 
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    std::vector<VkExtensionProperties> extensions(extensionCount); 
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-    
-    const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-    if(!checkExtensionSupport(glfwExtensions, &extensions)){
-        throw std::runtime_error("extensions required, but not available!"); 
-    }
-
-    std::cout << "\nAll needed extensions are present.";
-
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Cnake";
@@ -84,11 +92,22 @@ void CnakeApp::createInstance(){
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount); 
+    vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
+
+    auto requiredExtensions = getRequiredExtensions();
+    if(!checkExtensionSupport(&requiredExtensions, &instanceExtensions)){
+        throw std::runtime_error("extensions required, but not available!"); 
+    }
+
+    std::cout << "\nAll needed extensions are present.";
+
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = glfwExtensionCount;
-    createInfo.ppEnabledExtensionNames = glfwExtensions;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+    createInfo.ppEnabledExtensionNames = requiredExtensions.data();
     createInfo.enabledLayerCount = 0;
 
     if(enableValidationLayers){
@@ -105,6 +124,17 @@ void CnakeApp::createInstance(){
 
 void CnakeApp::initVulkan(){
     createInstance();
+    setupDebugMessenger();
+}
+
+void CnakeApp::setupDebugMessenger(){
+    if(!enableValidationLayers){ return; }
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
 }
 
 void CnakeApp::gameLoop(){
