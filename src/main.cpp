@@ -5,28 +5,38 @@
 #include <cstdlib>
 #include <cstring>
 
-void CnakeApp::gameLoop(){
+const char *version = "Cnake 0.0.0";
+
+const uint32_t WIDTH = 1920;
+const uint32_t HEIGHT = 1080;
+
+GLFWwindow *window;
+
+void run(){
+    initWindow();
+    initVulkan();
+    gameLoop();
+    cleanup();
+}
+
+void gameLoop(){
     while(!glfwWindowShouldClose(window)){
        glfwPollEvents(); 
     }
 }
 
-void CnakeApp::run(){
-    initWindow();
+void initWindow(){
+    glfwInit();
 
-    Engine engine(window);
-    engine.initVulkan();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    gameLoop();
-
-    engine.cleanup();
+    window = glfwCreateWindow(WIDTH, HEIGHT, version, nullptr, nullptr);
 }
 
 int main(){
-    CnakeApp app;
-
     try{
-        app.run();
+        run();
     }catch(const std::exception &e){
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
