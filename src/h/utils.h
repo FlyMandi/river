@@ -1,3 +1,5 @@
+#pragma once
+
 #include <filesystem>
 
-std::filesystem::path getProjectRoot();
+std::filesystem::path getProjectRoot(const char* rootName);
