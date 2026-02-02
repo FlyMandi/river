@@ -44,6 +44,7 @@ newaction({
         print("clean the build...")
         os.rmdir("./build/")
         os.rmdir("./bin/")
+        os.rmdir("./.cache/")
         os.remove("BuildRules.xml")
         os.remove("BuildRules.props")
         os.remove("BuildRules.targets")
