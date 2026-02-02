@@ -11,7 +11,7 @@ project("Cnake")
     language("C++")
     cppdialect("C++20")
     targetdir("bin/%{cfg.buildcfg}")
-    includedirs({ "./vendor/", "./vendor/GLFW/include/", "%{VULKAN_SDK}/Include/" })
+    includedirs({ "./vendor/GLM/", "./vendor/GLFW/include/", "%{VULKAN_SDK}/Include/" })
     syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/GLFW/lib-vc2022/" })
     files({ "**.h", "**.cpp" })
 
