@@ -6,13 +6,7 @@
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    #ifdef DEBUG
-        printDebugLog('\0', "window resized to: ");
-        printDebugLog(width);
-        printDebugLog("x");
-        printDebugLog(height, '\n');
-    #endif
-    framebufferResized = true;
+    framebufferResized = VK_TRUE;
 }
 
 void initGLFW()

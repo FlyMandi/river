@@ -58,7 +58,7 @@ static std::vector<const char*> getRequiredExtensions()
     return extensions;
 }
 
-static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
+static VkBool32 checkInstanceExtensions(std::vector<const char*> *requiredExt, std::vector<VkExtensionProperties> *instanceExt)
 {
     #ifdef DEBUG
         printDebugLog('\0', "Present:", '\n');
@@ -66,13 +66,12 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
         {
             printDebugLog('\t', extension.extensionName, '\n');
         }
-
         printDebugLog('\0', "Required:", '\n');
     #endif
 
     for(const auto &required : *requiredExt)
     {
-        bool extFound = false;
+        VkBool32 extFound = VK_FALSE;
         
             for(const auto &present : *instanceExt)
             {
@@ -82,7 +81,7 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
                         printDebugLog('\t', required, '\n');
                     #endif
 
-                    extFound = true;
+                    extFound = VK_TRUE;
                     break;
                 }
             }
@@ -93,13 +92,13 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
                 printDebugLog(required, '\n');
             #endif
 
-            return false; 
+            return VK_FALSE; 
         } 
     }
-    return true;
+    return VK_TRUE;
 }
 
-static bool checkValidationLayerSupport()
+static VkBool32 checkValidationLayerSupport()
 {
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -109,23 +108,23 @@ static bool checkValidationLayerSupport()
 
     for(const char *layer : validationLayers)
     {
-        bool layerFound = false;
+        VkBool32 layerFound = VK_FALSE;
 
         for(const auto &layerPresent : layerVec)
         {
             if(0 == strcmp(layerPresent.layerName, layer))
             {
-                layerFound = true;
+                layerFound = VK_TRUE;
                 break;
             }
         }
         if(!layerFound)
         {
-            return false; 
+            return VK_FALSE; 
         }
     }
 
-    return true;
+    return VK_TRUE;
 }
 
 static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
@@ -355,7 +354,7 @@ void drawFrame()
 
     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
     {
-        framebufferResized = false;
+        framebufferResized = VK_FALSE;
         recreateSwapchain();
     }
     else if(result != VK_SUCCESS)
