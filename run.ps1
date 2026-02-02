@@ -1,3 +1,4 @@
+#TODO: fix linux
 param( 
     [Parameter(position=0,Mandatory=$false)]
     $build = "Debug",
