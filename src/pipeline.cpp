@@ -48,8 +48,11 @@ internal std::vector<char> readFile(const std::filesystem::path &filename)
     return buffer;
 }
 
-void createGraphicsPipeline(const ProjectManifest &manifest)
-{
+void createGraphicsPipeline
+(
+    const EngineData        &engine,
+    const ProjectManifest   &manifest
+){
     auto vertShaderCode = readFile(manifest.vertexShader);
     auto fragShaderCode = readFile(manifest.fragmentShader);
 
@@ -95,14 +98,14 @@ void createGraphicsPipeline(const ProjectManifest &manifest)
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)swapchainExtent.width;
-    viewport.height = (float)swapchainExtent.height;
+    viewport.width = (float)engine.swapchainExtent.width;
+    viewport.height = (float)engine.swapchainExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapchainExtent;
+    scissor.extent = engine.swapchainExtent;
 
     VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
     viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -195,15 +198,17 @@ void createGraphicsPipeline(const ProjectManifest &manifest)
     vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
 }
 
-void createFramebuffers()
-{
-    swapchainFramebuffers.resize(swapchainImageViews.size());
+void createFramebuffers
+(
+    EngineData &engine
+){
+    engine.swapchainFramebuffers.resize(engine.swapchainImageViews.size());
 
-    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainImageViews.size(); ++i)
     {
         std::array<VkImageView, 2> attachments =
         {
-            swapchainImageViews[i],
+            engine.swapchainImageViews[i],
             depthImageView
         };
 
@@ -212,20 +217,30 @@ void createFramebuffers()
         framebufferCreateInfo.renderPass = renderPass;
         framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferCreateInfo.pAttachments = attachments.data();
-        framebufferCreateInfo.width = swapchainExtent.width;
-        framebufferCreateInfo.height = swapchainExtent.height;
+        framebufferCreateInfo.width = engine.swapchainExtent.width;
+        framebufferCreateInfo.height = engine.swapchainExtent.height;
         framebufferCreateInfo.layers = 1;
 
         riverAssertVkSuccess
         (
-            vkCreateFramebuffer(logicalDevice, &framebufferCreateInfo, nullptr, &swapchainFramebuffers[i]),
+            vkCreateFramebuffer
+            (
+                logicalDevice,
+                &framebufferCreateInfo,
+                nullptr,
+                &engine.swapchainFramebuffers[i]
+            ),
             "failed to create framebuffer!"
         );
     }
 }
 
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
-{
+void recordCommandBuffer
+(
+    EngineData      &engine,
+    VkCommandBuffer &commandBuffer,
+    uint32_t        &imageIndex
+){
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -242,9 +257,9 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapchainFramebuffers[imageIndex];
+    renderPassInfo.framebuffer = engine.swapchainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapchainExtent;
+    renderPassInfo.renderArea.extent = engine.swapchainExtent;
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
@@ -261,8 +276,8 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapchainExtent.width);
-    viewport.height = static_cast<float>(swapchainExtent.height);
+    viewport.width = static_cast<float>(engine.swapchainExtent.width);
+    viewport.height = static_cast<float>(engine.swapchainExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
@@ -270,7 +285,7 @@ void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapchainExtent;
+    scissor.extent = engine.swapchainExtent;
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -390,9 +405,11 @@ void createCommandBuffers()
     );
 }
 
-void cleanupSyncObjects()
-{
-    for(size_t i = 0; i < swapchainImages.size(); ++i)
+void cleanupSyncObjects
+(
+    const EngineData &engine
+){
+    for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
         vkDestroySemaphore(logicalDevice, imageReadyForWriteSemaphores[i], nullptr);
         imageReadyForWriteSemaphores[i] = VK_NULL_HANDLE;
@@ -411,11 +428,13 @@ void cleanupSyncObjects()
     riverLog("destroyed acquireSemaphore.", RIV_LOG_LEVEL_TRACE);
 }
 
-void createSyncObjects()
-{
-    imageReadyForWriteSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
-    imageReadyForPresentSemaphores.resize(swapchainImages.size(), VK_NULL_HANDLE);
-    inFlightFences.resize(swapchainImages.size(), VK_NULL_HANDLE);
+void createSyncObjects
+(
+    const EngineData &engine
+){
+    imageReadyForWriteSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
+    imageReadyForPresentSemaphores.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
+    inFlightFences.resize(engine.swapchainImages.size(), VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -430,7 +449,7 @@ void createSyncObjects()
         "failed to create acquireSemaphore."
     );
 
-    for(size_t i = 0; i < swapchainImages.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
         riverAssertVkSuccess
         (

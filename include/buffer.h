@@ -1,7 +1,9 @@
 #pragma once
 
-#include "vulkan/vulkan_core.h"
+#include <vulkan/vulkan_core.h>
 #include <glm/glm.hpp>
+
+#include "river.h"
 
 #include <set>
 #include <vector>
@@ -57,7 +59,10 @@ extern void createBuffer
     std::set<uint32_t>      &uniqueQueueFamilies
 );
 
-extern void createDepthResources();
+extern void createDepthResources
+(
+    const EngineData &engine
+);
 
 extern uint32_t findSuitableMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags flags);
 
@@ -71,7 +76,11 @@ VkFormat findSupportedFormat
     VkFormatFeatureFlags        features
 );
 
-extern void updateUniformBuffer(uint32_t currentImage);
+extern void updateUniformBuffer
+(
+    const EngineData    &engine,
+    uint32_t            currentImage //redundant?
+);
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
 extern std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions();

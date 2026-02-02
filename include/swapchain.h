@@ -5,18 +5,8 @@
 
 #include "river.h"
 
-#include <vector>
-
+//maybe get rid of this in the future
 constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
-//TODO:#57: rid of inline global scope vars
-inline VkSwapchainKHR swapchain;
-inline VkFormat swapchainImageFormat;
-inline VkExtent2D swapchainExtent;
-
-inline std::vector<VkImage> swapchainImages{};
-inline std::vector<VkImageView> swapchainImageViews{};
-inline std::vector<VkFramebuffer> swapchainFramebuffers{};
 
 inline uint32_t swapchainImageCount;
 
@@ -28,17 +18,27 @@ extern VkExtent2D chooseSwapExtent
 
 extern void createSwapchain
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const UserSettings  &settings
 );
 
 extern void recreateSwapchain
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const UserSettings  &settings
 );
 
-extern void createSwapImageViews();
-extern void createRenderPass();
+extern void createSwapImageViews
+(
+    EngineData &engine
+);
 
-extern void cleanupSwapchain();
+extern void createRenderPass
+(
+    const EngineData &engine
+);
+
+extern void cleanupSwapchain
+(
+    const EngineData &engine
+);

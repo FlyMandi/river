@@ -337,15 +337,15 @@ void initVulkan
     createLogicalDevice();
 
     createSwapchain(engine, settings);
-    createSwapImageViews();
+    createSwapImageViews(engine);
 
-    createRenderPass();
+    createRenderPass(engine);
     createDescriptorSetLayout();
-    createGraphicsPipeline(manifest);
+    createGraphicsPipeline(engine, manifest);
 
     createCommandPools();
-    createDepthResources();
-    createFramebuffers();
+    createDepthResources(engine);
+    createFramebuffers(engine);
 
     createTextureImage(manifest.projectTexturePath);
     createTextureImageView();
@@ -359,15 +359,15 @@ void initVulkan
     createDescriptorSets();
 
     createCommandBuffers();
-    createSyncObjects();
+    createSyncObjects(engine);
 }
 
 void cleanupVulkan(EngineData &engine)
 {
     vkDeviceWaitIdle(logicalDevice);
 
-    cleanupSyncObjects();
-    cleanupSwapchain();
+    cleanupSyncObjects(engine);
+    cleanupSwapchain(engine);
 
     vkDestroySampler(logicalDevice, textureSampler, nullptr);
 
@@ -417,7 +417,7 @@ void drawFrame
         vkAcquireNextImageKHR
         (
             logicalDevice,
-            swapchain,
+            engine.swapchain,
             UINT64_MAX,
             acquireSemaphore,
             VK_NULL_HANDLE,
@@ -436,10 +436,10 @@ void drawFrame
 
     vkResetFences(logicalDevice, 1, &inFlightFences[currentFrame]);
 
-    updateUniformBuffer(currentFrame);
+    updateUniformBuffer(engine, currentFrame);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+    recordCommandBuffer(engine, commandBuffers[currentFrame], imageIndex);
 
     std::array<VkSemaphore, 1> waitSemaphores =
     {
@@ -477,7 +477,7 @@ void drawFrame
 
     VkSwapchainKHR swapchains[] =
     {
-        swapchain
+        engine.swapchain
     };
 
     VkPresentInfoKHR presentInfo{};

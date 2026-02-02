@@ -29,8 +29,16 @@ inline std::vector<VkFence> inFlightFences(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE)
 
 inline VkBool32 framebufferResized = VK_FALSE;
 
-extern void createGraphicsPipeline(const ProjectManifest &manifest);
-extern void createFramebuffers();
+extern void createGraphicsPipeline
+(
+    const EngineData        &engine,
+    const ProjectManifest   &manifest
+);
+
+extern void createFramebuffers
+(
+    EngineData &engine
+);
 
 extern void createCommandPools();
 extern void createCommandBuffers();
@@ -47,7 +55,19 @@ extern void createDescriptorSetLayout();
 extern void createDescriptorPool();
 extern void createDescriptorSets();
 
-extern void createSyncObjects();
-extern void cleanupSyncObjects();
+extern void createSyncObjects
+(
+    const EngineData &engine
+);
 
-extern void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+extern void cleanupSyncObjects
+(
+    const EngineData &engine
+);
+
+extern void recordCommandBuffer
+(
+    EngineData      &engine,
+    VkCommandBuffer &commandBuffer,
+    uint32_t        &imageIndex
+);

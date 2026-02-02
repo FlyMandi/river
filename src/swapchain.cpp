@@ -35,7 +35,7 @@ internal VkExtent2D chooseSwapExtent
 
 void createSwapchain
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const UserSettings  &settings
 ){
     SwapchainSupportDetails swapchainSupport = querySwapchainSupport(physicalDevice, engine.surface);
@@ -107,37 +107,47 @@ void createSwapchain
 
     riverAssertVkSuccess
     (
-        vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapchain),
+        vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &engine.swapchain),
         "failed to create swap chain!"
     );
 
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, nullptr);
-    swapchainImages.resize(swapchainImageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, swapchain, &swapchainImageCount, swapchainImages.data());
+    vkGetSwapchainImagesKHR(logicalDevice, engine.swapchain, &swapchainImageCount, nullptr);
+    engine.swapchainImages.resize(swapchainImageCount);
+    vkGetSwapchainImagesKHR
+    (
+        logicalDevice,
+        engine.swapchain,
+        &swapchainImageCount,
+        engine.swapchainImages.data()
+    );
 
-    swapchainImageFormat = surfaceFormat.format;
-    swapchainExtent = extent;
+    engine.swapchainImageFormat = surfaceFormat.format;
+    engine.swapchainExtent = extent;
 }
 
-void createSwapImageViews()
-{
-    swapchainImageViews.resize(swapchainImages.size());
+void createSwapImageViews
+(
+    EngineData &engine
+){
+    engine.swapchainImageViews.resize(engine.swapchainImages.size());
 
-    for(uint32_t i = 0; i < swapchainImages.size(); ++i)
+    for(uint32_t i = 0; i < engine.swapchainImages.size(); ++i)
     {
-        swapchainImageViews[i] =    createImageView
-                                    (
-                                        swapchainImages[i],
-                                        swapchainImageFormat,
-                                        VK_IMAGE_ASPECT_COLOR_BIT
-                                    );
+        engine.swapchainImageViews[i] = createImageView
+                                        (
+                                            engine.swapchainImages[i],
+                                            engine.swapchainImageFormat,
+                                            VK_IMAGE_ASPECT_COLOR_BIT
+                                        );
     }
 }
 
-void createRenderPass()
-{
+void createRenderPass
+(
+    const EngineData &engine
+){
     VkAttachmentDescription colorAttachmentDescription{};
-    colorAttachmentDescription.format = swapchainImageFormat;
+    colorAttachmentDescription.format = engine.swapchainImageFormat;
     colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 
     colorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -217,28 +227,30 @@ void createRenderPass()
     );
 }
 
-void cleanupSwapchain()
-{
+void cleanupSwapchain
+(
+    const EngineData &engine
+){
     vkDestroyImageView(logicalDevice, depthImageView, nullptr);
     vkDestroyImage(logicalDevice, depthImage, nullptr);
     vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
 
-    for(size_t i = 0; i < swapchainFramebuffers.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainFramebuffers.size(); ++i)
     {
-        vkDestroyFramebuffer(logicalDevice, swapchainFramebuffers[i], nullptr);
+        vkDestroyFramebuffer(logicalDevice, engine.swapchainFramebuffers[i], nullptr);
     }
 
-    for(size_t i = 0; i < swapchainImageViews.size(); ++i)
+    for(size_t i = 0; i < engine.swapchainImageViews.size(); ++i)
     {
-        vkDestroyImageView(logicalDevice, swapchainImageViews[i], nullptr);
+        vkDestroyImageView(logicalDevice, engine.swapchainImageViews[i], nullptr);
     }
 
-    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
+    vkDestroySwapchainKHR(logicalDevice, engine.swapchain, nullptr);
 }
 
 void recreateSwapchain
 (
-    const EngineData    &engine,
+    EngineData          &engine,
     const UserSettings  &settings
 ){
     int width = 0;
@@ -252,12 +264,12 @@ void recreateSwapchain
     }
     vkDeviceWaitIdle(logicalDevice);
 
-    cleanupSwapchain();
+    cleanupSwapchain(engine);
 
     createSwapchain(engine, settings);
-    createSwapImageViews();
-    createDepthResources();
-    createFramebuffers();
+    createSwapImageViews(engine);
+    createDepthResources(engine);
+    createFramebuffers(engine);
 
     riverLog(std::format("recreated swapchain: {}x{}", width, height), RIV_LOG_LEVEL_TRACE);
 }

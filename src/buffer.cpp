@@ -5,14 +5,14 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/vector_float3.hpp"
-#include "glm/trigonometric.hpp"
-#include "glm/gtx/hash.hpp" // IWYU pragma: keep (for some reason clang doesn't recognize I need it below)
-#include "vulkan/vulkan_core.h"
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/gtx/hash.hpp>
+#include <vulkan/vulkan_core.h>
 
 #include "pipeline.h"
 #include "river.h"
@@ -276,8 +276,11 @@ void createUniformBuffers()
     };
 }
 
-void updateUniformBuffer(uint32_t currentImage)
-{
+void updateUniformBuffer
+(
+    const EngineData    &engine,
+    uint32_t            currentImage //redundant?
+){
     persistent std::chrono::time_point startTime = std::chrono::high_resolution_clock::now();
 
     std::chrono::time_point currentTime = std::chrono::high_resolution_clock::now();
@@ -289,7 +292,8 @@ void updateUniformBuffer(uint32_t currentImage)
     uniformBuffer.projection =  glm::perspective
                                 (
                                     glm::radians(35.0f),
-                                    swapchainExtent.width / static_cast<float>(swapchainExtent.height),
+                                    engine.swapchainExtent.width /
+                                        static_cast<float>(engine.swapchainExtent.height),
                                     0.1f,
                                     256.0f
                                 );
@@ -325,8 +329,10 @@ VkFormat findSupportedFormat
     return VK_FORMAT_MAX_ENUM; //to silence clang
 }
 
-void createDepthResources()
-{
+void createDepthResources
+(
+    const EngineData &engine
+){
     const std::vector<VkFormat> candidates =
     {
         VK_FORMAT_D32_SFLOAT,
@@ -342,8 +348,8 @@ void createDepthResources()
                             );
     createImage
     (
-        swapchainExtent.width,
-        swapchainExtent.height,
+        engine.swapchainExtent.width,
+        engine.swapchainExtent.height,
         depthFormat,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,

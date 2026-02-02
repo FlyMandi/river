@@ -21,33 +21,41 @@ global uint8_t logLevel;
 
 struct ProjectManifest
 {
-    std::string projectName = "RIV_UNINITIALIZED_STRING";
-    std::string projectVersion = "RIV_UNINITIALIZED_STRING";
-    std::filesystem::path projectRoot = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path projectLog = "RIV_UNINITIALIZED_PATH";
+    std::string             projectName         = "RIV_UNINITIALIZED_STRING";
+    std::string             projectVersion      = "RIV_UNINITIALIZED_STRING";
+    std::filesystem::path   projectRoot         = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   projectLog          = "RIV_UNINITIALIZED_PATH";
 
-    std::filesystem::path projectModelPath = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path projectTexturePath = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   projectModelPath    = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   projectTexturePath  = "RIV_UNINITIALIZED_PATH";
 
-    std::filesystem::path vertexShader = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path fragmentShader = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   vertexShader        = "RIV_UNINITIALIZED_PATH";
+    std::filesystem::path   fragmentShader      = "RIV_UNINITIALIZED_PATH";
 };
 
 struct UserSettings
 {
-    uint32_t windowHeight;
-    uint32_t windowWidth;
+    uint32_t            windowHeight;
+    uint32_t            windowWidth;
 
-    VkPresentModeKHR presentMode;
+    VkPresentModeKHR    presentMode;
 };
 
 struct EngineData
 {
-    GLFWwindow  *window;
-    std::string windowName;
+    GLFWwindow                  *window;
+    std::string                 windowName;
 
-    VkInstance      instance;
-    VkSurfaceKHR    surface;
+    VkInstance                  instance;
+    VkSurfaceKHR                surface;
+
+    VkSwapchainKHR              swapchain;
+    VkFormat                    swapchainImageFormat;
+    VkExtent2D                  swapchainExtent;
+
+    std::vector<VkImage>        swapchainImages{};
+    std::vector<VkImageView>    swapchainImageViews{};
+    std::vector<VkFramebuffer>  swapchainFramebuffers{};
 };
 
 enum RiverLogLevel
