@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <optional>
 
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
@@ -15,15 +16,16 @@
     const bool enableValidationLayers = true;
 #endif
 
+struct QueueFamilyIndices{
+    std::optional<uint32_t> graphicsFamily;
+};
+
 struct Engine{
 
     Engine() = default;
     Engine(const Engine&) = delete;
     Engine &operator=(const Engine&) = delete;
     Engine(GLFWwindow *&window) : window(window){};
-
-    uint32_t instanceExtensionCount = 0;
-    uint32_t glfwExtensionCount = 0;
 
     const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
@@ -45,7 +47,7 @@ struct Engine{
 
     void pickPhysicalDevice();      
     uint32_t rateDeviceSuitability(VkPhysicalDevice device);
-    uint32_t findQueueFamilies(VkPhysicalDevice device);
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
