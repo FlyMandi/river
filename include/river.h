@@ -85,7 +85,6 @@ inline void riverLog(const auto &text, const RiverLogLevel level)
     }
 }
 
-//FIXME:#44: WIP
 inline void riverAssert(bool condition, const auto &assertFailureMsg)
 {
     if(condition)
