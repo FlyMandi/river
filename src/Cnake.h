@@ -3,6 +3,7 @@
 #include "Engine_Window.h"
 #include "Engine_Pipeline.h"
 #include "Engine_Device.h"
+#include "Engine_Swapchain.h"
 #include <string>
 
 namespace engine{
@@ -12,6 +13,7 @@ class Cnake {
 
     EngineWindow engineWindow{w_WIDTH, w_HEIGHT, "Cnake " + m_Version};
     EngineDevice engineDevice{engineWindow};
+    EngineSwapChain engineSwapChain{engineDevice, engineWindow.getExtent()};
     EnginePipeline enginePipeline{engineDevice, EnginePipeline::defaultPipelineConfigInfo(w_WIDTH, w_HEIGHT), "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv"};
 
  public:
