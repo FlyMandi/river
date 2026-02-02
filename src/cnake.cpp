@@ -39,14 +39,12 @@ bool CnakeApp::checkExtensionSupport(const char **glfwExt, const std::vector<VkE
     }
 
     bool extFound = false;
-
     for(const auto &extension : *vulkanExt){
         if(0 == strcmp(extension.extensionName, *glfwExt)){
             extFound = true;
             break;
         }
     }
-
     if(!extFound){ return false; } 
 
     return true;
@@ -69,7 +67,7 @@ void CnakeApp::createInstance(){
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
     if(!checkExtensionSupport(glfwExtensions, &extensions)){
-        throw std::runtime_error("extensions requested, but not available!"); 
+        throw std::runtime_error("extensions required, but not available!"); 
     }
 
     std::cout << "\nAll needed extensions are present.";
