@@ -1,49 +1,158 @@
 ---@diagnostic disable: undefined-global, undefined-field
-require"vendor/premake-ecc/ecc"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
-workspace("River")
-    configurations({ "Debug", "Release" })
-    platforms({"Win64"})
+workspace("river3D")
+    configurations({"debug", "asan", "release"})
+    platforms({"linux", "windows"})
     location("build")
-
-    project("River")
-        language("C++")
-        cppdialect("C++23")
-        warnings("Extra")
-        targetdir("bin/%{cfg.platform}_%{cfg.buildcfg}")
-        objdir("obj/%{cfg.platform}_%{cfg.buildcfg}")
-        includedirs({
-            "./include/",
-            "./vendor/glfw-3.4-win64/include/",
-            "./vendor/stb/",
-            "./vendor/tinyobjloader/",
-            "%{VULKAN_SDK}/Include/",
-        })
-        syslibdirs({ "%{VULKAN_SDK}/Lib/", "./vendor/glfw-3.4-win64/lib-vc2022/" })
-        files({ "./src/*", "./include/*" })
-
-filter("configurations:Debug")
-    kind("ConsoleApp")
-    defines{"DEBUG"}
-    staticruntime("off")
-    runtime("Debug")
-    symbols("On")
-    ignoredefaultlibraries({ "MSVCRT" })
-
-filter("configurations:Release")
-    kind("WindowedApp")
-    staticruntime("off")
-    runtime("Release")
-    symbols("Off")
-    optimize("Speed")
-
-filter("platforms:Win64")
-    links{ "glfw3", "vulkan-1" }
-    system("Windows")
     architecture("x86_64")
 
--- filter("platforms:Unix")
-    -- links{ "glfw3", "vulkan" }
---     system("linux")
---     architecture("x86_64")
+project("river3D common functions")
+    language("C")
+    cdialect("C99")
+    warnings("Extra")
+    kind("StaticLib")
+    targetname("river3Dcommon")
+    libdirs({"./vendor/imgsurf/bin/%{cfg.buildcfg}/"})
+    includedirs({"./include/",
+                 "/usr/include/",
+                 "./vendor/puddle/include/",
+                 "./vendor/imgsurf/include/"})
+
+    filter("configurations:asan")
+        defines{"ASAN"}
+
+    filter("configurations:debug")
+        defines{"DEBUG"}
+
+    filter("configurations:debug or asan")
+        runtime("debug")
+        symbols("On")
+        optimize("Off")
+
+    filter("configurations:release")
+        staticruntime("off")
+        runtime("release")
+        symbols("Off")
+        optimize("Speed")
+
+    filter("platforms:Linux")
+        system("Linux")
+        defines("BUILD_LINUX")
+        targetdir("bin/%{cfg.buildcfg}")
+        objdir("obj/river3Dcommon/")
+        files({"./src/river3D_*",
+               "./include/river3D_*",
+               "./src/linux_river3Dcommon*",
+               "./include/linux_river3Dcommon*",
+               "./src/river3Dcommon*",
+               "./include/river3Dcommon*"})
+        links("imgsurf:static")
+        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
+                      "-Wsign-compare"})
+        linkoptions({"-lX11", "-fuse-ld=mold"})
+        toolset("clang")
+
+    filter("platforms:Windows")
+        system("Windows")
+        defines("BUILD_WINDOWS")
+        targetdir("bin/%{cfg.buildcfg}")
+        objdir("obj/")
+        files({"./src/river3D_*",
+               "./include/river3D_*",
+               "./src/win32_river3Dcommon*",
+               "./include/win32_river3Dcommon*",
+               "./src/river3Dcommon*",
+               "./include/river3Dcommon*" })
+        links({"imgsurf.lib"})
+        buildoptions({"/wd4068"})
+
+    filter({"platforms:Linux", "configurations:debug or asan"})
+        buildoptions({"-gfull", "-O1"})
+        linkoptions({"-gfull", "-O1"})
+
+    filter({"platforms:Linux", "configurations:asan"})
+        buildoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
+                      "-static-libasan"})
+        linkoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
+                     "-static-libasan"})
+
+    filter({"platforms:Windows", "configurations:asan"})
+        editandcontinue("Off")
+        buildoptions({"/fsanitize=address", "/Zi", "/INCREMENTAL:NO"})
+
+    filter({"platforms:Windows", "configurations:release"})
+        linkoptions("/NODEFAULTLIB:MSVCRTD")
+
+project("river3D software renderer")
+    language("C")
+    cdialect("C99")
+    warnings("Extra")
+    kind("SharedLib")
+    targetname("river3Dsoftware")
+    libdirs({"./vendor/imgsurf/bin/%{cfg.buildcfg}/", "./bin/%{cfg.buildcfg}/"})
+    includedirs({"./include/",
+                 "/usr/include/",
+                 "./vendor/puddle/include/",
+                 "./vendor/imgsurf/include/"})
+
+    filter("configurations:asan")
+        defines{"ASAN"}
+
+    filter("configurations:debug")
+        defines{"DEBUG"}
+
+    filter("configurations:debug or asan")
+        runtime("debug")
+        symbols("On")
+        optimize("Off")
+
+    filter("configurations:release")
+        staticruntime("off")
+        runtime("release")
+        symbols("Off")
+        optimize("Speed")
+
+    filter("platforms:Linux")
+        system("Linux")
+        defines("BUILD_LINUX")
+        targetdir("bin/%{cfg.buildcfg}")
+        objdir("obj/river3Dsoftware/")
+        files({"./src/linux_river3Dsoftware*",
+               "./include/linux_river3Dsoftware*",
+               "./src/river3Dsoftware*",
+               "./include/river3Dsoftware*" })
+        links({"imgsurf:static", "river3Dcommon:static"})
+        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
+                      "-Wsign-compare"})
+        linkoptions({"-lX11", "-lXrender", "-lriver3Dcommon", "-lm", "-fuse-ld=mold"})
+        toolset("clang")
+
+    filter("platforms:Windows")
+        system("Windows")
+        defines("BUILD_WINDOWS")
+        targetdir("bin/%{cfg.buildcfg}")
+        objdir("obj/")
+        files({"./src/win32_river3Dsoftware*",
+               "./include/win32_river3Dsoftware*",
+               "./src/river3Dsoftware*",
+               "./include/river3Dsoftware*" })
+        links({"imgsurf.lib", "river3Dcommon.lib"})
+        buildoptions({"/wd4068"})
+
+    filter({"platforms:Linux", "configurations:debug or asan"})
+        buildoptions({"-gfull", "-O1"})
+        linkoptions({"-gfull", "-O1"})
+
+    filter({"platforms:Linux", "configurations:asan"})
+        buildoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
+                      "-static-libasan"})
+        linkoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
+                     "-static-libasan"})
+
+    filter({"platforms:Windows", "configurations:asan"})
+        editandcontinue("Off")
+        buildoptions({"/fsanitize=address", "/Zi", "/INCREMENTAL:NO"})
+
+    filter({"platforms:Windows", "configurations:release"})
+        linkoptions("/NODEFAULTLIB:MSVCRTD")
