@@ -1,5 +1,7 @@
 [System.Version]$installVersion = "1.4.309.0"
 
+# TODO: write bash version of setup script and cleanup this mess
+
 function Install-VulkanSDK
 {
     Write-Host "Installing Vulkan SDK version $installVersion`:`n"
