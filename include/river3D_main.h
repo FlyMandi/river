@@ -1,32 +1,22 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
-#include <glm/glm.hpp>
-
-#include <filesystem>
-#include <vector>
-#include <fstream>
 
 #define persistent  static
 #define global      static
 #define internal    static
+
+// TODO: use EngineData! :D
 
 //fix dangling globals
 global uint32_t currentFrame = 0;
 global std::ofstream logFile;
 global uint8_t logLevel;
 
-constexpr auto ENGINE_NAME = "River";
+#define ENGINE_NAME = "river3D";
 //maybe get rid of this in the future
-constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-
-#ifdef _WIN32
-    constexpr uint32_t RIV_MAX_PATH = 260; //bytes
-#else
-    constexpr uint32_t RIV_MAX_PATH = 256; //bytes
-#endif
+#define MAX_FRAMES_IN_FLIGHT = 2;
 
 #ifdef DEBUG
     #define RIV_ASSERT              riverAssert
