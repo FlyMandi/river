@@ -5,6 +5,7 @@ build/
 bin/
 obj/
 
+compile_flags*
 compile_commands*
 *.raddbg
 *.log
