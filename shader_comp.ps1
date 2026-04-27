@@ -1,3 +1,5 @@
+# TODO: write bash version
+
 $glslc = (Join-Path -PATH $env:VULKAN_SDK -ChildPath "\bin\glslc.exe")
 $src = Join-Path $PSScriptRoot "\src\"
 $shaders = Join-Path $src "\shaders\"
