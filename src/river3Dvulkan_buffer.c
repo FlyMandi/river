@@ -1,42 +1,13 @@
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_ENABLE_EXPERIMENTAL
+#include "river3D_main.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include "vertstream_main.h"
 
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/vector_float3.hpp>
-#include <glm/trigonometric.hpp>
-#include <glm/gtx/hash.hpp>
 #include <vulkan/vulkan_core.h>
-
-#include "pipeline.h"
-#include "river.h"
-#include "buffer.h"
-#include "image.h"
-
-#include <unordered_map>
-#include <chrono>
-#include <cstdint>
-#include <cstring>
-#include <set>
-
-template<> struct std::hash<Vertex>
-{
-    size_t operator()(Vertex const& vertex) const
-    {
-        return  ((hash<glm::vec3>()(vertex.position) ^ (hash<glm::vec3>()(vertex.colour) << 1)) >> 1) ^
-                (hash<glm::vec2>()(vertex.textureCoordinate) << 1);
-    }
-};
 
 void loadModel
 (
-    EngineData                  &engine,
-    const std::filesystem::path &modelPath
+    EngineData &engine,
+    StringView modelPath
 ){
     tinyobj::attrib_t attributes;
     std::vector<tinyobj::shape_t> shapes;
@@ -284,8 +255,8 @@ void createUniformBuffers
 
 void updateUniformBuffer
 (
-    const EngineData    &engine,
-    uint32_t            currentImage //redundant?
+    const EngineData &engine,
+    uint32_t         currentImage //redundant?
 ){
     persistent std::chrono::time_point startTime = std::chrono::high_resolution_clock::now();
 

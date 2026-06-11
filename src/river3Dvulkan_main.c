@@ -1,17 +1,10 @@
-#include "river.h"
-#include "window.h"
-#include "engine.h"
-#include "device.h"
-#include "swapchain.h"
-#include "pipeline.h"
-
-#include "GLFW/glfw3.h"
+#include "river3D_main.h"
 
 #include <iostream>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT             messageType, 
+        VkDebugUtilsMessageTypeFlagsEXT             messageType,
         const VkDebugUtilsMessengerCallbackDataEXT  *pCallbackData,
         void                                        *pUserData
     ){
@@ -44,7 +37,7 @@ static std::vector<const char*> getRequiredExtensions(){
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     if(build_DEBUG){
-        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); 
+        extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
 
     return extensions;
@@ -53,7 +46,7 @@ static std::vector<const char*> getRequiredExtensions(){
 static bool checkValidationLayerSupport(){
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    
+
     std::vector<VkLayerProperties> layerVec(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, layerVec.data());
 
@@ -67,7 +60,7 @@ static bool checkValidationLayerSupport(){
             }
         }
         if(!layerFound){
-            return false; 
+            return false;
         }
     }
 
@@ -75,10 +68,10 @@ static bool checkValidationLayerSupport(){
 }
 
 static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo){
-    createInfo = {}; 
+    createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT; 
+    createInfo.messageSeverity =    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
 }
@@ -94,7 +87,7 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
     printDebugLog("\nRequired:", 1, 1);
     for(const auto &required : *requiredExt){
         bool extFound = false;
-        
+
             for(const auto &present : *instanceExt){
                 if(0 == strcmp(required, present.extensionName)){
                     printDebugLog("found:\t", 0, 0);
@@ -103,10 +96,10 @@ static bool checkInstanceExtensions(std::vector<const char*> *requiredExt, std::
                     break;
                 }
             }
-        if(!extFound){ 
+        if(!extFound){
             printDebugLog("not found:\t", 0, 0);
-            return false; 
-        } 
+            return false;
+        }
     }
 
     return true;
@@ -136,9 +129,8 @@ void engine::createInstance(){
         printDebugLog("\nAll required extensions are present.", 0, 1);
     }else{
         printDebugLog("\nERROR: extensions required, but not available!", 2, 1);
-        throw std::runtime_error("extensions required, but not available!"); 
+        throw std::runtime_error("extensions required, but not available!");
     }
-
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -149,9 +141,9 @@ void engine::createInstance(){
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     if(build_DEBUG){
-        createInfo.enabledLayerCount = static_cast<uint32_t>(device::validationLayers.size()); 
+        createInfo.enabledLayerCount = static_cast<uint32_t>(device::validationLayers.size());
         createInfo.ppEnabledLayerNames = device::validationLayers.data();
-        
+
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
     }else{
@@ -168,8 +160,8 @@ void engine::createInstance(){
 }
 
 void engine::setupDebugMessenger(){
-    if(!build_DEBUG){ 
-        return; 
+    if(!build_DEBUG){
+        return;
     }
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
@@ -273,7 +265,7 @@ void engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
         printDebugLog("\nERROR: failed to begin recording command buffer!", 2, 1);
         throw std::runtime_error("failed to begin recording command buffer!");
     }
-    
+
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -322,7 +314,7 @@ void engine::createSyncObjects(){
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    
+
     if((vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::imageAvailableSemaphore)) != VK_SUCCESS || (vkCreateSemaphore(device::logicalDevice, &semaphoreInfo, nullptr, &pipeline::renderFinishedSemaphore)) != VK_SUCCESS){
         printDebugLog("\nERROR: failed to create semaphores!", 2, 1);
         throw std::runtime_error("failed to create semaphores!");

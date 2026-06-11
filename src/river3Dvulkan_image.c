@@ -1,12 +1,7 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "river3D_main.h"
+#include "imgsurf_main.h"
 
 #include "vulkan/vulkan_core.h"
-
-#include "river.h"
-#include "pipeline.h"
-#include "buffer.h"
-#include "image.h"
 
 internal void copyBufferToImage
 (

@@ -1,18 +1,12 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
+#include "imgsurf_main.h"
+
 #include <vulkan/vulkan_core.h>
 
 #define persistent  static
 #define global      static
 #define internal    static
-
-// TODO: use EngineData! :D
-
-//fix dangling globals
-global uint32_t currentFrame = 0;
-global std::ofstream logFile;
-global uint8_t logLevel;
 
 #define ENGINE_NAME = "river3D";
 //maybe get rid of this in the future

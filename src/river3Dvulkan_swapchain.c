@@ -1,14 +1,6 @@
+#include "river3D_main.h"
+
 #include "vulkan/vulkan_core.h"
-
-#include "river.h"
-#include "device.h"
-#include "swapchain.h"
-#include "pipeline.h"
-#include "buffer.h"
-#include "image.h"
-
-#include <algorithm>
-#include <cstdint>
 
 internal VkExtent2D chooseSwapExtent
 (

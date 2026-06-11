@@ -1,19 +1,8 @@
+#include "river3D_main.h"
+
 #include "vulkan/vulkan_core.h"
-#include "river.h"
-#include "window.h"
-#include "device.h"
-#include "swapchain.h"
-#include "pipeline.h"
-#include "buffer.h"
-#include "image.h"
 
-#include <cstdint>
-#include <cstring>
-#include <ctime>
-#include <filesystem>
-#include <iostream>
-
-constexpr const char* logLevelStamps[] =
+const char* logLevelStamps[5] =
 {
     "[RIV_TRACE]: ",
     "[RIV_DEBUG]: ",
@@ -22,7 +11,7 @@ constexpr const char* logLevelStamps[] =
     "[RIV_ASSER]: "
 };
 
-constexpr const char* logLevelANSI[] =
+const char* logLevelANSI[6] =
 {
     "\033[30;1;1m",
     "\033[37;1;1m",
@@ -32,7 +21,7 @@ constexpr const char* logLevelANSI[] =
     "\033[35;1;7m"
 };
 
-constexpr const char* clearANSI = "\033[0m";
+const char* clearANSI = "\033[0m";
 
 RiverLogLevel severityTranslation(VkDebugUtilsMessageSeverityFlagBitsEXT severity)
 {

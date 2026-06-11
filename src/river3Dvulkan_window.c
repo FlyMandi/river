@@ -1,5 +1,4 @@
-#include "river.h"
-#include "window.h"
+#include "river3D_main.h"
 
 internal void framebufferResizeCallback
 (
@@ -17,6 +16,6 @@ void createSurface(EngineData &engine)
     //TODO:#39: find out if I can create a surface smaller than the window.
     //GLFW sub-windows? or Vulkan scissor?
 
-    VkResult result = glfwCreateWindowSurface(engine.instance, engine.window, nullptr, &engine.surface);
+    VkResult result = glfwCreateWindowSurface(engine.instance, engine.window, 0, &engine.surface);
     RIV_ASSERT_VK_SUCCESS(result,  "failed to create window surface!");
 }

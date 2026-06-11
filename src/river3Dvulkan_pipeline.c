@@ -1,14 +1,6 @@
 #include "vulkan/vulkan_core.h"
 
-#include "river.h"
-#include "buffer.h"
-#include "pipeline.h"
-
-#include <cstdint>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#include "river3D_main.h"
 
 internal VkShaderModule createShaderModule
 (

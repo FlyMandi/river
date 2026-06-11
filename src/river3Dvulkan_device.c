@@ -1,11 +1,8 @@
-#include "river.h"
+#include "river3D_main.h"
+
 #include "vulkan/vulkan_core.h"
-#include "device.h"
 
-#include <set>
-#include <map>
-
-const std::vector<const char*> deviceExtensions =
+const char *deviceExtensions[1] =
 {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -14,9 +11,9 @@ internal VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
 
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+    vkEnumerateDeviceExtensionProperties(device, 0, &extensionCount, nullptr);
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+    vkEnumerateDeviceExtensionProperties(device, 0, &extensionCount, availableExtensions.data());
 
     std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
@@ -33,7 +30,7 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice &device, const VkSur
     QueueFamilyIndices indices{};
     uint32_t queueFamilyCount = 0;
 
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, 0);
 
     std::vector<VkQueueFamilyProperties> physicalQueueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, physicalQueueFamilies.data());
@@ -147,8 +144,8 @@ SwapchainSupportDetails querySwapchainSupport
     uint32_t presentModeCount;
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &details.capabilities);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, 0);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, 0);
 
     if(0 != formatCount)
     {
@@ -177,7 +174,7 @@ void pickPhysicalDevice
 ){
     uint32_t deviceCount = 0;
 
-    vkEnumeratePhysicalDevices(engine.instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(engine.instance, &deviceCount, 0);
     if(0 == deviceCount)
     {
         riverLog("failed to find any GPU with vulkan support!", RIV_LOG_LEVEL_ERROR);
@@ -252,7 +249,7 @@ void createLogicalDevice
         createInfo.enabledLayerCount = 0;
     #endif
 
-    VkResult result = vkCreateDevice(engine.physicalDevice, &createInfo, nullptr, &engine.logicalDevice);
+    VkResult result = vkCreateDevice(engine.physicalDevice, &createInfo, 0, &engine.logicalDevice);
     RIV_ASSERT_VK_SUCCESS(result, "failed to create logical device.");
 
     vkGetDeviceQueue(engine.logicalDevice, engine.logicalQueueFamilies.graphicsIndex, 0, &engine.graphicsQueue);
