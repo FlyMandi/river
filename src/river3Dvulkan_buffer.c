@@ -9,11 +9,8 @@ void loadModel
     EngineData &engine,
     StringView modelPath
 ){
-    tinyobj::attrib_t attributes;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
-    std::string warn;
-    std::string error;
 
     bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &warn, &error, modelPath.string().c_str());
     RIV_ASSERT(result, (warn + error));
@@ -52,43 +49,47 @@ void loadModel
     }
 }
 
-VkVertexInputBindingDescription getVertexBindingDescription()
-{
+VkVertexInputBindingDescription getVertexBindingDescription
+(
+    void
+){
     VkVertexInputBindingDescription bindingDescription{};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
+    bindingDescription.binding   = 0;
+    bindingDescription.stride    = sizeof(Vertex);
     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     return bindingDescription;
 }
 
-std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions()
-{
-    std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+VkVertexInputAttributeDescription* getVertexAttributeDescriptions
+(
+    void
+){
+    VkVertexInputAttributeDescription attributeDescriptions[3];
 
-    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].binding  = 0;
     attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, position);
+    attributeDescriptions[0].format   = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[0].offset   = offsetof(Vertex, position);
 
-    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].binding  = 0;
     attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, colour);
+    attributeDescriptions[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[1].offset   = offsetof(Vertex, colour);
 
-    attributeDescriptions[2].binding = 0;
+    attributeDescriptions[2].binding  = 0;
     attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, textureCoordinate);
+    attributeDescriptions[2].format   = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[2].offset   = offsetof(Vertex, textureCoordinate);
 
     return attributeDescriptions;
 }
 
 uint32_t findSuitableMemoryType
 (
-    const EngineData            &engine,
-    const uint32_t              &typeFilter,
-    const VkMemoryPropertyFlags &flags
+    const EngineData            *engine,
+    const uint32_t              *typeFilter,
+    const VkMemoryPropertyFlags *flags
 ){
     for(uint32_t i = 0; i < engine.deviceMemoryProperties.memoryTypeCount; ++i)
     {
@@ -105,17 +106,17 @@ uint32_t findSuitableMemoryType
 
 void createBuffer
 (
-    const EngineData            &engine,
-    const VkDeviceSize          &bufferSize,
-    const VkBufferUsageFlags    &usageFlags,
-    const VkMemoryPropertyFlags &memPropFlags,
-    VkBuffer                    &buffer,
-    VkDeviceMemory              &bufferMemory,
-    const std::set<uint32_t>    &uniqueQueueFamilies
+    const EngineData            *engine,
+    const VkDeviceSize          *bufferSize,
+    const VkBufferUsageFlags    *usageFlags,
+    const VkMemoryPropertyFlags *memPropFlags,
+    VkBuffer                    *buffer,
+    VkDeviceMemory              *bufferMemory,
+    const std::set<uint32_t>    *uniqueQueueFamilies
 ){
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = bufferSize;
+    bufferInfo.size  = bufferSize;
     bufferInfo.usage = usageFlags;
 
     if(uniqueQueueFamilies.size() > 1)
@@ -151,36 +152,39 @@ void createBuffer
 
 internal void copyBuffer
 (
-    EngineData          &engine,
-    const VkBuffer      &srcBuffer,
-    const VkBuffer      &dstBuffer,
-    const VkDeviceSize  &bufferSize
+    EngineData         *engine,
+    const VkBuffer     *srcBuffer,
+    const VkBuffer     *dstBuffer,
+    const VkDeviceSize *bufferSize
 ){
-    VkCommandBuffer commandBuffer = setupCommandBuffer(engine, engine.transferCommandPool);
+  VkCommandBuffer commandBuffer = setupCommandBuffer(engine,
+                                                     engine.transferCommandPool);
 
-    VkBufferCopy transferCopyRegion{};
-    transferCopyRegion.size = bufferSize;
-    transferCopyRegion.srcOffset = 0;
-    transferCopyRegion.dstOffset = 0;
+  VkBufferCopy transferCopyRegion{};
+  transferCopyRegion.size = bufferSize;
+  transferCopyRegion.srcOffset = 0;
+  transferCopyRegion.dstOffset = 0;
 
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
+  vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &transferCopyRegion);
 
-    flushCommandBuffer(engine, commandBuffer, engine.transferCommandPool, engine.transferQueue);
+  flushCommandBuffer(engine, commandBuffer, engine.transferCommandPool,
+                     engine.transferQueue);
 }
 
 void createVertexBuffer
 (
-    EngineData &engine
+    EngineData *engine
 ){
     engine.vertSize = sizeof(engine.vertices[0]) * engine.vertices.size();
-    VkDeviceSize indexSize = sizeof(engine.vertexIndices[0]) * engine.vertexIndices.size();
+    VkDeviceSize indexSize = sizeof(engine.vertexIndices[0]) *
+                                    engine.vertexIndices.size();
 
     VkDeviceSize bufferSize = engine.vertSize + indexSize;
 
-    VkBuffer stagingBuffer;
+    VkBuffer       stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    std::set<uint32_t> queueFamilies =
+    uint32_t queueFamilies[2] =
     {
         engine.logicalQueueFamilies.graphicsIndex,
         engine.logicalQueueFamilies.transferIndex
@@ -197,11 +201,11 @@ void createVertexBuffer
     void* pData;
 
     vkMapMemory(engine.logicalDevice, stagingBufferMemory, 0, engine.vertSize, 0, &pData);
-    ::memcpy(pData, engine.vertices.data(), static_cast<size_t>(engine.vertSize));
+    memcpy(pData, engine.vertices.data(), static_cast<size_t>(engine.vertSize));
     vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
     vkMapMemory(engine.logicalDevice, stagingBufferMemory, engine.vertSize, indexSize, 0, &pData);
-    ::memcpy(pData, engine.vertexIndices.data(), static_cast<size_t>(indexSize));
+    memcpy(pData, engine.vertexIndices.data(), static_cast<size_t>(indexSize));
     vkUnmapMemory(engine.logicalDevice, stagingBufferMemory);
 
     createBuffer(engine,
@@ -220,7 +224,7 @@ void createVertexBuffer
 
 void createUniformBuffers
 (
-    EngineData &engine
+    EngineData *engine
 ){
     VkDeviceSize uniformBufferSize = sizeof(UniformBufferObject);
 

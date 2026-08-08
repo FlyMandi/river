@@ -15,7 +15,7 @@ internal VkBool32 checkDeviceExtensionSupport(VkPhysicalDevice device)
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, 0, &extensionCount, availableExtensions.data());
 
-    std::set<std::string_view> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    // StringView requiredExtensions = (deviceExtensions.begin(), deviceExtensions.end());
 
     for(const auto &extension : availableExtensions)
     {

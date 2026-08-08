@@ -130,8 +130,10 @@ internal VkResult CreateDebugUtilsMessengerEXT
     }
 }
 
-internal VkBool32 checkValidationLayerSupport()
-{
+internal VkBool32 checkValidationLayerSupport
+(
+    void
+){
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -152,7 +154,7 @@ internal VkBool32 checkValidationLayerSupport()
         }
         if(!layerFound)
         {
-            std::string msg = "validation layer not found: ";
+            StringView msg = cstr_sv("validation layer not found: ");
             msg += layer;
 
             riverLog(msg, RIV_LOG_LEVEL_WARN);
@@ -166,7 +168,7 @@ internal VkBool32 checkValidationLayerSupport()
 
 internal void populateDebugMessengerCreateInfo
 (
-    VkDebugUtilsMessengerCreateInfoEXT &createInfo
+    VkDebugUtilsMessengerCreateInfoEXT *createInfo
 ){
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -222,8 +224,8 @@ internal std::vector<const char*> getRequiredExtensions()
 
 internal VkBool32 checkInstanceExtensions
 (
-    std::vector<const char*>            *requiredExt,
-    std::vector<VkExtensionProperties>  *instanceExt
+    StringView            *requiredExt,
+    VkExtensionProperties *instanceExt
 ){
     for(const auto &required : *requiredExt)
     {
@@ -239,7 +241,7 @@ internal VkBool32 checkInstanceExtensions
             }
         if(!extFound)
         {
-            std::string msg = "extension not found: ";
+            StringView msg = cstr_sv("extension not found: ");
             msg += required;
 
             riverLog(msg, RIV_LOG_LEVEL_ERROR);
@@ -260,12 +262,12 @@ internal void createInstance
     #endif
 
     VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = manifest.projectName.c_str();
+    appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName   = manifest.projectName;
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
-    appInfo.pEngineName = ENGINE_NAME;
-    appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.pEngineName        = ENGINE_NAME;
+    appInfo.engineVersion      = VK_MAKE_API_VERSION(0, 0, 0, 1);
+    appInfo.apiVersion         = VK_API_VERSION_1_0;
 
     uint32_t instanceExtensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
@@ -300,11 +302,11 @@ internal void createInstance
     RIV_ASSERT_VK_SUCCESS(result, "failed to create instance.");
 }
 
-void initVulkan
+void vkInit
 (
-    EngineData              &engine,
-    const ProjectManifest   &manifest,
-    const UserSettings      &settings
+    EngineData            *engine,
+    const ProjectManifest *manifest,
+    const UserSettings    *settings
 ){
     createInstance(engine, manifest);
 
@@ -340,9 +342,9 @@ void initVulkan
     createSyncObjects(engine);
 }
 
-void cleanupVulkan
+void vkShutdown
 (
-    EngineData &engine
+    EngineData *engine
 ){
     vkDeviceWaitIdle(engine.logicalDevice);
 
@@ -455,14 +457,13 @@ void drawFrame
     };
 
     VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &engine.imageReadyForPresentSemaphores[imageIndex];
-
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapchains;
-    presentInfo.pImageIndices = &imageIndex;
-    presentInfo.pResults = nullptr;
+    presentInfo.pWaitSemaphores    = &engine.imageReadyForPresentSemaphores[imageIndex];
+    presentInfo.swapchainCount     = 1;
+    presentInfo.pSwapchains        = swapchains;
+    presentInfo.pImageIndices      = &imageIndex;
+    presentInfo.pResults           = nullptr;
 
     std::swap(engine.imageReadyForWriteSemaphores[imageIndex], engine.acquireSemaphore);
 
@@ -481,33 +482,39 @@ void drawFrame
     currentFrame = (++currentFrame) % MAX_FRAMES_IN_FLIGHT;
 }
 
-std::filesystem::path getProjectRoot(const char *rootName)
-{
-    std::filesystem::path current = std::filesystem::canonical(std::filesystem::current_path());
+StringView getProjectRoot
+(
+    StringView rootName
+){
+    StringView current = pdExpandPath(".");
 
-    for(; current.string().length() < RIV_MAX_PATH;)
+    for(; current.size < RV_MAX_PATH;)
     {
-        if(strcmp(current.filename().string().c_str(), rootName) == 0)
+        if(sv_same(current, rootName))
         {
-            riverLog(std::format("set project root to {} with strlen {}",
-                                 current.string(), current.string().length()),
-                     RIV_LOG_LEVEL_TRACE);
+            riverLog(std::format("set project root to "PRI_SV" with length %u",
+                                 ARG_SV(current), current.size),
+                     RV_LOG_LEVEL_TRACE);
 
             return current;
         }
-        current = current.parent_path();
+        current = pdParentPath(current);
     }
-    return "RIV_PATH_UNDETERMINED";
+    return "RV_PATH_UNDETERMINED";
 }
 
-void riverSetupLog(const std::filesystem::path &path)
-{
+void riverSetupLog
+(
+    const StringView path
+){
     logFile.open(path, std::ios::trunc);
     RIV_ASSERT(logFile.is_open(), "failed to open log file!");
 }
 
-void riverCloseLog()
-{
+void riverCloseLog
+(
+    void
+){
     if(logFile.is_open())
     {
         logFile.close();

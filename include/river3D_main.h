@@ -73,7 +73,7 @@ struct EngineData
     #endif
 
     GLFWwindow                          *window;
-    std::string                         windowName;
+    StringView                          windowName;
 
     VkInstance                          instance;
     VkSurfaceKHR                        surface;
