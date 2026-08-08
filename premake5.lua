@@ -19,7 +19,7 @@ project("river3D_common")
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
     buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                  "-Wsign-compare", "Wtype-limits"})
+                  "-Wsign-compare", "-Wtype-limits"})
     links("imgsurf:static")
 
     filter("configurations:asan")
@@ -91,7 +91,7 @@ project("river3D_software")
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
     buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                  "-Wsign-compare", "Wtype-limits"})
+                  "-Wsign-compare", "-Wtype-limits"})
     links({"imgsurf:static", "river3Dcommon:static"})
 
     filter("configurations:asan")
@@ -164,7 +164,7 @@ project("river3D_vulkan")
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
     buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                  "-Wsign-compare", "Wtype-limits"})
+                  "-Wsign-compare", "-Wtype-limits"})
     links({"imgsurf:static", "river3Dcommon:static"})
 
     filter("configurations:asan")
