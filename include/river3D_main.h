@@ -20,32 +20,21 @@
     #define RIV_ASSERT_VK_SUCCESS   0 && riverAssertVkSuccess
 #endif
 
-struct SwapchainSupportDetails
-{
-    VkSurfaceCapabilitiesKHR capabilities{};
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-};
-
-struct QueueFamilyIndices
-{
-    uint32_t graphicsIndex = UINT32_MAX;
-    uint32_t transferIndex = UINT32_MAX;
-    uint32_t presentIndex  = UINT32_MAX;
-};
-
 struct Vertex
 {
-    glm::vec3 position;
-    glm::vec3 colour;
-    glm::vec2 textureCoordinate;
+    int32_t  x;
+    int32_t  y;
+    int32_t  z;
+    int32_t  textureY;
+    int32_t  textureX;
+    uint32_t colour;
 
-    bool operator==(const Vertex& other) const
-    {
-        return  position            == other.position   &&
-                colour              == other.colour     &&
-                textureCoordinate   == other.textureCoordinate;
-    }
+    // bool operator==(const Vertex& other) const
+    // {
+    //     return  position            == other.position   &&
+    //             colour              == other.colour     &&
+    //             textureCoordinate   == other.textureCoordinate;
+    // }
 };
 
 struct UniformBufferObject
@@ -55,41 +44,30 @@ struct UniformBufferObject
     glm::mat4 projection;
 };
 
-struct ProjectManifest
+typedef struct ProjectManifest
 {
-    ProjectManifest& operator=(const ProjectManifest&) = delete;
-    ProjectManifest& operator=(const ProjectManifest&&) = delete;
+    StringView projectName;        // = "RV_UNINITIALIZED_STRING";
+    StringView projectVersion;     // = "RV_UNINITIALIZED_STRING";
+    StringView projectRoot;        // = "RV_UNINITIALIZED_PATH";
+    StringView projectLog;         // = "RV_UNINITIALIZED_PATH";
 
-    std::string             projectName         = "RIV_UNINITIALIZED_STRING";
-    std::string             projectVersion      = "RIV_UNINITIALIZED_STRING";
-    std::filesystem::path   projectRoot         = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path   projectLog          = "RIV_UNINITIALIZED_PATH";
+    StringView projectModelPath;   // = "RV_UNINITIALIZED_PATH";
+    StringView projectTexturePath; // = "RV_UNINITIALIZED_PATH";
 
-    std::filesystem::path   projectModelPath    = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path   projectTexturePath  = "RIV_UNINITIALIZED_PATH";
-
-    std::filesystem::path   vertexShader        = "RIV_UNINITIALIZED_PATH";
-    std::filesystem::path   fragmentShader      = "RIV_UNINITIALIZED_PATH";
-};
+    StringView vertexShader;       // = "RV_UNINITIALIZED_PATH";
+    StringView fragmentShader;     // = "RV_UNINITIALIZED_PATH";
+}
+ProjectManifest;
 
 struct UserSettings
 {
-    UserSettings& operator=(const UserSettings&) = delete;
-    UserSettings& operator=(const UserSettings&&) = delete;
-
-    uint32_t            windowHeight;
-    uint32_t            windowWidth;
-
-    VkPresentModeKHR    presentMode;
+    uint32_t         windowHeight;
+    uint32_t         windowWidth;
+    VkPresentModeKHR presentMode;
 };
-
-//maybe chop this up in swapchain / device / pipeline / buffer structs if it gets too big
 
 struct EngineData
 {
-    EngineData& operator=(const EngineData&) = delete;
-    EngineData& operator=(const EngineData&&) = delete;
-
     #ifdef DEBUG
         VkDebugUtilsMessengerEXT debugMessenger;
     #endif
@@ -177,32 +155,32 @@ enum RiverLogLevel
     RIV_LOG_LEVEL_UNDEFINED = 5
 };
 
-extern void initVulkan
+extern void vkInit
 (
-    EngineData              &engine,
-    const ProjectManifest   &manifest,
-    const UserSettings      &settings
+    EngineData            *engine,
+    const ProjectManifest *manifest,
+    const UserSettings    *settings
 );
 
-extern void cleanupVulkan
+extern void vkShutdown
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void drawFrame
 (
-    EngineData          &engine,
-    const UserSettings  &settings
+    EngineData         *engine,
+    const UserSettings *settings
 );
 
-extern std::filesystem::path getProjectRoot
+extern StringView getProjectRoot
 (
-    const char *rootName
+    const StringView rootName
 );
 
 extern void riverSetupLog
 (
-    const std::filesystem::path &path
+    const StringView path
 );
 
 extern void riverCloseLog();
@@ -221,23 +199,23 @@ const std::vector<const char*> validationLayers =
 
 extern void riverLog
 (
-    const std::string_view  text,
-    const RiverLogLevel     &level
+    const StringView text,
+    const uint8_t    level
 );
 
 extern bool riverAssert
 (
-    const bool              &condition,
-    const std::string_view  assertFailureMsg
+    const bool       &condition,
+    const StringView assertFailureMsg
 );
 
 extern bool riverAssertVkSuccess
 (
-    const VkResult          &result,
-    const std::string_view  assertFailureMsg
+    const VkResult   &result,
+    const StringView assertFailureMsg
 );
 
 extern void riverThrow
 (
-    const std::string_view throwMsg
+    const StringView throwMsg
 );

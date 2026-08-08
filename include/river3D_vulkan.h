@@ -1,166 +1,181 @@
 #pramga once
 
+typedef struct SwapchainSupportDetails
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    // std::vector<VkSurfaceFormatKHR> formats;
+    // std::vector<VkPresentModeKHR> presentModes;
+}
+SwapchainSupportDetails;
+
+struct QueueFamilyIndices
+{
+    uint32_t graphicsIndex; // = UINT32_MAX;
+    uint32_t transferIndex; // = UINT32_MAX;
+    uint32_t presentIndex;  // = UINT32_MAX;
+};
+
 extern void createSurface
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern SwapchainSupportDetails querySwapchainSupport
 (
-    const VkPhysicalDevice  &physicalDevice,
-    const VkSurfaceKHR      &surface
+    const VkPhysicalDevice *physicalDevice,
+    const VkSurfaceKHR     *surface
 );
 
 extern QueueFamilyIndices findQueueFamilies
 (
-    const EngineData &engine
+    const EngineData *engine
 );
 
 extern void pickPhysicalDevice
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createLogicalDevice
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern VkSampleCountFlagBits getMaxMSAASamples
 (
-    const EngineData &engine
+    const EngineData *engine
 );
 
 extern void loadModel
 (
-    EngineData &engine,
+    EngineData *engine,
     StringView modelPath
 );
 
 extern void createBuffer
 (
-    const EngineData            &engine,
-    const VkDeviceSize          &bufferSize,
-    const VkBufferUsageFlags    &usageFlags,
-    const VkMemoryPropertyFlags &memPropFlags,
-    VkBuffer                    &buffer,
-    VkDeviceMemory              &bufferMemory,
-    const std::set<uint32_t>    &uniqueQueueFamilies
+    const EngineData            *engine,
+    const VkDeviceSize          *bufferSize,
+    const VkBufferUsageFlags    *usageFlags,
+    const VkMemoryPropertyFlags *memPropFlags,
+    VkBuffer                    *buffer,
+    VkDeviceMemory              *bufferMemory,
+    const std::set<uint32_t>    *uniqueQueueFamilies
 );
 
 extern void createDepthResources
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern uint32_t findSuitableMemoryType
 (
-    const EngineData            &engine,
-    const uint32_t              &typeFilter,
-    const VkMemoryPropertyFlags &flags
+    const EngineData            *engine,
+    const uint32_t              *typeFilter,
+    const VkMemoryPropertyFlags *flags
 );
 
 extern void createVertexBuffer
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createUniformBuffers
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern VkFormat findSupportedFormat
 (
-    const EngineData            &engine,
-    const std::vector<VkFormat> &candidates,
-    const VkImageTiling         &tiling,
-    const VkFormatFeatureFlags  &features
+    const EngineData            *engine,
+    const std::vector<VkFormat> *candidates,
+    const VkImageTiling         *tiling,
+    const VkFormatFeatureFlags  *features
 );
 
 extern void updateUniformBuffer
 (
-    const EngineData &engine,
+    const EngineData *engine,
     uint32_t         currentImage //redundant?
 );
 
 extern VkVertexInputBindingDescription getVertexBindingDescription();
-extern std::array<VkVertexInputAttributeDescription, 3> getVertexAttributeDescriptions();
+extern VkVertexInputAttributeDescription* getVertexAttributeDescriptions();
 
 extern void createImage
 (
-    const EngineData            &engine,
-    const uint32_t              &width,
-    const uint32_t              &height,
-    const uint32_t              &mipLevels,
-    const VkFormat              &format,
-    const VkImageTiling         &tiling,
-    const VkImageUsageFlags     &usage,
-    const VkMemoryPropertyFlags &memPropFlags,
-    VkImage                     &image,
-    VkDeviceMemory              &imageMem
+    const EngineData            *engine,
+    const uint32_t              *width,
+    const uint32_t              *height,
+    const uint32_t              *mipLevels,
+    const VkFormat              *format,
+    const VkImageTiling         *tiling,
+    const VkImageUsageFlags     *usage,
+    const VkMemoryPropertyFlags *memPropFlags,
+    VkImage                     *image,
+    VkDeviceMemory              *imageMem
 );
 
 extern VkImageView createImageView
 (
-    const EngineData            &engine,
-    const VkImage               &image,
-    const uint32_t              &mipLevels,
-    const VkFormat              &format,
-    const VkImageAspectFlags    &aspectFlags
+    const EngineData         *engine,
+    const VkImage            *image,
+    const uint32_t           *mipLevels,
+    const VkFormat           *format,
+    const VkImageAspectFlags *aspectFlags
 );
 
 extern void createTextureImage
 (
-    EngineData              &engine,
-    const ProjectManifest   &manifest
+    EngineData            *engine,
+    const ProjectManifest *manifest
 );
 
 extern void createTextureSampler
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void transitionImageLayout
 (
-    EngineData          &engine,
-    const VkImage       &image,
-    const uint32_t      &mipLevels,
-    const VkFormat      &format,
-    const VkImageLayout &oldLayout,
-    const VkImageLayout &newLayout
+    EngineData          *engine,
+    const VkImage       *image,
+    const uint32_t      *mipLevels,
+    const VkFormat      *format,
+    const VkImageLayout *oldLayout,
+    const VkImageLayout *newLayout
 );
 
 extern void createGraphicsPipeline
 (
-    EngineData              &engine,
-    const ProjectManifest   &manifest
+    EngineData            *engine,
+    const ProjectManifest *manifest
 );
 
 extern void createFramebuffers
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createCommandPools
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createCommandBuffers
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern VkCommandBuffer setupCommandBuffer
 (
-    const EngineData    &engine,
+    const EngineData    *engine,
     VkCommandPool       &commandPool
 );
 
 extern void flushCommandBuffer
 (
-    const EngineData        &engine,
+    const EngineData        *engine,
     const VkCommandBuffer   &commandBuffer,
     const VkCommandPool     &commandPool,
     const VkQueue           &queue
@@ -168,54 +183,54 @@ extern void flushCommandBuffer
 
 extern void createDescriptorSetLayout
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createDescriptorPool
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createDescriptorSets
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void createSyncObjects
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void cleanupSyncObjects
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void recordCommandBuffer
 (
-    const EngineData        &engine,
-    const VkCommandBuffer   &commandBuffer,
-    const uint32_t          &imageIndex
+    const EngineData      *engine,
+    const VkCommandBuffer *commandBuffer,
+    const uint32_t        *imageIndex
 );
 
 extern void createSwapchain
 (
-    EngineData          &engine,
-    const UserSettings  &settings
+    EngineData          *engine,
+    const UserSettings  *settings
 );
 
 extern void recreateSwapchain
 (
-    EngineData          &engine,
-    const UserSettings  &settings
+    EngineData         *engine,
+    const UserSettings *settings
 );
 
 extern void createRenderPass
 (
-    EngineData &engine
+    EngineData *engine
 );
 
 extern void cleanupSwapchain
 (
-    const EngineData &engine
+    const EngineData *engine
 );
