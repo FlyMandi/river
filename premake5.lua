@@ -7,7 +7,7 @@ workspace("river3D")
     location("build")
     architecture("x86_64")
 
-project("river3D common functions")
+project("river3D_common")
     language("C")
     cdialect("C99")
     warnings("Extra")
@@ -18,6 +18,9 @@ project("river3D common functions")
                  "/usr/include/",
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
+    buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
+                  "-Wsign-compare", "Wtype-limits"})
+    links("imgsurf:static")
 
     filter("configurations:asan")
         defines{"ASAN"}
@@ -47,9 +50,6 @@ project("river3D common functions")
                "./include/linux_river3Dcommon*",
                "./src/river3Dcommon*",
                "./include/river3Dcommon*"})
-        links("imgsurf:static")
-        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                      "-Wsign-compare"})
         linkoptions({"-lX11", "-fuse-ld=mold"})
         toolset("clang")
 
@@ -64,8 +64,6 @@ project("river3D common functions")
                "./include/win32_river3Dcommon*",
                "./src/river3Dcommon*",
                "./include/river3Dcommon*" })
-        links({"imgsurf.lib"})
-        buildoptions({"/wd4068"})
 
     filter({"platforms:Linux", "configurations:debug or asan"})
         buildoptions({"-gfull", "-O1"})
@@ -81,10 +79,7 @@ project("river3D common functions")
         editandcontinue("Off")
         buildoptions({"/fsanitize=address", "/Zi", "/INCREMENTAL:NO"})
 
-    filter({"platforms:Windows", "configurations:release"})
-        linkoptions("/NODEFAULTLIB:MSVCRTD")
-
-project("river3D software renderer")
+project("river3D_software")
     language("C")
     cdialect("C99")
     warnings("Extra")
@@ -95,6 +90,9 @@ project("river3D software renderer")
                  "/usr/include/",
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
+    buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
+                  "-Wsign-compare", "Wtype-limits"})
+    links({"imgsurf:static", "river3Dcommon:static"})
 
     filter("configurations:asan")
         defines{"ASAN"}
@@ -122,9 +120,6 @@ project("river3D software renderer")
                "./include/linux_river3Dsoftware*",
                "./src/river3Dsoftware*",
                "./include/river3Dsoftware*" })
-        links({"imgsurf:static", "river3Dcommon:static"})
-        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                      "-Wsign-compare"})
         linkoptions({"-lX11", "-lXrender", "-lriver3Dcommon", "-lm", "-fuse-ld=mold"})
         toolset("clang")
 
@@ -157,7 +152,7 @@ project("river3D software renderer")
     filter({"platforms:Windows", "configurations:release"})
         linkoptions("/NODEFAULTLIB:MSVCRTD")
 
-project("river3D vulkan renderer")
+project("river3D_vulkan")
     language("C")
     cdialect("C99")
     warnings("Extra")
@@ -168,6 +163,9 @@ project("river3D vulkan renderer")
                  "/usr/include/",
                  "./vendor/puddle/include/",
                  "./vendor/imgsurf/include/"})
+    buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
+                  "-Wsign-compare", "Wtype-limits"})
+    links({"imgsurf:static", "river3Dcommon:static"})
 
     filter("configurations:asan")
         defines{"ASAN"}
@@ -195,9 +193,6 @@ project("river3D vulkan renderer")
                "./include/linux_river3Dvulkan*",
                "./src/river3Dvulkan*",
                "./include/river3Dvulkan*" })
-        links({"imgsurf:static", "river3Dcommon:static"})
-        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                      "-Wsign-compare"})
         linkoptions({"-lX11", "-lXrender", "-lriver3Dcommon", "-lm", "-fuse-ld=mold"})
         toolset("clang")
 
@@ -210,8 +205,6 @@ project("river3D vulkan renderer")
                "./include/win32_river3Dvulkan*",
                "./src/river3Dvulkan*",
                "./include/river3Dvulkan*" })
-        links({"imgsurf.lib", "river3Dcommon.lib"})
-        buildoptions({"/wd4068"})
 
     filter({"platforms:Linux", "configurations:debug or asan"})
         buildoptions({"-gfull", "-O1"})
